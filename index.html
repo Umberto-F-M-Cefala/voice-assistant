@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#007bff">
+<title>Assistente vocale di Umberto F. M. Cefalà</title>
+<link rel="manifest" href="manifest.json"> 
+<style>
+  /* Reset e impostazioni base per REM (1rem = 16px circa) */
+  html { font-size: 100%; box-sizing: border-box; }
+  *, *:before, *:after { box-sizing: inherit; }
+  
+  body { 
+    font-family: Arial, sans-serif; 
+    text-align: center; 
+    padding: 1.25rem; /* 20px */
+    margin: 0;
+    background-color: #fff;
+  }
+  
+  /* Contenitore controlli principali affiancati */
+  .controls-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem; /* Spazio tra i bottoni */
+      margin-bottom: 0.625rem; /* 10px */
+      flex-wrap: wrap; /* Su schermi piccolissimi va a capo se serve */
+  }
+
+  /* Stile bottone microfono (Flexbox per centrare icona) */
+  #micButton {
+    font-size: 3.75rem; /* 60px */
+    cursor: pointer;
+    border: 0.3125rem solid #007bff; /* 5px */
+    background-color: #f8f9fa; 
+    border-radius: 1.875rem; /* 30px */
+    width: 7.5rem;  /* 120px */
+    height: 7.5rem; /* 120px */
+    margin: 0.625rem; /* 10px */
+    transition: background-color 0.2s, border-color 0.2s; 
+    
+    /* Centratura assoluta dell'icona */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  #micButton:hover { background-color: #e2e6ea; }
+  
+  /* Classe per bottone microfono in ascolto */
+  #micButton.listening {
+      border-color: #dc3545; 
+      background-color: #fdf5f6; 
+  }
+
+  /* Stile bottone Stop (Flexbox per centrare icona) */
+  #stopButton {
+    font-size: 3.75rem; /* 60px */
+    cursor: pointer;
+    border: 0.1875rem solid #dc3545; /* 3px */
+    background: #fff;
+    color: #dc3545;
+    border-radius: 0.3125rem; /* 5px */
+    width: 7.5rem;  /* 120px */
+    height: 7.5rem; /* 120px */
+    margin: 0.625rem; /* 10px */
+    
+    /* Centratura assoluta dell'icona */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  #stopButton:hover { background-color: #fdf5f6; }
+
+  /* Output log */
+  #output { 
+    margin-top: 1rem; 
+    white-space: pre-wrap; 
+    text-align: left; 
+    background: #f4f4f4; 
+    padding: 0.625rem; 
+    border-radius: 0.3125rem; 
+    min-height: 9.375rem; /* 150px */
+    border: 1px solid #ccc;
+    font-size: 1rem;
+  }
+  
+  /* Elementi di input generici */
+  input, select, button { 
+      margin: 0.3125rem; 
+      padding: 0.3125rem; 
+      font-size: 1rem;
+  }
+
+  /* Area tempi rapidi */
+  .quick-times {
+      margin: 0.625rem 0;
+  }
+  
+  /* Preselettori tempo */
+  .time-selector {
+      font-size: 1rem;
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      border: 2px solid #6c757d;
+      background: #fff;
+      border-radius: 0.3125rem;
+      transition: background-color 0.2s, color 0.2s;
+  }
+  .time-selector:hover { background-color: #f8f9fa; }
+  .time-selector.active {
+      background-color: #007bff;
+      color: #fff;
+      border-color: #007bff;
+  }
+  
+  /* Bottone menu a tendina */
+  #toggleButtons {
+    cursor: pointer;
+    margin-top: 0.625rem;
+    padding: 0.625rem;
+    width: 12.5rem; /* 200px */
+    border: 2px solid #6c757d;
+    background-color: #f8f9fa;
+    border-radius: 0.3125rem;
+    font-weight: bold;
+    font-size: 1.125rem; /* 18px */
+    /* Rimossi hover complessi per migliorare UX su mobile */
+  }
+
+  #extraButtons {
+    display: none; 
+    border: 1px solid #ccc;
+    border-radius: 0.3125rem;
+    padding: 0.625rem;
+    margin-top: 0.3125rem;
+    max-width: 25rem; /* 400px */
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #fff;
+  }
+  
+  /* Adattamenti mobile */
+  @media (max-width: 480px) {
+      #micButton, #stopButton {
+          width: 6rem; /* un po' più piccoli su schermi stretti */
+          height: 6rem;
+          font-size: 3rem;
+      }
+      .time-selector {
+          padding: 0.3rem 0.5rem;
+          font-size: 0.9rem;
+      }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="controls-container">
+  <button id="micButton">🎤</button>  
+  <button id="stopButton">⏹️</button>
+</div>
+
+<div class="quick-times">
+    <strong>Preseleziona tempo:</strong><br>
+    <button id="listen2s" class="time-selector">2s</button>
+    <button id="listen4s" class="time-selector">4s</button>
+    <button id="listen6s" class="time-selector">6s</button>
+    <button id="listenCustom" class="time-selector active">Custom</button>
+</div>
+<label>Tempo Custom (ms): <input id="listeningTime" type="number" value="5000" style="width: 4rem;"></label>
+
+<div id="output"></div>
+
+<button id="toggleButtons">⬇️ Opzioni</button>
+<div id="extraButtons">
+  <button id="infoArchive">Informazioni Archivio</button> 
+  <button id="infoCommands">Informazioni Comandi</button> 
+  <button id="exportCommands">Esporta Archivio</button>
+  <br>
+  <input type="file" id="importFile" accept=".json">
+  <br>
+  <button id="resetArchive">Reset Archivio</button>
+</div>
+
+
+<script>
+/* ================== CONFIG E STATO ================== */
+// MODIFICA: Archivio di default minimale. Le sezioni vengono create dinamicamente all'importazione.
+const defaultArchive = {
+    "conversazione": []
+};
+let archive = JSON.parse(localStorage.getItem('archive') || JSON.stringify(defaultArchive));
+
+// Stati dell'app
+let appState = "IDLE";
+let tempMemory = {}; 
+let lastMainOutput = ""; 
+let lastBotOutput = "";  
+let currentRecognition = null; 
+let selectedListenMode = 'custom'; 
+
+// Vocabolario comandi
+const onWords = ["accendi", "attiva", "aziona", "avvia", "metti in funzione", "start"];
+const offWords = ["disattiva", "arresta", "blocca", "chiudi", "ferma", "interrompi", "spegni", "stop"];
+const readWords = ["leggi", "recita", "esponi"];
+const copyWords = ["copia", "salva", "trascrivi", "conserva", "riporta", "tieni"];
+const affirmativeWords = ["sì", "va bene", "ok", "tieni", "conferma", "esatto", "tutti"];
+const negativeWords = ["no", "per niente", "cancella", "rimuovi", "annulla", "nessuno"];
+const searchVerbs = ["cerca", "cerchi", "trova", "trovi", "dimmi", "dici"];
+const searchPreps = ["in", "nelle", "nei", "nello", "nella", "su", "sulle", "sui", "sullo", "sulla"];
+const randomWords = ["random", "a caso", "a scelta", "a tua scelta"];
+
+/* ================== FUNZIONI BASE ================== */
+function saveArchive() {
+  localStorage.setItem('archive', JSON.stringify(archive));
+}
+
+function speak(text, onEndCallback = null, isMainOutput = true) {
+  speechSynthesis.cancel(); 
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'it-IT';
+  
+  lastBotOutput = text; 
+  if (isMainOutput) {
+      lastMainOutput = text; 
+  }
+  if (onEndCallback) {
+    utter.onend = onEndCallback;
+  }
+  speechSynthesis.speak(utter);
+  appendOutput("Bot: " + text);
+}
+
+function appendOutput(text) {
+  document.getElementById('output').textContent += text + "\n";
+}
+
+/* ================== CONTROLLI PRINCIPALI ================== */
+
+function activateListening() {
+    if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+    } else {
+        document.getElementById('output').textContent = "";
+    }
+    
+    let listeningTime;
+    if (selectedListenMode === '2s') listeningTime = 2000;
+    else if (selectedListenMode === '4s') listeningTime = 4000;
+    else if (selectedListenMode === '6s') listeningTime = 6000;
+    else listeningTime = parseInt(document.getElementById('listeningTime').value) || 5000;
+    
+    startListening(handleSpeech, listeningTime);
+}
+
+document.getElementById('micButton').onclick = activateListening;
+
+function setListenMode(mode) {
+    selectedListenMode = mode;
+    const buttons = document.querySelectorAll('.time-selector');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    if (mode === '2s') document.getElementById('listen2s').classList.add('active');
+    else if (mode === '4s') document.getElementById('listen4s').classList.add('active');
+    else if (mode === '6s') document.getElementById('listen6s').classList.add('active');
+    else document.getElementById('listenCustom').classList.add('active');
+}
+
+document.getElementById('listen2s').onclick = () => setListenMode('2s');
+document.getElementById('listen4s').onclick = () => setListenMode('4s');
+document.getElementById('listen6s').onclick = () => setListenMode('6s');
+document.getElementById('listenCustom').onclick = () => setListenMode('custom');
+
+document.getElementById('stopButton').onclick = () => {
+  speechSynthesis.cancel(); 
+  if (currentRecognition) {
+      currentRecognition.stop(); 
+      currentRecognition = null;
+  }
+  document.getElementById('micButton').classList.remove('listening');
+  appState = "IDLE";
+  tempMemory = {};
+  appendOutput("Bot: Interrotto.");
+};
+
+function startListening(callback, duration) {
+  if (!('webkitSpeechRecognition' in window)) {
+    appendOutput("ERRORE: Riconoscimento vocale non supportato.");
+    return;
+  }
+  
+  if (currentRecognition) currentRecognition.stop();
+  
+  document.getElementById('micButton').classList.add('listening');
+  
+  const recognition = new webkitSpeechRecognition();
+  currentRecognition = recognition; 
+  
+  recognition.lang = "it-IT";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  
+  recognition.onresult = (event) => {
+    const text = event.results[0][0].transcript.toLowerCase();
+    callback(text);
+  };
+  
+  recognition.onerror = (event) => {
+    appendOutput("Errore: " + event.error);
+    appState = "IDLE"; 
+  };
+
+  recognition.onend = () => {
+    currentRecognition = null; 
+    document.getElementById('micButton').classList.remove('listening');
+  };
+  
+  recognition.start();
+  appendOutput("In ascolto...");
+  
+  setTimeout(() => {
+    if (currentRecognition === recognition) {
+        recognition.stop();
+    }
+  }, duration);
+}
+
+/* ================== GESTORE STATI ================== */
+function handleSpeech(text) {
+  appendOutput("Tu: " + text);
+  switch (appState) {
+    case "IDLE":
+      handleCommand(text); 
+      break;
+    case "AWAITING_SEARCH_CHOICE":
+      handleSearchChoice(text);
+      break;
+  }
+}
+
+/* ================== GESTIONE COMANDI ================== */
+function handleCommand(text) {
+  let found = false;
+
+  // 1. RIPETI
+  if (text === "ripeti") {
+    if (lastMainOutput) speak(lastMainOutput, null, false);
+    else speak("Non c'è nulla da ripetere.", null, false);
+    found = true;
+  }
+  
+  // 2. COPIA NEGLI APPUNTI (MODIFICATO con testo extra)
+  const isSaveCommand = copyWords.some(w => text.includes(w)) && !text.includes("testo") && !text.includes("messaggio");
+  if (!found && isSaveCommand) {
+    if (lastMainOutput) {
+      const textToCopy = lastMainOutput + " - - testo trascritto dall'assistente vocale.";
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        speak("Testo copiato negli appunti con firma.", null, false);
+      });
+    } else {
+      speak("Non c'è nulla da salvare.", null, false);
+    }
+    found = true;
+  }
+
+  // 3. AZIONI ON/OFF (Simulate)
+  if (!found && (onWords.some(w => text.includes(w)) || offWords.some(w => text.includes(w)))) {
+    found = handleAction(text);
+  }
+  
+  // 4. LETTURA CASUALE PER TAG
+  if (!found && readWords.some(w => text.includes(w))) {
+    found = handleRead(text);
+  }
+
+  // 5. RICERCA METADATI (Autore/Titolo)
+  if (!found) {
+    let searchType = null;
+    let query = "";
+    if (text.includes("autore")) {
+        searchType = "meta_author";
+        query = text.split("autore")[1].trim();
+    } else if (text.includes("titolo")) {
+        searchType = "meta_title";
+        query = text.split("titolo")[1].trim();
+    }
+    
+    if (searchType && query) {
+        found = handleMetadataSearch(searchType, query);
+    }
+  }
+
+  // 6. RICERCA AVANZATA IN SEZIONE SPECIFICA
+  if (!found) {
+    const searchPattern = new RegExp(`(${searchVerbs.join('|')})\\s+(${searchPreps.join('|')})\\s+([a-zA-Z0-9_]+)\\s+(.*)`, 'i');
+    const match = text.match(searchPattern);
+    
+    if (match) {
+        const section = match[3].toLowerCase();
+        const query = match[4].trim();
+        // Verifica dinamica se la sezione esiste nell'archivio corrente
+        if (archive[section]) {
+            found = handleAdvancedSearch(section, query);
+        } else {
+            speak(`La sezione "${section}" non esiste nel mio archivio.`, null, false);
+            found = true;
+        }
+    }
+  }
+
+  // 7. COMANDI CONVERSAZIONE (Standard)
+  if (!found && archive.conversazione) {
+    for (let cmd of archive.conversazione) {
+      if (text.includes(cmd.trigger.toLowerCase())) {
+        speak(cmd.output, null, true);
+        found = true;
+        break;
+      }
+    }
+  }
+
+  // MODIFICATO: Rimossa logica di cortesia random (cortesia array rimosso)
+
+  if (!found && appState === "IDLE") {
+    appendOutput("Bot: Comando non riconosciuto.");
+  }
+}
+
+/* ================== HELPER RICERCA ================== */
+function getRandomItems(arr, n) {
+    const shuffled = [...arr].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, n);
+}
+
+function parseNumberFromText(text) {
+    const writtenNumbers = { "uno": 1, "un": 1, "due": 2, "tre": 3, "quattro": 4, "cinque": 5 };
+    for (const key in writtenNumbers) if (text.includes(key)) return writtenNumbers[key];
+    const numMatch = text.match(/[\d]+/);
+    return numMatch ? parseInt(numMatch[0]) : 1;
+}
+
+function handleAction(text) {
+  let action = onWords.some(w => text.includes(w)) ? "attivato" : "disattivato";
+  let target = "";
+  if (text.includes("gps")) target = "GPS";
+  else if (text.includes("bluetooth")) target = "Bluetooth";
+  else if (text.includes("dati")) target = "Dati";
+  else if (text.includes("aereo")) target = "Modalità Aereo";
+  else if (text.includes("wifi")) target = "WiFi";
+  
+  if (target) {
+    speak(`Ho ${action} il ${target} (simulato).`, null, false);
+    return true; 
+  }
+  return false; 
+}
+
+function handleRead(text) {
+  if (text.includes("casuale")) {
+    const allEntries = [].concat(...Object.values(archive));
+    const tags = [...new Set(allEntries.map(c => c.tag).filter(Boolean))];
+    for (let t of tags) {
+      if (text.includes(t)) {
+        speakRandomTag(t);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function speakRandomTag(tag) {
+  const allEntries = [].concat(...Object.values(archive));
+  const filtered = allEntries.filter(c => c.tag === tag);
+  if (filtered.length === 0) {
+    speak("Nessun comando per il tag " + tag, null, false);
+    return;
+  }
+  const choice = filtered[Math.floor(Math.random() * filtered.length)];
+  speak(choice.output, null, true);
+}
+
+function handleAdvancedSearch(section, query) {
+    const sectionArray = archive[section];
+    if (!sectionArray) return false;
+
+    const queryLower = query.toLowerCase();
+    const isRandom = randomWords.some(w => queryLower.includes(w));
+    
+    if (isRandom) {
+        if (sectionArray.length === 0) {
+            speak(`La sezione ${section} è vuota.`, null, false);
+            return true;
+        }
+        const count = parseNumberFromText(queryLower);
+        const items = getRandomItems(sectionArray, count);
+        speak(`Ecco ${items.length} risultati casuali da ${section}:`, null, false);
+        items.forEach(item => speak(item.output, null, true));
+        return true;
+    }
+
+    // Ricerca esatta
+    const exactMatch = sectionArray.find(c => c.trigger.toLowerCase() === queryLower);
+    if (exactMatch) {
+        speak(exactMatch.output, null, true);
+        return true;
+    }
+
+    // Ricerca parziale
+    const results = sectionArray.filter(c => 
+        (c.trigger && c.trigger.toLowerCase().includes(queryLower)) || 
+        (c.output && c.output.toLowerCase().includes(queryLower))
+    );
+
+    return handleSearchResults(results, `per "${query}" in ${section}`);
+}
+
+function handleMetadataSearch(searchType, query) {
+    const queryLower = query.toLowerCase();
+    const allEntries = [].concat(...Object.values(archive));
+    const results = allEntries.filter(c => 
+        c[searchType] && c[searchType].toLowerCase().includes(queryLower)
+    );
+    return handleSearchResults(results, `per ${searchType.split('_')[1]} "${query}"`);
+}
+
+function handleSearchResults(results, contextString) {
+    if (results.length === 0) {
+        speak(`Nessun risultato trovato ${contextString}.`, null, false);
+    } else if (results.length === 1) {
+        speak(results[0].output, null, true);
+    } else {
+        let listString = `Ho trovato ${results.length} risultati ${contextString}: `;
+        const ordinals = ["primo", "secondo", "terzo", "quarto", "quinto", "sesto", "settimo", "ottavo", "nono", "decimo"];
+        listString += results.map((r, i) => {
+            const indexName = ordinals[i] || `numero ${i+1}`;
+            const displayName = r.meta_title || r.trigger || `Risultato ${i+1}`;
+            return `${indexName}, "${displayName}"`;
+        }).join('; ');
+        
+        listString += ". Quali vuoi ascoltare? Dì 'primo', 'secondo', 'tutti' o 'nessuno'.";
+        tempMemory.searchResults = results;
+        appState = "AWAITING_SEARCH_CHOICE";
+        speak(listString, null, true);
+    }
+    return true;
+}
+
+function handleSearchChoice(text) {
+    if (negativeWords.some(w => text.includes(w))) {
+        speak("Annullato.", null, false);
+        appState = "IDLE";
+        tempMemory = {};
+        return;
+    }
+
+    const results = tempMemory.searchResults || [];
+    let indicesToRead = [];
+
+    if (affirmativeWords.some(w => text.includes(w))) {
+        indicesToRead = results.map((_, i) => i);
+    } else {
+        const ordinals = ["primo", "secondo", "terzo", "quarto", "quinto", "sesto", "settimo", "ottavo", "nono", "decimo"];
+        for (let i = 0; i < ordinals.length; i++) {
+            if (text.includes(ordinals[i]) && i < results.length) indicesToRead.push(i);
+        }
+    }
+
+    if (indicesToRead.length > 0) {
+        speak(`Leggo ${indicesToRead.length} risultati.`, null, false);
+        for (const index of indicesToRead) {
+            if (results[index]) speak(results[index].output, null, true);
+        }
+    } else {
+        speak("Non ho capito. Riprova o dì annulla.", null, false);
+        return; 
+    }
+    appState = "IDLE";
+    tempMemory = {};
+}
+
+/* ================== GESTIONE UI EXTRA ================== */
+
+document.getElementById('toggleButtons').onclick = () => {
+    const extra = document.getElementById('extraButtons');
+    const arrow = document.getElementById('toggleButtons');
+    // Semplice toggle display senza logiche complesse
+    if (extra.style.display === 'none' || extra.style.display === '') {
+      extra.style.display = 'block';
+      arrow.textContent = '⬆️ Chiudi Opzioni';
+    } else {
+      extra.style.display = 'none';
+      arrow.textContent = '⬇️ Opzioni';
+    }
+};
+
+document.getElementById('infoArchive').onclick = () => {
+  const infoText = `
+INFO ARCHIVIO JSON
+------------------
+Struttura: Oggetto singolo { ... }.
+Le chiavi sono le Sezioni (es. "ricette", "orto").
+Ogni sezione è un array [ ... ] di comandi.
+
+Struttura Comando:
+{
+  "trigger": "parola attivazione",
+  "output": "testo risposta",
+  "tag": "categoria (es. primi)",
+  "meta_title": "titolo per ricerca",
+  "meta_author": "autore per ricerca"
+}
+
+L'app riconosce automaticamente le sezioni presenti nel file caricato.
+`;
+  document.getElementById('output').textContent = infoText;
+};
+
+// NUOVO BOTTONE INFO COMANDI
+document.getElementById('infoCommands').onclick = () => {
+    const cmdText = `
+LISTA COMANDI VOCALI E FUNZIONI
+-------------------------------
+1. BASE:
+   - "Ripeti": Ripete l'ultima frase detta dal bot.
+   - "Copia" / "Salva": Copia l'ultimo testo negli appunti (con firma).
+   - "Stop" / "Basta": Interrompe la voce.
+
+2. RICERCA DIRETTA:
+   - Pronuncia la parola chiave (trigger) per attivare un comando standard (sezione "conversazione").
+
+3. RICERCA AVANZATA (in Sezioni):
+   - "Cerca in [sezione] [parola]" 
+     Es: "Cerca in ricette torta" o "Trova in giardinaggio rose".
+     Nota: La sezione deve esistere nel file caricato.
+
+4. RICERCA METADATI:
+   - "...titolo [titolo]": Cerca per campo meta_title.
+   - "...autore [nome]": Cerca per campo meta_author.
+
+5. LETTURA RANDOM:
+   - "Cerca in [sezione] un random" (o "due random").
+   - "Leggi casuale [tag]": Pesca un comando con quel tag specifico.
+`;
+    document.getElementById('output').textContent = cmdText;
+};
+
+document.getElementById('exportCommands').onclick = () => {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(archive, null, 2));
+  const dlAnchor = document.createElement('a');
+  dlAnchor.setAttribute("href", dataStr);
+  dlAnchor.setAttribute("download", "archivio_assistente.json");
+  dlAnchor.click();
+};
+
+document.getElementById('importFile').onchange = (event) => {
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      let addedCount = 0;
+      
+      // Logica dinamica: importa qualsiasi chiave trovi
+      for (const section in imported) {
+          if (!archive[section]) {
+              archive[section] = [];
+          }
+          
+          for (let cmd of imported[section]) {
+              if (cmd.trigger && cmd.output) {
+                  archive[section].push({
+                      trigger: cmd.trigger,
+                      output: cmd.output,
+                      tag: cmd.tag || "",
+                      meta_title: cmd.meta_title || "",
+                      meta_author: cmd.meta_author || ""
+                  });
+                  addedCount++;
+              }
+          }
+      }
+      
+      saveArchive();
+      appendOutput(`Bot: Archivio importato. Aggiunti ${addedCount} comandi in varie sezioni.`);
+    } catch (err) {
+      appendOutput("Errore JSON: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = null;
+};
+
+document.getElementById('resetArchive').onclick = () => {
+  if (confirm("Cancellare tutto e tornare all'archivio vuoto?")) {
+    archive = JSON.parse(JSON.stringify(defaultArchive)); 
+    saveArchive();
+    appendOutput("Bot: Archivio resettato.");
+  }
+};
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error: ', err));
+  });
+}
+</script>
+</body>
+</html>
