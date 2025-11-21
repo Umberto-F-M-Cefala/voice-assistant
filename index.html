@@ -7,100 +7,94 @@
 <title>Assistente vocale di Umberto F. M. Cefalà</title>
 <link rel="manifest" href="manifest.json"> 
 <style>
-  /* Reset e impostazioni base per REM (1rem = 16px circa) */
+  /* ================= STILI (Mobile Friendly REM) ================= */
   html { font-size: 100%; box-sizing: border-box; }
   *, *:before, *:after { box-sizing: inherit; }
   
   body { 
     font-family: Arial, sans-serif; 
     text-align: center; 
-    padding: 1.25rem; /* 20px */
+    padding: 1.25rem; 
     margin: 0;
     background-color: #fff;
   }
   
-  /* Contenitore controlli principali affiancati */
+  /* Contenitore Bottoni Mic/Stop */
   .controls-container {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 1rem; /* Spazio tra i bottoni */
-      margin-bottom: 0.625rem; /* 10px */
-      flex-wrap: wrap; /* Su schermi piccolissimi va a capo se serve */
+      gap: 1rem; 
+      margin-bottom: 0.625rem; 
+      flex-wrap: wrap; 
   }
 
-  /* Stile bottone microfono (Flexbox per centrare icona) */
+  /* Icona stato dinamica */
+  #statusIconContainer {
+      font-size: 2rem;
+      margin-top: 0.5rem;
+      min-height: 2.5rem;
+  }
+
+  /* Elenco Sezioni */
+  #sectionsList {
+      font-size: 0.9rem;
+      color: #333;
+      background-color: #e9ecef;
+      padding: 0.5rem;
+      border-radius: 0.3125rem;
+      margin-top: 0.625rem;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+      border: 1px solid #ced4da;
+  }
+
+  /* Stile Bottoni Principali */
   #micButton {
-    font-size: 3.75rem; /* 60px */
+    font-size: 3.75rem; 
     cursor: pointer;
-    border: 0.3125rem solid #007bff; /* 5px */
+    border: 0.3125rem solid #007bff; 
     background-color: #f8f9fa; 
-    border-radius: 1.875rem; /* 30px */
-    width: 7.5rem;  /* 120px */
-    height: 7.5rem; /* 120px */
-    margin: 0.625rem; /* 10px */
+    border-radius: 3rem; 
+    width: 7.5rem;  
+    height: 7.5rem; 
+    margin: 0.625rem; 
     transition: background-color 0.2s, border-color 0.2s; 
-    
-    /* Centratura assoluta dell'icona */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
+    display: flex; align-items: center; justify-content: center; padding: 0;
   }
   #micButton:hover { background-color: #e2e6ea; }
-  
-  /* Classe per bottone microfono in ascolto */
-  #micButton.listening {
-      border-color: #dc3545; 
-      background-color: #fdf5f6; 
-  }
+  #micButton.listening { border-color: #dc3545; background-color: #fdf5f6; }
 
-  /* Stile bottone Stop (Flexbox per centrare icona) */
   #stopButton {
-    font-size: 3.75rem; /* 60px */
+    font-size: 3.75rem; 
     cursor: pointer;
-    border: 0.1875rem solid #dc3545; /* 3px */
+    border: 0.1875rem solid #dc3545; 
     background: #fff;
     color: #dc3545;
-    border-radius: 0.3125rem; /* 5px */
-    width: 7.5rem;  /* 120px */
-    height: 7.5rem; /* 120px */
-    margin: 0.625rem; /* 10px */
-    
-    /* Centratura assoluta dell'icona */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
+    border-radius: 0.3125rem; 
+    width: 7.5rem;  
+    height: 7.5rem; 
+    margin: 0.625rem; 
+    display: flex; align-items: center; justify-content: center; padding: 0;
   }
   #stopButton:hover { background-color: #fdf5f6; }
 
-  /* Output log */
+  /* Output Text Box */
   #output { 
-    margin-top: 1rem; 
+    margin-top: 0.5rem; 
     white-space: pre-wrap; 
     text-align: left; 
     background: #f4f4f4; 
     padding: 0.625rem; 
     border-radius: 0.3125rem; 
-    min-height: 9.375rem; /* 150px */
+    min-height: 9.375rem; 
     border: 1px solid #ccc;
     font-size: 1rem;
   }
   
-  /* Elementi di input generici */
-  input, select, button { 
-      margin: 0.3125rem; 
-      padding: 0.3125rem; 
-      font-size: 1rem;
-  }
-
-  /* Area tempi rapidi */
-  .quick-times {
-      margin: 0.625rem 0;
-  }
+  input, select, button { margin: 0.3125rem; padding: 0.3125rem; font-size: 1rem; }
+  .quick-times { margin: 0.625rem 0; }
   
-  /* Preselettori tempo */
   .time-selector {
       font-size: 1rem;
       padding: 0.5rem 0.75rem;
@@ -111,57 +105,30 @@
       transition: background-color 0.2s, color 0.2s;
   }
   .time-selector:hover { background-color: #f8f9fa; }
-  .time-selector.active {
-      background-color: #007bff;
-      color: #fff;
-      border-color: #007bff;
-  }
+  .time-selector.active { background-color: #007bff; color: #fff; border-color: #007bff; }
   
-  /* Bottone menu a tendina */
   #toggleButtons {
-    cursor: pointer;
-    margin-top: 0.625rem;
-    padding: 0.625rem;
-    width: 12.5rem; /* 200px */
-    border: 2px solid #6c757d;
-    background-color: #f8f9fa;
-    border-radius: 0.3125rem;
-    font-weight: bold;
-    font-size: 1.125rem; /* 18px */
-    /* Rimossi hover complessi per migliorare UX su mobile */
+    cursor: pointer; margin-top: 0.625rem; padding: 0.625rem; width: 12.5rem;
+    border: 2px solid #6c757d; background-color: #f8f9fa; border-radius: 0.3125rem;
+    font-weight: bold; font-size: 1.125rem;
   }
 
   #extraButtons {
-    display: none; 
-    border: 1px solid #ccc;
-    border-radius: 0.3125rem;
-    padding: 0.625rem;
-    margin-top: 0.3125rem;
-    max-width: 25rem; /* 400px */
-    margin-left: auto;
-    margin-right: auto;
+    display: none; border: 1px solid #ccc; border-radius: 0.3125rem; padding: 0.625rem;
+    margin-top: 0.3125rem; max-width: 25rem; margin-left: auto; margin-right: auto;
     background-color: #fff;
   }
   
-  /* Adattamenti mobile */
   @media (max-width: 480px) {
-      #micButton, #stopButton {
-          width: 6rem; /* un po' più piccoli su schermi stretti */
-          height: 6rem;
-          font-size: 3rem;
-      }
-      .time-selector {
-          padding: 0.3rem 0.5rem;
-          font-size: 0.9rem;
-      }
+      #micButton, #stopButton { width: 6rem; height: 6rem; font-size: 3rem; }
+      .time-selector { padding: 0.3rem 0.5rem; font-size: 0.9rem; }
   }
-
 </style>
 </head>
 <body>
 
 <div class="controls-container">
-  <button id="micButton">🎤</button>  
+  <button id="micButton">🎙️</button>  
   <button id="stopButton">⏹️</button>
 </div>
 
@@ -172,8 +139,11 @@
     <button id="listen6s" class="time-selector">6s</button>
     <button id="listenCustom" class="time-selector active">Custom</button>
 </div>
-<label>Tempo Custom (ms): <input id="listeningTime" type="number" value="5000" style="width: 4rem;"></label>
+<label>Tempo Custom (ms): <input id="listeningTime" type="number" value="8000" style="width: 5rem;"></label>
 
+<div id="sectionsList">Caricamento sezioni...</div>
+
+<div id="statusIconContainer"></div>
 <div id="output"></div>
 
 <button id="toggleButtons">⬇️ Opzioni</button>
@@ -181,90 +151,169 @@
   <button id="infoArchive">Informazioni Archivio</button> 
   <button id="infoCommands">Informazioni Comandi</button> 
   <button id="exportCommands">Esporta Archivio</button>
-  <br>
   <input type="file" id="importFile" accept=".json">
-  <br>
   <button id="resetArchive">Reset Archivio</button>
 </div>
 
-
 <script>
 /* ================== CONFIG E STATO ================== */
-// MODIFICA: Archivio di default minimale. Le sezioni vengono create dinamicamente all'importazione.
-const defaultArchive = {
-    "conversazione": []
-};
+const defaultArchive = { "conversazione": [] };
 let archive = JSON.parse(localStorage.getItem('archive') || JSON.stringify(defaultArchive));
 
-// Stati dell'app
-let appState = "IDLE";
+let appState = "IDLE"; 
 let tempMemory = {}; 
 let lastMainOutput = ""; 
-let lastBotOutput = "";  
 let currentRecognition = null; 
+let recognitionTimeout = null; // Nuova variabile per gestire il timer
 let selectedListenMode = 'custom'; 
+const SIGNATURE_TEXT = " - - testo trascritto dall'assistente vocale.";
 
-// Vocabolario comandi
-const onWords = ["accendi", "attiva", "aziona", "avvia", "metti in funzione", "start"];
-const offWords = ["disattiva", "arresta", "blocca", "chiudi", "ferma", "interrompi", "spegni", "stop"];
-const readWords = ["leggi", "recita", "esponi"];
+// Vocabolario
 const copyWords = ["copia", "salva", "trascrivi", "conserva", "riporta", "tieni"];
-const affirmativeWords = ["sì", "va bene", "ok", "tieni", "conferma", "esatto", "tutti"];
-const negativeWords = ["no", "per niente", "cancella", "rimuovi", "annulla", "nessuno"];
+const affirmativeWords = ["sì", "va bene", "ok", "conferma", "esatto", "tutti", "tutto"];
+const negativeWords = ["no", "cancella", "rimuovi", "annulla", "nessuno", "basta"];
 const searchVerbs = ["cerca", "cerchi", "trova", "trovi", "dimmi", "dici"];
 const searchPreps = ["in", "nelle", "nei", "nello", "nella", "su", "sulle", "sui", "sullo", "sulla"];
-const randomWords = ["random", "a caso", "a scelta", "a tua scelta"];
+const readWords = ["leggi", "recita", "esponi"];
+const randomWords = ["random", "a caso", "casuale"];
 
-/* ================== FUNZIONI BASE ================== */
-function saveArchive() {
-  localStorage.setItem('archive', JSON.stringify(archive));
+/* ================== MAPPA NUMERI ================== */
+let textToNumMap = {
+    "un": 1, "uno": 1, "primo": 1,
+    "due": 2, "secondo": 2,
+    "tre": 3, "terzo": 3,
+    "quattro": 4, "quarto": 4,
+    "cinque": 5, "quinto": 5,
+    "sei": 6, "sesto": 6,
+    "sette": 7, "settimo": 7,
+    "otto": 8, "ottavo": 8,
+    "nove": 9, "nono": 9,
+    "dieci": 10, "decimo": 10,
+    "cento": 100
+};
+
+function populateNumberMap() {
+    const units = ["", "uno", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove"];
+    const tens = ["", "dieci", "venti", "trenta", "quaranta", "cinquanta", "sessanta", "settanta", "ottanta", "novanta"];
+    const specials = ["dieci", "undici", "dodici", "tredici", "quattordici", "quindici", "sedici", "diciassette", "diciotto", "diciannove"];
+
+    for (let i = 1; i < 100; i++) {
+        let word = "";
+        if (i < 10) continue; 
+        else if (i >= 10 && i < 20) word = specials[i - 10];
+        else {
+            let t = Math.floor(i / 10);
+            let u = i % 10;
+            let tenWord = tens[t];
+            let unitWord = units[u];
+            if ((u === 1 || u === 8) && tenWord.length > 0) tenWord = tenWord.substring(0, tenWord.length - 1);
+            word = tenWord + unitWord;
+        }
+        textToNumMap[word] = i;
+        if (word.endsWith("tre")) textToNumMap[word.replace("tre", "tré")] = i;
+    }
 }
+populateNumberMap();
 
-function speak(text, onEndCallback = null, isMainOutput = true) {
-  speechSynthesis.cancel(); 
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'it-IT';
-  
-  lastBotOutput = text; 
-  if (isMainOutput) {
-      lastMainOutput = text; 
-  }
-  if (onEndCallback) {
-    utter.onend = onEndCallback;
-  }
-  speechSynthesis.speak(utter);
-  appendOutput("Bot: " + text);
+/* ================== GESTIONE UI SEZIONI ================== */
+function updateSectionList() {
+    const listDiv = document.getElementById('sectionsList');
+    const sections = Object.keys(archive);
+    
+    if (sections.length === 0) {
+        listDiv.textContent = "Elenco delle sezioni: Nessuna sezione presente";
+        return;
+    }
+
+    const labels = sections.map(sec => {
+        const count = Array.isArray(archive[sec]) ? archive[sec].length : 0;
+        return `${sec} (n. ${count})`;
+    });
+
+    listDiv.textContent = "Elenco delle sezioni: " + labels.join(" - ");
+}
+updateSectionList();
+
+/* ================== HELPER VISUALIZZAZIONE ================== */
+function setStatusIcon(type) {
+    const container = document.getElementById('statusIconContainer');
+    let icon = "";
+    let label = "";
+    switch(type) {
+        case 'search': icon = "🔍"; label = "Ricerca"; break;
+        case 'conversation': icon = "💬"; label = "Conversazione"; break;
+        case 'random': icon = "📖"; label = "Lettura Random"; break;
+        case 'transcription': icon = "🪶"; label = "Trascrizione"; break;
+        default: icon = ""; 
+    }
+    container.innerHTML = icon ? `${icon} <span style="font-size:1rem; vertical-align:middle">${label}</span>` : "";
 }
 
 function appendOutput(text) {
-  document.getElementById('output').textContent += text + "\n";
+  const outDiv = document.getElementById('output');
+  outDiv.textContent += text + "\n";
+  outDiv.scrollTop = outDiv.scrollHeight;
+}
+
+function displayEntryDetails(item) {
+    const out = `----------------
+ricerca: ${item.trigger || "N/A"}
+contenuto: ${item.output || "N/A"}
+tag: ${item.tag || "-"}
+titolo: ${item.meta_title || "-"}
+autore: ${item.meta_author || "-"}
+----------------`;
+    appendOutput(out);
+}
+
+/* ================== FUNZIONI VOCALI ================== */
+function speak(text, onEndCallback = null, isEntry = false) {
+  speechSynthesis.cancel(); 
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'it-IT';
+  if (!isEntry) appendOutput("Bot: " + text);
+  if (onEndCallback) utter.onend = onEndCallback;
+  speechSynthesis.speak(utter);
+}
+
+function speakEntry(item) {
+    speak(item.output, null, true);
 }
 
 /* ================== CONTROLLI PRINCIPALI ================== */
 
 function activateListening() {
-    if (speechSynthesis.speaking) {
-        speechSynthesis.cancel();
-    } else {
-        document.getElementById('output').textContent = "";
+    if (speechSynthesis.speaking) speechSynthesis.cancel();
+
+    // NUOVO: Se stiamo già ascoltando, ferma e invia subito
+    if (currentRecognition) {
+        currentRecognition.stop(); 
+        if (recognitionTimeout) clearTimeout(recognitionTimeout); // Ferma il timer automatico
+        return;
     }
-    
+
     let listeningTime;
     if (selectedListenMode === '2s') listeningTime = 2000;
     else if (selectedListenMode === '4s') listeningTime = 4000;
     else if (selectedListenMode === '6s') listeningTime = 6000;
-    else listeningTime = parseInt(document.getElementById('listeningTime').value) || 5000;
+    else listeningTime = parseInt(document.getElementById('listeningTime').value) || 8000;
     
     startListening(handleSpeech, listeningTime);
 }
 
 document.getElementById('micButton').onclick = activateListening;
 
+// NUOVO: Shortcut Ctrl + Alt + v
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'v') {
+        e.preventDefault(); // Previene azioni default del browser
+        activateListening();
+    }
+});
+
 function setListenMode(mode) {
     selectedListenMode = mode;
-    const buttons = document.querySelectorAll('.time-selector');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    
+    document.querySelectorAll('.time-selector').forEach(btn => btn.classList.remove('active'));
     if (mode === '2s') document.getElementById('listen2s').classList.add('active');
     else if (mode === '4s') document.getElementById('listen4s').classList.add('active');
     else if (mode === '6s') document.getElementById('listen6s').classList.add('active');
@@ -282,10 +331,14 @@ document.getElementById('stopButton').onclick = () => {
       currentRecognition.stop(); 
       currentRecognition = null;
   }
+  if (recognitionTimeout) clearTimeout(recognitionTimeout);
   document.getElementById('micButton').classList.remove('listening');
+  
   appState = "IDLE";
   tempMemory = {};
-  appendOutput("Bot: Interrotto.");
+  lastMainOutput = ""; 
+  document.getElementById('output').textContent = ""; 
+  setStatusIcon("");
 };
 
 function startListening(callback, duration) {
@@ -293,422 +346,359 @@ function startListening(callback, duration) {
     appendOutput("ERRORE: Riconoscimento vocale non supportato.");
     return;
   }
-  
   if (currentRecognition) currentRecognition.stop();
   
   document.getElementById('micButton').classList.add('listening');
-  
   const recognition = new webkitSpeechRecognition();
   currentRecognition = recognition; 
-  
   recognition.lang = "it-IT";
   recognition.interimResults = false;
   recognition.maxAlternatives = 1;
   
-  recognition.onresult = (event) => {
-    const text = event.results[0][0].transcript.toLowerCase();
-    callback(text);
-  };
-  
-  recognition.onerror = (event) => {
-    appendOutput("Errore: " + event.error);
-    appState = "IDLE"; 
-  };
-
+  recognition.onresult = (event) => callback(event.results[0][0].transcript.toLowerCase());
+  recognition.onerror = (event) => { appendOutput("Errore: " + event.error); appState = "IDLE"; };
   recognition.onend = () => {
     currentRecognition = null; 
     document.getElementById('micButton').classList.remove('listening');
   };
   
   recognition.start();
-  appendOutput("In ascolto...");
+  appendOutput("...In ascolto... (Premi di nuovo per inviare subito)");
   
-  setTimeout(() => {
-    if (currentRecognition === recognition) {
-        recognition.stop();
-    }
+  // Salva il timeout per poterlo cancellare se si preme Stop o il tasto Mic
+  recognitionTimeout = setTimeout(() => { 
+      if (currentRecognition === recognition) recognition.stop(); 
   }, duration);
 }
 
-/* ================== GESTORE STATI ================== */
+/* ================== LOGICA CENTRALE ================== */
+
 function handleSpeech(text) {
   appendOutput("Tu: " + text);
-  switch (appState) {
-    case "IDLE":
-      handleCommand(text); 
-      break;
-    case "AWAITING_SEARCH_CHOICE":
+
+  if (appState === "AWAITING_SEARCH_CHOICE") {
       handleSearchChoice(text);
-      break;
+      return;
   }
-}
 
-/* ================== GESTIONE COMANDI ================== */
-function handleCommand(text) {
-  let found = false;
-
-  // 1. RIPETI
+  // 1. COMANDI DI SISTEMA
   if (text === "ripeti") {
-    if (lastMainOutput) speak(lastMainOutput, null, false);
-    else speak("Non c'è nulla da ripetere.", null, false);
-    found = true;
-  }
-  
-  // 2. COPIA NEGLI APPUNTI (MODIFICATO con testo extra)
-  const isSaveCommand = copyWords.some(w => text.includes(w)) && !text.includes("testo") && !text.includes("messaggio");
-  if (!found && isSaveCommand) {
-    if (lastMainOutput) {
-      const textToCopy = lastMainOutput + " - - testo trascritto dall'assistente vocale.";
-      navigator.clipboard.writeText(textToCopy).then(() => {
-        speak("Testo copiato negli appunti con firma.", null, false);
-      });
-    } else {
-      speak("Non c'è nulla da salvare.", null, false);
-    }
-    found = true;
+      if (lastMainOutput) speak("Ripeto: " + lastMainOutput);
+      else speak("Non c'è nulla da ripetere.");
+      return;
   }
 
-  // 3. AZIONI ON/OFF (Simulate)
-  if (!found && (onWords.some(w => text.includes(w)) || offWords.some(w => text.includes(w)))) {
-    found = handleAction(text);
-  }
-  
-  // 4. LETTURA CASUALE PER TAG
-  if (!found && readWords.some(w => text.includes(w))) {
-    found = handleRead(text);
+  // 2. COPIA DIRETTA / TRASCRIZIONE
+  const commandWord = copyWords.find(w => text.startsWith(w));
+  if (commandWord) {
+      setStatusIcon('transcription');
+      handleCopyCommand(text, commandWord);
+      return;
   }
 
-  // 5. RICERCA METADATI (Autore/Titolo)
-  if (!found) {
-    let searchType = null;
-    let query = "";
-    if (text.includes("autore")) {
-        searchType = "meta_author";
-        query = text.split("autore")[1].trim();
-    } else if (text.includes("titolo")) {
-        searchType = "meta_title";
-        query = text.split("titolo")[1].trim();
-    }
-    
-    if (searchType && query) {
-        found = handleMetadataSearch(searchType, query);
-    }
+  // 3. LETTURA LOOP / RANDOM
+  if (readWords.some(w => text.startsWith(w))) {
+      setStatusIcon('random');
+      if (handleRead(text)) return;
   }
 
-  // 6. RICERCA AVANZATA IN SEZIONE SPECIFICA
-  if (!found) {
-    const searchPattern = new RegExp(`(${searchVerbs.join('|')})\\s+(${searchPreps.join('|')})\\s+([a-zA-Z0-9_]+)\\s+(.*)`, 'i');
-    const match = text.match(searchPattern);
-    
-    if (match) {
-        const section = match[3].toLowerCase();
-        const query = match[4].trim();
-        // Verifica dinamica se la sezione esiste nell'archivio corrente
-        if (archive[section]) {
-            found = handleAdvancedSearch(section, query);
-        } else {
-            speak(`La sezione "${section}" non esiste nel mio archivio.`, null, false);
-            found = true;
-        }
-    }
-  }
-
-  // 7. COMANDI CONVERSAZIONE (Standard)
-  if (!found && archive.conversazione) {
-    for (let cmd of archive.conversazione) {
-      if (text.includes(cmd.trigger.toLowerCase())) {
-        speak(cmd.output, null, true);
-        found = true;
-        break;
+  // 4. RICERCA METADATI
+  if (text.includes("autore") || text.includes("titolo")) {
+      setStatusIcon('search');
+      let type = text.includes("autore") ? "meta_author" : "meta_title";
+      let query = text.split(text.includes("autore") ? "autore" : "titolo")[1].trim();
+      if (query) {
+          handleMetadataSearch(type, query);
+          return;
       }
+  }
+
+  // 5. RICERCA AVANZATA
+  const searchPattern = new RegExp(`(${searchVerbs.join('|')})\\s+(${searchPreps.join('|')})\\s+([a-zA-Z0-9_]+)\\s+(.*)`, 'i');
+  const match = text.match(searchPattern);
+  if (match) {
+      setStatusIcon('search');
+      const section = match[3].toLowerCase();
+      const query = match[4].trim();
+      if (archive[section]) {
+          handleAdvancedSearch(section, query);
+          return;
+      } else {
+          speak(`La sezione "${section}" non esiste.`);
+          return;
+      }
+  }
+
+  // 6. RICERCA DIRETTA
+  if (archive.conversazione) {
+      for (let cmd of archive.conversazione) {
+          if (text.includes(cmd.trigger.toLowerCase())) {
+              setStatusIcon('conversation');
+              displayEntryDetails(cmd);
+              speakEntry(cmd);
+              lastMainOutput = cmd.output; 
+              return;
+          }
+      }
+  }
+
+  // 7. NON RICONOSCIUTO
+  lastMainOutput = text;
+  setStatusIcon('');
+  appendOutput("(Testo non riconosciuto. Dì 'Salva' o 'Ripeti')");
+}
+
+/* ================== IMPLEMENTAZIONE FUNZIONI ================== */
+
+function parseNumber(text) {
+    const digitMatch = text.match(/\d+/);
+    if (digitMatch) return parseInt(digitMatch[0]);
+    for (const [key, val] of Object.entries(textToNumMap)) {
+        if (text.includes(key)) return val;
     }
-  }
-
-  // MODIFICATO: Rimossa logica di cortesia random (cortesia array rimosso)
-
-  if (!found && appState === "IDLE") {
-    appendOutput("Bot: Comando non riconosciuto.");
-  }
+    return null;
 }
 
-/* ================== HELPER RICERCA ================== */
-function getRandomItems(arr, n) {
-    const shuffled = [...arr].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, n);
-}
+function handleCopyCommand(text, commandWord) {
+    let content = text.substring(commandWord.length).trim();
+    
+    // NUOVO: Logica firma invertita (Default: NO firma)
+    let useSignature = false;
+    if (content.includes("con firma") || content.includes("aggiungi firma") || text.includes("con firma")) {
+        useSignature = true;
+        content = content.replace("con firma", "").replace("aggiungi firma", "").trim();
+    }
+    
+    if (!content && lastMainOutput) content = lastMainOutput;
+    else if (!content) { speak("Non c'è nulla da salvare."); return; }
 
-function parseNumberFromText(text) {
-    const writtenNumbers = { "uno": 1, "un": 1, "due": 2, "tre": 3, "quattro": 4, "cinque": 5 };
-    for (const key in writtenNumbers) if (text.includes(key)) return writtenNumbers[key];
-    const numMatch = text.match(/[\d]+/);
-    return numMatch ? parseInt(numMatch[0]) : 1;
-}
+    // NUOVO: Sostituzione Punteggiatura
+    // virgola -> , | punto -> . | due punti -> : | a capo -> \n
+    content = content.replace(/\bvirgola\b/gi, ", ")
+                     .replace(/\bpunto\b/gi, ". ")
+                     .replace(/\bdue punti\b/gi, ": ")
+                     .replace(/\ba capo\b/gi, "\n");
 
-function handleAction(text) {
-  let action = onWords.some(w => text.includes(w)) ? "attivato" : "disattivato";
-  let target = "";
-  if (text.includes("gps")) target = "GPS";
-  else if (text.includes("bluetooth")) target = "Bluetooth";
-  else if (text.includes("dati")) target = "Dati";
-  else if (text.includes("aereo")) target = "Modalità Aereo";
-  else if (text.includes("wifi")) target = "WiFi";
-  
-  if (target) {
-    speak(`Ho ${action} il ${target} (simulato).`, null, false);
-    return true; 
-  }
-  return false; 
+    // Pulizia spazi doppi generati
+    content = content.replace(/\s\s+/g, ' ').trim();
+    // Fix per spazi prima della punteggiatura (es: "parola ,")
+    content = content.replace(/\s+([,.:])/g, '$1');
+
+    const finalString = useSignature ? content + SIGNATURE_TEXT : content;
+    
+    navigator.clipboard.writeText(finalString).then(() => {
+        speak(useSignature ? "Salvato con firma." : "Salvato.");
+        appendOutput(`📋 Appunti: "${finalString}"`);
+        lastMainOutput = content;
+    });
 }
 
 function handleRead(text) {
-  if (text.includes("casuale")) {
-    const allEntries = [].concat(...Object.values(archive));
-    const tags = [...new Set(allEntries.map(c => c.tag).filter(Boolean))];
-    for (let t of tags) {
-      if (text.includes(t)) {
-        speakRandomTag(t);
+    if (text.includes("casuale")) {
+        const allEntries = [].concat(...Object.values(archive));
+        const item = allEntries[Math.floor(Math.random() * allEntries.length)];
+        displayEntryDetails(item);
+        speakEntry(item);
         return true;
-      }
     }
-  }
-  return false;
-}
-
-function speakRandomTag(tag) {
-  const allEntries = [].concat(...Object.values(archive));
-  const filtered = allEntries.filter(c => c.tag === tag);
-  if (filtered.length === 0) {
-    speak("Nessun comando per il tag " + tag, null, false);
-    return;
-  }
-  const choice = filtered[Math.floor(Math.random() * filtered.length)];
-  speak(choice.output, null, true);
+    
+    const sectionMatch = Object.keys(archive).find(sec => text.includes(sec));
+    if (sectionMatch) {
+        const list = archive[sectionMatch];
+        if (!list || list.length === 0) {
+            speak(`La sezione ${sectionMatch} è vuota.`);
+            return true;
+        }
+        const startIndex = Math.floor(Math.random() * list.length);
+        speak(`Leggo ${sectionMatch} partendo dall'elemento ${startIndex + 1}.`);
+        speechSynthesis.cancel();
+        for (let i = 0; i < list.length; i++) {
+            const idx = (startIndex + i) % list.length;
+            const item = list[idx];
+            const utter = new SpeechSynthesisUtterance(item.output);
+            utter.lang = 'it-IT';
+            utter.onstart = () => displayEntryDetails(item);
+            speechSynthesis.speak(utter);
+        }
+        return true;
+    }
+    return false;
 }
 
 function handleAdvancedSearch(section, query) {
-    const sectionArray = archive[section];
-    if (!sectionArray) return false;
-
-    const queryLower = query.toLowerCase();
-    const isRandom = randomWords.some(w => queryLower.includes(w));
-    
+    const list = archive[section];
+    const isRandom = randomWords.some(w => query.includes(w));
     if (isRandom) {
-        if (sectionArray.length === 0) {
-            speak(`La sezione ${section} è vuota.`, null, false);
-            return true;
-        }
-        const count = parseNumberFromText(queryLower);
-        const items = getRandomItems(sectionArray, count);
-        speak(`Ecco ${items.length} risultati casuali da ${section}:`, null, false);
-        items.forEach(item => speak(item.output, null, true));
-        return true;
+        const item = list[Math.floor(Math.random() * list.length)];
+        displayEntryDetails(item);
+        speakEntry(item);
+        return;
     }
-
-    // Ricerca esatta
-    const exactMatch = sectionArray.find(c => c.trigger.toLowerCase() === queryLower);
-    if (exactMatch) {
-        speak(exactMatch.output, null, true);
-        return true;
-    }
-
-    // Ricerca parziale
-    const results = sectionArray.filter(c => 
-        (c.trigger && c.trigger.toLowerCase().includes(queryLower)) || 
-        (c.output && c.output.toLowerCase().includes(queryLower))
+    const results = list.filter(c => 
+        (c.trigger && c.trigger.toLowerCase().includes(query)) || 
+        (c.output && c.output.toLowerCase().includes(query))
     );
-
-    return handleSearchResults(results, `per "${query}" in ${section}`);
+    processSearchResults(results, `in ${section} per "${query}"`);
 }
 
-function handleMetadataSearch(searchType, query) {
-    const queryLower = query.toLowerCase();
-    const allEntries = [].concat(...Object.values(archive));
-    const results = allEntries.filter(c => 
-        c[searchType] && c[searchType].toLowerCase().includes(queryLower)
-    );
-    return handleSearchResults(results, `per ${searchType.split('_')[1]} "${query}"`);
+function handleMetadataSearch(type, query) {
+    const all = [].concat(...Object.values(archive));
+    const results = all.filter(c => c[type] && c[type].toLowerCase().includes(query));
+    const vocalLabel = type === "meta_author" ? "autore" : 
+                       type === "meta_title" ? "titolo" : type;
+    processSearchResults(results, `per ${vocalLabel} "${query}"`);
 }
 
-function handleSearchResults(results, contextString) {
+function processSearchResults(results, context) {
     if (results.length === 0) {
-        speak(`Nessun risultato trovato ${contextString}.`, null, false);
+        speak("Nessun risultato " + context);
     } else if (results.length === 1) {
-        speak(results[0].output, null, true);
+        displayEntryDetails(results[0]);
+        speakEntry(results[0]);
+        lastMainOutput = results[0].output;
     } else {
-        let listString = `Ho trovato ${results.length} risultati ${contextString}: `;
-        const ordinals = ["primo", "secondo", "terzo", "quarto", "quinto", "sesto", "settimo", "ottavo", "nono", "decimo"];
-        listString += results.map((r, i) => {
-            const indexName = ordinals[i] || `numero ${i+1}`;
-            const displayName = r.meta_title || r.trigger || `Risultato ${i+1}`;
-            return `${indexName}, "${displayName}"`;
-        }).join('; ');
-        
-        listString += ". Quali vuoi ascoltare? Dì 'primo', 'secondo', 'tutti' o 'nessuno'.";
+        let listStr = `Ho trovato ${results.length} risultati: `;
+        results.forEach((r, i) => {
+            const title = r.meta_title || r.trigger || "Elemento";
+            listStr += `${i + 1}: ${title}; `; 
+        });
+        appendOutput("Risultati multipli:\n" + listStr);
+        speak(listStr + " Scegli il numero, oppure 'tutti' o 'nessuno'.");
         tempMemory.searchResults = results;
         appState = "AWAITING_SEARCH_CHOICE";
-        speak(listString, null, true);
     }
-    return true;
 }
 
 function handleSearchChoice(text) {
     if (negativeWords.some(w => text.includes(w))) {
-        speak("Annullato.", null, false);
+        speak("Annullato.");
         appState = "IDLE";
         tempMemory = {};
         return;
     }
 
-    const results = tempMemory.searchResults || [];
-    let indicesToRead = [];
-
-    if (affirmativeWords.some(w => text.includes(w))) {
-        indicesToRead = results.map((_, i) => i);
-    } else {
-        const ordinals = ["primo", "secondo", "terzo", "quarto", "quinto", "sesto", "settimo", "ottavo", "nono", "decimo"];
-        for (let i = 0; i < ordinals.length; i++) {
-            if (text.includes(ordinals[i]) && i < results.length) indicesToRead.push(i);
-        }
+    const results = tempMemory.searchResults;
+    if (text.includes("tutti") || text.includes("tutto")) {
+        speak(`Leggo tutti i ${results.length} risultati.`);
+        speechSynthesis.cancel();
+        results.forEach((item, i) => {
+            const intro = new SpeechSynthesisUtterance(`Numero ${i+1}.`);
+            intro.lang = 'it-IT';
+            speechSynthesis.speak(intro);
+            const utter = new SpeechSynthesisUtterance(item.output);
+            utter.lang = 'it-IT';
+            utter.onstart = () => displayEntryDetails(item);
+            speechSynthesis.speak(utter);
+        });
+        appState = "IDLE";
+        return;
     }
-
-    if (indicesToRead.length > 0) {
-        speak(`Leggo ${indicesToRead.length} risultati.`, null, false);
-        for (const index of indicesToRead) {
-            if (results[index]) speak(results[index].output, null, true);
-        }
+    
+    const choiceNum = parseNumber(text);
+    if (choiceNum !== null && choiceNum > 0 && choiceNum <= results.length) {
+        const item = results[choiceNum - 1];
+        displayEntryDetails(item);
+        speakEntry(item);
+        lastMainOutput = item.output;
+        appState = "IDLE";
     } else {
-        speak("Non ho capito. Riprova o dì annulla.", null, false);
-        return; 
+        speak("Numero non valido. Riprova o dì annulla.");
     }
-    appState = "IDLE";
-    tempMemory = {};
 }
 
-/* ================== GESTIONE UI EXTRA ================== */
+/* ================== GESTIONE EXTRA UI ================== */
 
 document.getElementById('toggleButtons').onclick = () => {
     const extra = document.getElementById('extraButtons');
-    const arrow = document.getElementById('toggleButtons');
-    // Semplice toggle display senza logiche complesse
-    if (extra.style.display === 'none' || extra.style.display === '') {
-      extra.style.display = 'block';
-      arrow.textContent = '⬆️ Chiudi Opzioni';
+    const btn = document.getElementById('toggleButtons');
+    if (extra.style.display === 'none' || !extra.style.display) {
+        extra.style.display = 'block';
+        btn.textContent = '⬆️ Chiudi Opzioni';
     } else {
-      extra.style.display = 'none';
-      arrow.textContent = '⬇️ Opzioni';
+        extra.style.display = 'none';
+        btn.textContent = '⬇️ Opzioni';
     }
 };
 
 document.getElementById('infoArchive').onclick = () => {
-  const infoText = `
-INFO ARCHIVIO JSON
-------------------
-Struttura: Oggetto singolo { ... }.
-Le chiavi sono le Sezioni (es. "ricette", "orto").
-Ogni sezione è un array [ ... ] di comandi.
-
-Struttura Comando:
+    const txt = `INFO ARCHIVIO
+-------------
+Esempio di struttura JSON valida con 2 sezioni:
 {
-  "trigger": "parola attivazione",
-  "output": "testo risposta",
-  "tag": "categoria (es. primi)",
-  "meta_title": "titolo per ricerca",
-  "meta_author": "autore per ricerca"
-}
-
-L'app riconosce automaticamente le sezioni presenti nel file caricato.
-`;
-  document.getElementById('output').textContent = infoText;
+  "conversazione": [
+    { "trigger": "ciao", "output": "Benvenuto.", "tag": "saluti", "meta_title": "", "meta_author": "" },
+    { "trigger": "aiuto", "output": "Chiedimi di cercare.", "tag": "info", "meta_title": "", "meta_author": "" }
+  ],
+  "poesie": [
+    { "trigger": "infinito", "output": "Sempre caro mi fu...", "tag": "leopardi", "meta_title": "L'infinito", "meta_author": "Leopardi" },
+    { "trigger": "veglia", "output": "Un'intera nottata...", "tag": "ungaretti", "meta_title": "Veglia", "meta_author": "Ungaretti" }
+  ]
+}`;
+    document.getElementById('output').textContent = txt;
 };
 
-// NUOVO BOTTONE INFO COMANDI
 document.getElementById('infoCommands').onclick = () => {
-    const cmdText = `
-LISTA COMANDI VOCALI E FUNZIONI
--------------------------------
-1. BASE:
-   - "Ripeti": Ripete l'ultima frase detta dal bot.
-   - "Copia" / "Salva": Copia l'ultimo testo negli appunti (con firma).
-   - "Stop" / "Basta": Interrompe la voce.
+    const txt = `GUIDA COMANDI VOCALI
+--------------------
+1. COMANDI BASE:
+   - "Ripeti": Ripete l'ultimo output.
+   - "Stop": Resetta tutto.
+   - Shortcut "Ctrl+Alt+v": Avvia/Ferma ascolto.
 
-2. RICERCA DIRETTA:
-   - Pronuncia la parola chiave (trigger) per attivare un comando standard (sezione "conversazione").
+2. SALVATAGGIO AVANZATO:
+   - "Salva [testo]": Copia (Default: NO firma).
+   - "Salva [testo] con firma": Aggiunge firma.
+   - Punteggiatura automatica: Dì "virgola", "punto", "due punti", "a capo".
 
-3. RICERCA AVANZATA (in Sezioni):
-   - "Cerca in [sezione] [parola]" 
-     Es: "Cerca in ricette torta" o "Trova in giardinaggio rose".
-     Nota: La sezione deve esistere nel file caricato.
+3. INTERAZIONE DIRETTA (Sezione 'Conversazione'):
+   - Dì solo la parola chiave (es. "Ciao").
 
-4. RICERCA METADATI:
-   - "...titolo [titolo]": Cerca per campo meta_title.
-   - "...autore [nome]": Cerca per campo meta_author.
+4. RICERCA AVANZATA:
+   - "Cerca in [sezione] [parola]".
+   - "...autore [nome]" / "...titolo [titolo]".
 
-5. LETTURA RANDOM:
-   - "Cerca in [sezione] un random" (o "due random").
-   - "Leggi casuale [tag]": Pesca un comando con quel tag specifico.
+5. LETTURA:
+   - "Leggi [sezione]" (sequenziale circolare).
+   - "Leggi casuale [tag]".
 `;
-    document.getElementById('output').textContent = cmdText;
+    document.getElementById('output').textContent = txt;
 };
 
 document.getElementById('exportCommands').onclick = () => {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(archive, null, 2));
-  const dlAnchor = document.createElement('a');
-  dlAnchor.setAttribute("href", dataStr);
-  dlAnchor.setAttribute("download", "archivio_assistente.json");
-  dlAnchor.click();
+  const a = document.createElement('a');
+  a.href = dataStr;
+  a.download = "archivio_assistente.json";
+  a.click();
 };
 
-document.getElementById('importFile').onchange = (event) => {
-  const file = event.target.files[0]; if (!file) return;
+document.getElementById('importFile').onchange = (e) => {
+  const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = ev => {
     try {
-      const imported = JSON.parse(e.target.result);
-      let addedCount = 0;
-      
-      // Logica dinamica: importa qualsiasi chiave trovi
-      for (const section in imported) {
-          if (!archive[section]) {
-              archive[section] = [];
-          }
-          
-          for (let cmd of imported[section]) {
-              if (cmd.trigger && cmd.output) {
-                  archive[section].push({
-                      trigger: cmd.trigger,
-                      output: cmd.output,
-                      tag: cmd.tag || "",
-                      meta_title: cmd.meta_title || "",
-                      meta_author: cmd.meta_author || ""
-                  });
-                  addedCount++;
-              }
-          }
+      const json = JSON.parse(ev.target.result);
+      for(let k in json) {
+          if (!archive[k]) archive[k] = [];
+          json[k].forEach(item => archive[k].push(item));
       }
-      
-      saveArchive();
-      appendOutput(`Bot: Archivio importato. Aggiunti ${addedCount} comandi in varie sezioni.`);
-    } catch (err) {
-      appendOutput("Errore JSON: " + err.message);
-    }
+      localStorage.setItem('archive', JSON.stringify(archive));
+      updateSectionList(); 
+      appendOutput(`Bot: Importazione completata.`);
+    } catch(err) { appendOutput("Errore JSON: " + err.message); }
   };
   reader.readAsText(file);
-  event.target.value = null;
 };
 
 document.getElementById('resetArchive').onclick = () => {
-  if (confirm("Cancellare tutto e tornare all'archivio vuoto?")) {
-    archive = JSON.parse(JSON.stringify(defaultArchive)); 
-    saveArchive();
+  if(confirm("Reset archivio?")) {
+    archive = JSON.parse(JSON.stringify(defaultArchive));
+    localStorage.setItem('archive', JSON.stringify(archive));
+    updateSectionList(); 
     appendOutput("Bot: Archivio resettato.");
   }
 };
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error: ', err));
-  });
-}
 </script>
 </body>
-</html>
+</html>/body>
+</html>tml>
