@@ -134,12 +134,12 @@
 
 <div class="quick-times">
     <strong>Preseleziona tempo:</strong><br>
-    <button id="listen2s" class="time-selector">2s</button>
-    <button id="listen4s" class="time-selector">4s</button>
-    <button id="listen6s" class="time-selector">6s</button>
+    <button id="listen2s" class="time-selector">3s</button>
+    <button id="listen4s" class="time-selector">7s</button>
+    <button id="listen6s" class="time-selector">9s</button>
     <button id="listenCustom" class="time-selector active">Custom</button>
 </div>
-<label>Tempo Custom (ms): <input id="listeningTime" type="number" value="8000" style="width: 5rem;"></label>
+<label>Tempo Custom: 2o clic su microfono per terminare</label>
 
 <div id="sectionsList">Caricamento sezioni...</div>
 
@@ -293,11 +293,11 @@ function activateListening() {
     }
 
     let listeningTime;
-    if (selectedListenMode === '2s') listeningTime = 2000;
-    else if (selectedListenMode === '4s') listeningTime = 4000;
-    else if (selectedListenMode === '6s') listeningTime = 6000;
-    else listeningTime = parseInt(document.getElementById('listeningTime').value) || 8000;
-    
+    if (selectedListenMode === '3s') listeningTime = 3000;
+    else if (selectedListenMode === '7s') listeningTime = 7000;
+    else if (selectedListenMode === '9s') listeningTime = 9000;
+    else listeningTime = -1;
+  
     startListening(handleSpeech, listeningTime);
 }
 
@@ -366,10 +366,12 @@ function startListening(callback, duration) {
   appendOutput("...In ascolto... (Premi di nuovo per inviare subito)");
   
   // Salva il timeout per poterlo cancellare se si preme Stop o il tasto Mic
-  recognitionTimeout = setTimeout(() => { 
-      if (currentRecognition === recognition) recognition.stop(); 
-  }, duration);
+if (selectedListenMode !== 'custom' || duration !== -1) {
+    recognitionTimeout = setTimeout(() => { 
+        if (currentRecognition === recognition) recognition.stop(); 
+    }, duration);
 }
+
 
 /* ================== LOGICA CENTRALE ================== */
 
