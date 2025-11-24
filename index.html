@@ -93,19 +93,6 @@
   }
   
   input, select, button { margin: 0.3125rem; padding: 0.3125rem; font-size: 1rem; }
-  .quick-times { margin: 0.625rem 0; }
-  
-  .time-selector {
-      font-size: 1rem;
-      padding: 0.5rem 0.75rem;
-      cursor: pointer;
-      border: 2px solid #6c757d;
-      background: #fff;
-      border-radius: 0.3125rem;
-      transition: background-color 0.2s, color 0.2s;
-  }
-  .time-selector:hover { background-color: #f8f9fa; }
-  .time-selector.active { background-color: #007bff; color: #fff; border-color: #007bff; }
   
   #toggleButtons {
     cursor: pointer; margin-top: 0.625rem; padding: 0.625rem; width: 12.5rem;
@@ -121,8 +108,7 @@
   
   @media (max-width: 480px) {
       #micButton, #stopButton { width: 6rem; height: 6rem; font-size: 3rem; }
-      .time-selector { padding: 0.3rem 0.5rem; font-size: 0.9rem; }
-  }
+      }
 </style>
 </head>
 <body>
@@ -131,15 +117,6 @@
   <button id="micButton">🎙️</button>  
   <button id="stopButton">⏹️</button>
 </div>
-
-<div class="quick-times">
-    <strong>Preseleziona tempo:</strong><br>
-    <button id="listen2s" class="time-selector">3s</button>
-    <button id="listen4s" class="time-selector">7s</button>
-    <button id="listen6s" class="time-selector">9s</button>
-    <button id="listenCustom" class="time-selector active">Custom</button>
-</div>
-<label>Tempo Custom: 2o clic su microfono per terminare</label>
 
 <div id="sectionsList">Caricamento sezioni...</div>
 
@@ -164,8 +141,6 @@ let appState = "IDLE";
 let tempMemory = {}; 
 let lastMainOutput = ""; 
 let currentRecognition = null; 
-let recognitionTimeout = null; // Nuova variabile per gestire il timer
-let selectedListenMode = 'custom'; 
 const SIGNATURE_TEXT = " - - testo trascritto dall'assistente vocale.";
 
 // Vocabolario
@@ -285,20 +260,12 @@ function speakEntry(item) {
 function activateListening() {
     if (speechSynthesis.speaking) speechSynthesis.cancel();
 
-    // NUOVO: Se stiamo già ascoltando, ferma e invia subito
     if (currentRecognition) {
         currentRecognition.stop(); 
-        if (recognitionTimeout) clearTimeout(recognitionTimeout); // Ferma il timer automatico
         return;
     }
 
-    let listeningTime;
-    if (selectedListenMode === '3s') listeningTime = 3000;
-    else if (selectedListenMode === '7s') listeningTime = 7000;
-    else if (selectedListenMode === '9s') listeningTime = 9000;
-    else listeningTime = -1;
-  
-    startListening(handleSpeech, listeningTime);
+    startListening(handleSpeech);
 }
 
 document.getElementById('micButton').onclick = activateListening;
@@ -311,27 +278,12 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-function setListenMode(mode) {
-    selectedListenMode = mode;
-    document.querySelectorAll('.time-selector').forEach(btn => btn.classList.remove('active'));
-    if (mode === '2s') document.getElementById('listen2s').classList.add('active');
-    else if (mode === '4s') document.getElementById('listen4s').classList.add('active');
-    else if (mode === '6s') document.getElementById('listen6s').classList.add('active');
-    else document.getElementById('listenCustom').classList.add('active');
-}
-
-document.getElementById('listen2s').onclick = () => setListenMode('2s');
-document.getElementById('listen4s').onclick = () => setListenMode('4s');
-document.getElementById('listen6s').onclick = () => setListenMode('6s');
-document.getElementById('listenCustom').onclick = () => setListenMode('custom');
-
 document.getElementById('stopButton').onclick = () => {
   speechSynthesis.cancel(); 
   if (currentRecognition) {
       currentRecognition.stop(); 
       currentRecognition = null;
   }
-  if (recognitionTimeout) clearTimeout(recognitionTimeout);
   document.getElementById('micButton').classList.remove('listening');
   
   appState = "IDLE";
@@ -341,7 +293,7 @@ document.getElementById('stopButton').onclick = () => {
   setStatusIcon("");
 };
 
-function startListening(callback, duration) {
+function startListening(callback) {
   if (!('webkitSpeechRecognition' in window)) {
     appendOutput("ERRORE: Riconoscimento vocale non supportato.");
     return;
@@ -365,12 +317,6 @@ function startListening(callback, duration) {
   recognition.start();
   appendOutput("...In ascolto... (Premi di nuovo per inviare subito)");
   
-  // Salva il timeout per poterlo cancellare se si preme Stop o il tasto Mic
-if (selectedListenMode !== 'custom' || duration !== -1) {
-    recognitionTimeout = setTimeout(() => { 
-        if (currentRecognition === recognition) recognition.stop(); 
-    }, duration);
-}
 }
 
 /* ================== LOGICA CENTRALE ================== */
