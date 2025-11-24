@@ -167,6 +167,45 @@ let textToNumMap = {
     "cento": 100
 };
 
+  /* ================== FUNZIONE PER RILASCIARE RISORSE ================== */
+function releaseResources() {
+    try { speechSynthesis.cancel(); } catch(e) {}
+    if (currentRecognition) {
+        try { currentRecognition.onend = null; currentRecognition.stop(); } catch(e) {}
+        currentRecognition = null;
+    }
+    appState = "IDLE";
+    tempMemory = {};
+    if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = null;
+    }
+}
+
+let inactivityTimer = null;
+const INACTIVITY_TIMEOUT = 15000; // 15 secondi
+
+function stopAllActivities() {
+    speechSynthesis.cancel();
+    if (currentRecognition) {
+        currentRecognition.onend = null; // previene richiamo automatico
+        currentRecognition.stop();
+        currentRecognition = null;
+    }
+    document.getElementById('micButton').classList.remove('listening');
+    appState = "IDLE";
+    tempMemory = {};
+    lastMainOutput = "";
+    appendOutput("Bot: Timeout inattività, microfono e TTS fermati.");
+}
+
+function resetInactivityTimer() {
+    if (inactivityTimer) clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+        stopAllActivities();
+    }, INACTIVITY_TIMEOUT);
+}
+  
 function populateNumberMap() {
     const units = ["", "uno", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove"];
     const tens = ["", "dieci", "venti", "trenta", "quaranta", "cinquanta", "sessanta", "settanta", "ottanta", "novanta"];
@@ -258,13 +297,17 @@ function speakEntry(item) {
 /* ================== CONTROLLI PRINCIPALI ================== */
 
 function activateListening() {
+    // Ferma eventuale TTS in corso
     if (speechSynthesis.speaking) speechSynthesis.cancel();
 
+    // Ferma eventuale riconoscimento precedente
     if (currentRecognition) {
-        currentRecognition.stop(); 
-        return;
+        currentRecognition.onend = null; // Evita doppi callback
+        currentRecognition.stop();
+        currentRecognition = null;
     }
 
+    // Avvia nuova sessione di ascolto
     startListening(handleSpeech);
 }
 
@@ -279,44 +322,39 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.getElementById('stopButton').onclick = () => {
-  speechSynthesis.cancel(); 
-  if (currentRecognition) {
-      currentRecognition.stop(); 
-      currentRecognition = null;
-  }
-  document.getElementById('micButton').classList.remove('listening');
-  
-  appState = "IDLE";
-  tempMemory = {};
-  lastMainOutput = ""; 
-  document.getElementById('output').textContent = ""; 
-  setStatusIcon("");
-};
+    releaseResources();
+    document.getElementById('micButton').classList.remove('listening');
+    document.getElementById('output').textContent = "";
+    setStatusIcon("");
+    lastMainOutput = "";
+  };
 
 function startListening(callback) {
-  if (!('webkitSpeechRecognition' in window)) {
-    appendOutput("ERRORE: Riconoscimento vocale non supportato.");
-    return;
-  }
-  if (currentRecognition) currentRecognition.stop();
-  
-  document.getElementById('micButton').classList.add('listening');
-  const recognition = new webkitSpeechRecognition();
-  currentRecognition = recognition; 
-  recognition.lang = "it-IT";
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-  
-  recognition.onresult = (event) => callback(event.results[0][0].transcript.toLowerCase());
-  recognition.onerror = (event) => { appendOutput("Errore: " + event.error); appState = "IDLE"; };
-  recognition.onend = () => {
-    currentRecognition = null; 
-    document.getElementById('micButton').classList.remove('listening');
-  };
-  
-  recognition.start();
-  appendOutput("...In ascolto... (Premi di nuovo per inviare subito)");
-  
+    if (!('webkitSpeechRecognition' in window)) {
+        appendOutput("ERRORE: Riconoscimento vocale non supportato.");
+        return;
+    }
+
+    // Ferma eventuale TTS e riconoscimento
+    releaseResources();
+
+    document.getElementById('micButton').classList.add('listening');
+    const recognition = new webkitSpeechRecognition();
+    currentRecognition = recognition; 
+    recognition.lang = "it-IT";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (event) => callback(event.results[0][0].transcript.toLowerCase());
+    recognition.onerror = (event) => { appendOutput("Errore: " + event.error); appState = "IDLE"; };
+    recognition.onend = () => {
+        currentRecognition = null; 
+        document.getElementById('micButton').classList.remove('listening');
+    };
+
+    recognition.start();
+    resetInactivityTimer();
+    appendOutput("...In ascolto... (Premi di nuovo per inviare subito)");
 }
 
 /* ================== LOGICA CENTRALE ================== */
@@ -324,6 +362,8 @@ function startListening(callback) {
 function handleSpeech(text) {
   appendOutput("Tu: " + text);
 
+   resetInactivityTimer();
+  
   if (appState === "AWAITING_SEARCH_CHOICE") {
       handleSearchChoice(text);
       return;
@@ -394,6 +434,10 @@ function handleSpeech(text) {
   lastMainOutput = text;
   setStatusIcon('');
   appendOutput("(Testo non riconosciuto. Dì 'Salva' o 'Ripeti')");
+  // Reset del timer di inattività
+  resetInactivityTimer();
+
+
 }
 
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
@@ -646,6 +690,13 @@ document.getElementById('resetArchive').onclick = () => {
     appendOutput("Bot: Archivio resettato.");
   }
 };
+
+  // Rilascia risorse se l'utente chiude o cambia tab
+window.addEventListener('beforeunload', releaseResources);
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) releaseResources();
+});
+
 </script>
 </body>
 </html>
