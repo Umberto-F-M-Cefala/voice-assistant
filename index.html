@@ -454,9 +454,22 @@ function startListening(callback) {
     };
 
     r.onend = () => {
-        mic.classList.remove('listening');
+    const mic = document.getElementById('micButton');
+    mic.classList.remove('listening');
+
+    // Se siamo in attesa di scelta multipla (numeri), non rilasciare subito currentRecognition
+    if (appState !== "AWAITING_SEARCH_CHOICE") {
         currentRecognition = null;
-    };
+    } else {
+        // Riavvia automaticamente l'ascolto per input breve
+        setTimeout(() => {
+            if (appState === "AWAITING_SEARCH_CHOICE" && !currentRecognition) {
+                startListening(handleSpeech);
+            }
+        }, 200);
+    }
+};
+
 
     r.start();
     resetInactivityTimer();
