@@ -355,7 +355,24 @@ function activateListening() {
     startListening(handleSpeech);
 }
 
-document.getElementById('micButton').onclick = activateListening;
+document.getElementById('micButton').onclick = () => {
+    const micBtn = document.getElementById('micButton');
+
+    if (appState === "LISTENING") {
+        // Se il microfono è già in ascolto, lo interrompe senza riavviare
+        if (currentRecognition) {
+            currentRecognition.onend = null;  // previene callback doppi
+            currentRecognition.stop();
+            currentRecognition = null;
+        }
+        micBtn.classList.remove('listening');
+        appState = "IDLE";
+        appendOutput("Ascolto interrotto manualmente.");
+    } else {
+        // Altrimenti avvia l'ascolto
+        activateListening();
+    }
+};
 
 // NUOVO: Shortcut Ctrl + Alt + v
 document.addEventListener('keydown', (e) => {
