@@ -731,7 +731,32 @@ window.addEventListener('beforeunload', releaseResources);
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) releaseResources();
 });
+/* ================== TOGGLE AUDIO OUTPUT ================== */
+const muteButton = document.getElementById('muteButton');
 
+function updateMuteButtonUI() {
+    if (audioEnabled) {
+        muteButton.textContent = "🔈"; // icona audio attivo
+        muteButton.classList.remove('mute-off');
+        muteButton.classList.add('mute-on');
+        appendOutput("Bot: Audio attivo.");
+    } else {
+        muteButton.textContent = "🔇"; // icona audio disattivato
+        muteButton.classList.remove('mute-on');
+        muteButton.classList.add('mute-off');
+        appendOutput("Bot: Audio disattivato.");
+    }
+}
+
+// Al click del bottone mute
+muteButton.onclick = () => {
+    audioEnabled = !audioEnabled;
+    updateMuteButtonUI();
+};
+
+// Inizializza lo stato all'avvio
+updateMuteButtonUI();
+  
 </script>
 </body>
 </html>
