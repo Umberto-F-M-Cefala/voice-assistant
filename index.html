@@ -550,13 +550,35 @@ function handleSpeech(text) {
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
 
 function parseNumber(text) {
-    const digitMatch = text.match(/\d+/);
+    if (!text) return null;
+
+    // Normalizzazione completa
+    let t = text.toLowerCase().trim();
+
+    // Rimuove punteggiatura residua: ".", ",", "?"
+    t = t.replace(/[^\wàèéìòù0-9 ]+/g, "");
+
+    // CASO 1 — cifra diretta "2", "5", "10"
+    const digitMatch = t.match(/\d+/);
     if (digitMatch) return parseInt(digitMatch[0]);
-    for (const [key, val] of Object.entries(textToNumMap)) {
-        if (text.includes(key)) return val;
+
+    // CASO 2 — "numero 5"
+    const afterNumero = t.match(/numero\s+(\d+)/);
+    if (afterNumero) return parseInt(afterNumero[1]);
+
+    // CASO 3 — parole ("uno", "due", "secondo", "cinque", ...)
+    for (const [word, value] of Object.entries(textToNumMap)) {
+        if (t === word) return value;          // match perfetto
+        if (t.includes(word)) return value;    // match approssimativo ("cinque per favore", "due grazie")
     }
+
+    // CASO 4 — fix parole spezzate dal riconoscimento (es. "du e")
+    const compact = t.replace(/\s+/g, "");
+    if (compact in textToNumMap) return textToNumMap[compact];
+
     return null;
 }
+
 
 function handleCopyCommand(text, commandWord) {
     let content = text.substring(commandWord.length).trim();
