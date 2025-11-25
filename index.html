@@ -358,20 +358,32 @@ function activateListening() {
 document.getElementById('micButton').onclick = () => {
     const micBtn = document.getElementById('micButton');
 
+   
     if (appState === "LISTENING") {
-        // Se il microfono è già in ascolto, lo interrompe senza riavviare
+
+        // Ferma riconoscimento attivo
         if (currentRecognition) {
-            currentRecognition.onend = null;  // previene callback doppi
+            currentRecognition.onend = null; // evita doppio evento
             currentRecognition.stop();
-            currentRecognition = null;
         }
+
         micBtn.classList.remove('listening');
         appState = "IDLE";
-        appendOutput("Ascolto interrotto manualmente.");
-    } else {
-        // Altrimenti avvia l'ascolto
-        activateListening();
+
+        // Se c’è testo invialo subito
+        if (lastInterimResult.trim() !== "") {
+            appendOutput("Tu (anticipato): " + lastInterimResult);
+            handleSpeech(lastInterimResult);
+            lastInterimResult = "";
+        } else {
+            appendOutput("Ascolto interrotto senza testo.");
+        }
+
+        return;
     }
+
+    activateListening();
+    appState = "LISTENING";
 };
 
 // NUOVO: Shortcut Ctrl + Alt + v
