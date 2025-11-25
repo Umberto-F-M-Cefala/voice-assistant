@@ -176,7 +176,7 @@ let tempMemory = {};
 let lastMainOutput = ""; 
 let currentRecognition = null; 
 const SIGNATURE_TEXT = " - - testo trascritto dall'assistente vocale.";
-
+let lastInterimResult = "";
 let audioEnabled = true; // output vocale attivo di default
   
 // Vocabolario
@@ -397,20 +397,36 @@ function startListening(callback) {
         return;
     }
 
-    // Ferma eventuale TTS e riconoscimento
+    // Ferma eventuale TTS e riconoscimento precedente
     releaseResources();
 
     document.getElementById('micButton').classList.add('listening');
+
     const recognition = new webkitSpeechRecognition();
-    currentRecognition = recognition; 
+    currentRecognition = recognition;
     recognition.lang = "it-IT";
-    recognition.interimResults = false;
+    recognition.interimResults = true;   //  Risultati intermedi abilitati
     recognition.maxAlternatives = 1;
 
-    recognition.onresult = (event) => callback(event.results[0][0].transcript.toLowerCase());
-    recognition.onerror = (event) => { appendOutput("Errore: " + event.error); appState = "IDLE"; };
+    //  Cattura e salva progressivamente la frase
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.toLowerCase();
+        lastInterimResult = transcript;
+
+        //  Se il risultato è finale → usa callback come sempre
+        if (event.results[0].isFinal) {
+            callback(transcript);
+            lastInterimResult = "";
+        }
+    };
+
+    recognition.onerror = (event) => {
+        appendOutput("Errore: " + event.error);
+        appState = "IDLE";
+    };
+
     recognition.onend = () => {
-        currentRecognition = null; 
+        currentRecognition = null;
         document.getElementById('micButton').classList.remove('listening');
     };
 
