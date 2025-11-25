@@ -423,43 +423,46 @@ function startListening(callback) {
         return;
     }
 
-    // Ferma eventuale TTS e riconoscimento precedente
+    // Chiude tutto PRIMA di creare il nuovo riconoscimento
     releaseResources();
 
-    document.getElementById('micButton').classList.add('listening');
+    const mic = document.getElementById('micButton');
+    mic.classList.add('listening');
 
-    const recognition = new webkitSpeechRecognition();
-    currentRecognition = recognition;
-    recognition.lang = "it-IT";
-    recognition.interimResults = true;   //  Risultati intermedi abilitati
-    recognition.maxAlternatives = 1;
+    const r = new webkitSpeechRecognition();
+    currentRecognition = r;
 
-    //  Cattura e salva progressivamente la frase
-    recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript.toLowerCase();
-        lastInterimResult = transcript;
+    r.lang = "it-IT";
+    r.interimResults = true;
+    r.maxAlternatives = 1;
 
-        //  Se il risultato è finale → usa callback come sempre
+    // Azzero testo provvisorio
+    lastInterimResult = "";
+
+    r.onresult = (event) => {
+        const text = event.results[0][0].transcript.toLowerCase();
+        lastInterimResult = text;
+
         if (event.results[0].isFinal) {
-            callback(transcript);
             lastInterimResult = "";
+            callback(text);
         }
     };
 
-    recognition.onerror = (event) => {
+    r.onerror = event => {
         appendOutput("Errore: " + event.error);
-        appState = "IDLE";
     };
 
-    recognition.onend = () => {
+    r.onend = () => {
+        mic.classList.remove('listening');
         currentRecognition = null;
-        document.getElementById('micButton').classList.remove('listening');
     };
 
-    recognition.start();
+    r.start();
     resetInactivityTimer();
-    appendOutput("...In ascolto... (Premi di nuovo per inviare subito)");
+    appendOutput("...In ascolto...");
 }
+
 
 /* ================== LOGICA CENTRALE ================== */
 
