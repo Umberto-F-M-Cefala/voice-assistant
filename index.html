@@ -24,9 +24,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;        /* distanza tra pulsanti */
+  gap: 1rem;
   margin-bottom: 0.625rem;
-  flex-wrap: wrap;   /* permette che i pulsanti si dispongano su più righe su schermi piccoli */
+  flex-wrap: wrap;
 }
 
   /* Icona stato dinamica */
@@ -54,7 +54,7 @@
   font-size: 3.75rem;
   width: 7.5rem;
   height: 7.5rem;
-  border-radius: 50%;           /* forma circolare */
+  border-radius: 50%;
   border: 0.3125rem solid #007bff;
   cursor: pointer;
   display: flex;
@@ -78,7 +78,6 @@
   justify-content: center;
   margin: 0.625rem;
 }
-  
   
   #stopButton:hover { background-color: #fdf5f6; }
 
@@ -168,7 +167,7 @@
 
 <script>
 /* ================== CONFIG E STATO ================== */
-const defaultArchive = { "conversazione": [] };
+const defaultArchive = { "conversazione": [], "rubrica": [] }; // Aggiunta rubrica come default
 let archive = JSON.parse(localStorage.getItem('archive') || JSON.stringify(defaultArchive));
 
 let appState = "IDLE"; 
@@ -187,6 +186,41 @@ const searchVerbs = ["cerca", "cerchi", "trova", "trovi", "dimmi", "dici"];
 const searchPreps = ["in", "nelle", "nei", "nello", "nella", "su", "sulle", "sui", "sullo", "sulla"];
 const readWords = ["leggi", "recita", "esponi"];
 const randomWords = ["random", "a caso", "casuale"];
+const whatsappWords = ["invia", "manda", "spedisci"]; 
+
+// Mappa Emoji
+const emojiMap = {
+    "cuore": "❤️",
+    "sorriso": "🙂",
+    "risata": "😂",
+    "ok": "👌",
+    "pollice su": "👍",
+    "pollice giù": "👎",
+    "fuoco": "🔥",
+    "stella": "⭐",
+    "sole": "☀️",
+    "luna": "🌙",
+    "bacio": "😘",
+    "abbraccio": "🤗",
+    "festa": "🎉",
+    "tort": "🎂", // prende torta
+    "regalo": "🎁",
+    "musica": "🎵",
+    "occhiolino": "😉",
+    "triste": "😢",
+    "arrabbiato": "😡",
+    "pensoso": "🤔",
+    "applauso": "👏",
+    "preghiera": "🙏",
+    "forza": "💪",
+    "bomba": "💣",
+    "attenzione": "⚠️",
+    "spunta": "✅",
+    "croce": "❌",
+    "fantasma": "👻",
+    "robot": "🤖",
+    "alieno": "👽"
+};
 
 /* ================== MAPPA NUMERI ================== */
 let textToNumMap = {
@@ -203,27 +237,27 @@ let textToNumMap = {
     "cento": 100
 };
 
-  /* ================== FUNZIONE PER RILASCIARE RISORSE ================== */
-function releaseResources() {
+/* ================== FUNZIONE PER RILASCIARE RISORSE ================== */
+function releaseResources(fullyStop = true) {
     try { speechSynthesis.cancel(); } catch(e) {}
 
     if (currentRecognition) {
         try {
             const r = currentRecognition;
-            currentRecognition = null;
-
-            // disattivo qualsiasi callback residuo
-            r.onend = () => {};
-
-            // metodo migliore per interrompere
-            if (typeof r.abort === "function") r.abort();
-            else r.stop();
-
+            if(fullyStop) currentRecognition = null;
+            
+            // Rimuovo callback per evitare riavvii indesiderati se stoppo tutto
+            if(fullyStop) r.onend = null;
+            
+            r.stop();
         } catch(e) {}
     }
 
-    appState = "IDLE";
-    tempMemory = {};
+    if(fullyStop) {
+        appState = "IDLE";
+        tempMemory = {};
+        document.getElementById('micButton').classList.remove('listening');
+    }
 
     if (inactivityTimer) {
         clearTimeout(inactivityTimer);
@@ -236,15 +270,7 @@ let inactivityTimer = null;
 const INACTIVITY_TIMEOUT = 15000; // 15 secondi
 
 function stopAllActivities() {
-    speechSynthesis.cancel();
-    if (currentRecognition) {
-        currentRecognition.onend = null; // previene richiamo automatico
-        currentRecognition.stop();
-        currentRecognition = null;
-    }
-    document.getElementById('micButton').classList.remove('listening');
-    appState = "IDLE";
-    tempMemory = {};
+    releaseResources(true);
     lastMainOutput = "";
     appendOutput("Bot: Timeout inattività, microfono e TTS fermati.");
 }
@@ -308,6 +334,7 @@ function setStatusIcon(type) {
         case 'conversation': icon = "💬"; label = "Conversazione"; break;
         case 'random': icon = "📖"; label = "Lettura Random"; break;
         case 'transcription': icon = "🪶"; label = "Trascrizione"; break;
+        case 'whatsapp': icon = "📱"; label = "WhatsApp"; break;
         default: icon = ""; 
     }
     container.innerHTML = icon ? `${icon} <span style="font-size:1rem; vertical-align:middle">${label}</span>` : "";
@@ -333,17 +360,24 @@ autore: ${item.meta_author || "-"}
 /* ================== FUNZIONI VOCALI ================== */
 function speak(text, onEndCallback = null, isEntry = false) {
 
-  if (!audioEnabled) { // TTS disattivato → solo testo in output
+  if (!audioEnabled) { 
       if (!isEntry) appendOutput("Bot (muto): " + text);
       if (onEndCallback) onEndCallback();
       return;
   }
 
+  // Importante: Cancella precedenti utterance per evitare code lunghe
   speechSynthesis.cancel();
+  
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = 'it-IT';
+  
   if (!isEntry) appendOutput("Bot: " + text);
-  if (onEndCallback) utter.onend = onEndCallback;
+  
+  if (onEndCallback) {
+      utter.onend = onEndCallback;
+  }
+  
   speechSynthesis.speak(utter);
 }
 
@@ -355,44 +389,33 @@ function speakEntry(item) {
 /* ================== CONTROLLI PRINCIPALI ================== */
 
 function activateListening() {
-    // Ferma eventuale TTS in corso
+    // 1. Ferma TTS
     if (speechSynthesis.speaking) speechSynthesis.cancel();
 
-    // Ferma eventuale riconoscimento precedente
+    // 2. Stop microfono precedente
     if (currentRecognition) {
-        currentRecognition.onend = null; // Evita doppi callback
+        currentRecognition.onend = null;
         currentRecognition.stop();
         currentRecognition = null;
     }
 
-    // Avvia nuova sessione di ascolto
+    // 3. Avvia
     startListening(handleSpeech);
 }
 
 document.getElementById('micButton').onclick = () => {
     const micBtn = document.getElementById('micButton');
 
-   
-    if (appState === "LISTENING") {
-
-        // Ferma riconoscimento attivo
-        if (currentRecognition) {
-            currentRecognition.onend = null; // evita doppio evento
-            currentRecognition.stop();
-        }
-
+    if (appState === "LISTENING" || micBtn.classList.contains('listening')) {
+        // Stop manuale
         micBtn.classList.remove('listening');
         appState = "IDLE";
-
-        // Se c’è testo invialo subito
-        if (lastInterimResult.trim() !== "") {
-            appendOutput("Tu (anticipato): " + lastInterimResult);
-            handleSpeech(lastInterimResult);
-            lastInterimResult = "";
-        } else {
-            appendOutput("Ascolto interrotto senza testo.");
+        
+        if (currentRecognition) {
+            currentRecognition.stop(); 
+            // Nota: onend gestirà la chiusura o l'invio del testo parziale
         }
-
+        appendOutput("Ascolto interrotto manualmente.");
         return;
     }
 
@@ -400,21 +423,20 @@ document.getElementById('micButton').onclick = () => {
     appState = "LISTENING";
 };
 
-// NUOVO: Shortcut Ctrl + Alt + v
+// Shortcut Ctrl + Alt + v
 document.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'v') {
-        e.preventDefault(); // Previene azioni default del browser
-        activateListening();
+        e.preventDefault(); 
+        const micBtn = document.getElementById('micButton');
+        micBtn.click();
     }
 });
 
 document.getElementById('stopButton').onclick = () => {
-    releaseResources();
-    document.getElementById('micButton').classList.remove('listening');
+    stopAllActivities(); // Resetta tutto
     document.getElementById('output').textContent = "";
     setStatusIcon("");
-    lastMainOutput = "";
-  };
+};
 
   
 function startListening(callback) {
@@ -422,9 +444,6 @@ function startListening(callback) {
         appendOutput("ERRORE: Riconoscimento vocale non supportato.");
         return;
     }
-
-    // Chiude tutto PRIMA di creare il nuovo riconoscimento
-    releaseResources();
 
     const mic = document.getElementById('micButton');
     mic.classList.add('listening');
@@ -436,7 +455,6 @@ function startListening(callback) {
     r.interimResults = true;
     r.maxAlternatives = 1;
 
-    // Azzero testo provvisorio
     lastInterimResult = "";
 
     r.onresult = (event) => {
@@ -450,26 +468,24 @@ function startListening(callback) {
     };
 
     r.onerror = event => {
-        appendOutput("Errore: " + event.error);
+        // Ignora "no-speech" se stiamo aspettando una scelta, altrimenti notifica
+        if (event.error !== 'no-speech') {
+             appendOutput("Errore Mic: " + event.error);
+        }
     };
 
     r.onend = () => {
-    const mic = document.getElementById('micButton');
-    mic.classList.remove('listening');
-
-    // Se siamo in attesa di scelta multipla (numeri), non rilasciare subito currentRecognition
-    if (appState !== "AWAITING_SEARCH_CHOICE") {
+        mic.classList.remove('listening');
         currentRecognition = null;
-    } else {
-        // Riavvia automaticamente l'ascolto per input breve
-        setTimeout(() => {
-            if (appState === "AWAITING_SEARCH_CHOICE" && !currentRecognition) {
-                startListening(handleSpeech);
-            }
-        }, 200);
-    }
-};
 
+        // LOGICA CRITICA PER FLUSSI CONCATENATI
+        // Se siamo in attesa di scelta, potrebbe essersi chiuso per silenzio.
+        // Ma non riavviamo all'infinito per la batteria. 
+        // L'utente deve ripremere se passa troppo tempo, 
+        // OPPURE se è appena finito un TTS di prompt, si deve riattivare da solo.
+        
+        // Qui gestiamo solo cleanup. Il riavvio automatico è gestito dalla callback del TTS in processSearchResults
+    };
 
     r.start();
     resetInactivityTimer();
@@ -481,9 +497,9 @@ function startListening(callback) {
 
 function handleSpeech(text) {
   appendOutput("Tu: " + text);
-
-   resetInactivityTimer();
+  resetInactivityTimer();
   
+  // GESTIONE INPUT CONCATENATO (SCELTA RISULTATI)
   if (appState === "AWAITING_SEARCH_CHOICE") {
       handleSearchChoice(text);
       return;
@@ -496,7 +512,14 @@ function handleSpeech(text) {
       return;
   }
 
-  // 2. COPIA DIRETTA / TRASCRIZIONE
+  // 2. WHATSAPP (Priorità alta)
+  if (whatsappWords.some(w => text.startsWith(w))) {
+      setStatusIcon('whatsapp');
+      handleWhatsapp(text);
+      return;
+  }
+
+  // 3. COPIA DIRETTA / TRASCRIZIONE
   const commandWord = copyWords.find(w => text.startsWith(w));
   if (commandWord) {
       setStatusIcon('transcription');
@@ -504,24 +527,25 @@ function handleSpeech(text) {
       return;
   }
 
-  // 3. LETTURA LOOP / RANDOM
+  // 4. LETTURA LOOP / RANDOM
   if (readWords.some(w => text.startsWith(w))) {
       setStatusIcon('random');
       if (handleRead(text)) return;
   }
 
-  // 4. RICERCA METADATI
+  // 5. RICERCA METADATI
   if (text.includes("autore") || text.includes("titolo")) {
       setStatusIcon('search');
       let type = text.includes("autore") ? "meta_author" : "meta_title";
-      let query = text.split(text.includes("autore") ? "autore" : "titolo")[1].trim();
+      let splitter = text.includes("autore") ? "autore" : "titolo";
+      let query = text.split(splitter)[1].trim();
       if (query) {
           handleMetadataSearch(type, query);
           return;
       }
   }
 
-  // 5. RICERCA AVANZATA
+  // 6. RICERCA AVANZATA (Cerca in...)
   const searchPattern = new RegExp(`(${searchVerbs.join('|')})\\s+(${searchPreps.join('|')})\\s+([a-zA-Z0-9_]+)\\s+(.*)`, 'i');
   const match = text.match(searchPattern);
   if (match) {
@@ -537,86 +561,158 @@ function handleSpeech(text) {
       }
   }
 
-  // 6. RICERCA DIRETTA
+  // 7. RICERCA DIRETTA (Trigger puro)
+  // Cerca in tutte le sezioni, priorità a conversazione
+  let found = null;
+  // Prima conversazione
   if (archive.conversazione) {
-      for (let cmd of archive.conversazione) {
-          if (text.includes(cmd.trigger.toLowerCase())) {
-              setStatusIcon('conversation');
-              displayEntryDetails(cmd);
-              speakEntry(cmd);
-              lastMainOutput = cmd.output; 
-              return;
-          }
+      found = archive.conversazione.find(cmd => text.includes(cmd.trigger.toLowerCase()));
+  }
+  // Se non trovato, cerca altrove
+  if (!found) {
+      for (let sec in archive) {
+          if (sec === "conversazione") continue;
+          found = archive[sec].find(cmd => text.includes(cmd.trigger.toLowerCase()));
+          if (found) break;
       }
   }
 
-  // 7. NON RICONOSCIUTO
+  if (found) {
+      setStatusIcon('conversation');
+      displayEntryDetails(found);
+      speakEntry(found);
+      lastMainOutput = found.output; 
+      return;
+  }
+
+  // 8. NON RICONOSCIUTO
   lastMainOutput = text;
   setStatusIcon('');
-  appendOutput("(Testo non riconosciuto. Dì 'Salva' o 'Ripeti')");
-  // Reset del timer di inattività
-  resetInactivityTimer();
-
-
+  appendOutput("(Testo non riconosciuto. Dì 'Salva', 'Ripeti' o 'Invia a...')");
 }
 
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
 
+// Helper formattazione testo (maiuscole ed emoji)
+function formatText(str) {
+    let s = str;
+
+    // 1. Sostituzione Emoji (es: "emoji cuore")
+    s = s.replace(/emoji\s+(\w+(\s\w+)?)/gi, (match, p1) => {
+        let key = p1.toLowerCase().trim();
+        return emojiMap[key] ? emojiMap[key] : match;
+    });
+
+    // 2. Maiuscola dopo i punti (. ! ?) e all'inizio assoluto
+    // Regex: trova inizio stringa O punteggiatura seguita da spazi, poi un carattere
+    s = s.replace(/(^\s*\w|[.!?]\s*\w)/g, c => c.toUpperCase());
+
+    return s;
+}
+
 function parseNumber(text) {
     if (!text) return null;
-
-    // Normalizzazione completa
-    let t = text.toLowerCase().trim();
-
-    // Rimuove punteggiatura residua: ".", ",", "?"
-    t = t.replace(/[^\wàèéìòù0-9 ]+/g, "");
-
-    // CASO 1 — cifra diretta "2", "5", "10"
+    let t = text.toLowerCase().trim().replace(/[^\wàèéìòù0-9 ]+/g, "");
+    
+    // Cifra
     const digitMatch = t.match(/\d+/);
     if (digitMatch) return parseInt(digitMatch[0]);
 
-    // CASO 2 — "numero 5"
+    // "numero 5"
     const afterNumero = t.match(/numero\s+(\d+)/);
     if (afterNumero) return parseInt(afterNumero[1]);
 
-    // CASO 3 — parole ("uno", "due", "secondo", "cinque", ...)
+    // Parole
     for (const [word, value] of Object.entries(textToNumMap)) {
-        if (t === word) return value;          // match perfetto
-        if (t.includes(word)) return value;    // match approssimativo ("cinque per favore", "due grazie")
+        if (t === word || t.includes(word)) return value; 
+    }
+    return null;
+}
+
+// Integrazione WhatsApp
+function handleWhatsapp(text) {
+    // Regex: invia [a/al/...] [nome] [messaggio]
+    // Strategia: togliamo il comando iniziale, poi cerchiamo il contatto più lungo corrispondente
+    let cleanText = text.replace(/^(invia|manda|spedisci)\s+(a|al|allo|alla)\s+/i, "").trim();
+    
+    if (!cleanText) {
+        speak("A chi devo inviare?");
+        return;
     }
 
-    // CASO 4 — fix parole spezzate dal riconoscimento (es. "du e")
-    const compact = t.replace(/\s+/g, "");
-    if (compact in textToNumMap) return textToNumMap[compact];
+    // Cerchiamo un contatto che corrisponda all'inizio della stringa
+    let bestMatch = null;
+    let bestLen = 0;
+    let messageBody = "";
 
-    return null;
+    // Scansiona tutto l'archivio
+    for (let sec in archive) {
+        archive[sec].forEach(item => {
+            let trg = item.trigger.toLowerCase();
+            if (cleanText.startsWith(trg)) {
+                if (trg.length > bestLen) {
+                    bestLen = trg.length;
+                    bestMatch = item;
+                }
+            }
+        });
+    }
+
+    if (bestMatch) {
+        // Estrai il messaggio (tutto ciò che c'è dopo il nome)
+        messageBody = cleanText.substring(bestLen).trim();
+        // Capitalizza il messaggio
+        if (messageBody) messageBody = formatText(messageBody);
+
+        let number = bestMatch.output.replace(/[^0-9+]/g, ""); // Pulisci numero
+        
+        if (!messageBody) {
+             speak(`Contatto ${bestMatch.trigger} trovato, ma il messaggio è vuoto.`);
+             return;
+        }
+
+        speak(`Apro WhatsApp per ${bestMatch.trigger}.`);
+        appendOutput(`Bot: Apro WA per ${bestMatch.trigger} (${number}) con: "${messageBody}"`);
+        
+        setTimeout(() => {
+            window.open(`https://wa.me/${number}?text=${encodeURIComponent(messageBody)}`, '_blank');
+        }, 1500);
+
+    } else {
+        speak("Contatto non trovato nell'archivio.");
+    }
 }
 
 
 function handleCopyCommand(text, commandWord) {
     let content = text.substring(commandWord.length).trim();
     
-    // NUOVO: Logica firma invertita (Default: NO firma)
+    // Firma
     let useSignature = false;
-    if (content.includes("con firma") || content.includes("aggiungi firma") || text.includes("con firma")) {
+    if (content.includes("con firma") || content.includes("aggiungi firma")) {
         useSignature = true;
-        content = content.replace("con firma", "").replace("aggiungi firma", "").trim();
+        content = content.replace(/con firma|aggiungi firma/gi, "").trim();
     }
     
     if (!content && lastMainOutput) content = lastMainOutput;
     else if (!content) { speak("Non c'è nulla da salvare."); return; }
 
-    // NUOVO: Sostituzione Punteggiatura
-    // virgola -> , | punto -> . | due punti -> : | a capo -> \n
-    content = content.replace(/\bvirgola\b/gi, ", ")
-                     .replace(/\bpunto\b/gi, ". ")
-                     .replace(/\bdue punti\b/gi, ": ")
+    // Sostituzione Punteggiatura vocale
+    content = content.replace(/\bvirgola\b/gi, ",")
+                     .replace(/\bpunto\b/gi, ".")
+                     .replace(/\bdue punti\b/gi, ":")
+                     .replace(/\bpunto e virgola\b/gi, ";")
+                     .replace(/\bpunto esclamativo\b/gi, "!")
+                     .replace(/\bpunto interrogativo\b/gi, "?")
                      .replace(/\ba capo\b/gi, "\n");
 
-    // Pulizia spazi doppi generati
+    // Applicazione Formattazione Avanzata (Maiuscole + Emoji)
+    content = formatText(content);
+
+    // Pulizia spazi
+    content = content.replace(/\s+([,.:;!?])/g, '$1'); // via spazi pre-punteggiatura
+    content = content.replace(/([,.:;!?])\s*/g, '$1 '); // spazio post-punteggiatura
     content = content.replace(/\s\s+/g, ' ').trim();
-    // Fix per spazi prima della punteggiatura (es: "parola ,")
-    content = content.replace(/\s+([,.:])/g, '$1');
 
     const finalString = useSignature ? content + SIGNATURE_TEXT : content;
     
@@ -630,6 +726,7 @@ function handleCopyCommand(text, commandWord) {
 function handleRead(text) {
     if (text.includes("casuale")) {
         const allEntries = [].concat(...Object.values(archive));
+        if(allEntries.length === 0) { speak("Archivio vuoto."); return true; }
         const item = allEntries[Math.floor(Math.random() * allEntries.length)];
         displayEntryDetails(item);
         speakEntry(item);
@@ -643,30 +740,23 @@ function handleRead(text) {
             speak(`La sezione ${sectionMatch} è vuota.`);
             return true;
         }
-        const startIndex = Math.floor(Math.random() * list.length);
-        speak(`Leggo ${sectionMatch} partendo dall'elemento ${startIndex + 1}.`);
-        speechSynthesis.cancel();
+        
+        speak(`Leggo ${sectionMatch}.`);
+        
         let index = 0;
-
-function speakNext() {
-    const idx = (startIndex + index) % list.length;
-    const item = list[idx];
-
-    displayEntryDetails(item);
-
-    const utter = new SpeechSynthesisUtterance(item.output);
-    utter.lang = 'it-IT';
-
-    utter.onend = () => {
-        index++;
-        if (index < list.length) speakNext();
-    };
-
-    speechSynthesis.speak(utter);
-}
-
-speakNext();
-      
+        function speakNext() {
+            if (index >= list.length || appState !== "LISTENING") return; // Stop se l'utente ferma
+            
+            const item = list[index];
+            displayEntryDetails(item);
+            
+            speak(item.output, () => {
+                index++;
+                if (index < list.length) speakNext();
+            });
+        }
+        // Piccola pausa prima di iniziare
+        setTimeout(speakNext, 1000);
         return true;
     }
     return false;
@@ -674,6 +764,8 @@ speakNext();
 
 function handleAdvancedSearch(section, query) {
     const list = archive[section];
+    if (!list) { speak("Sezione inesistente."); return; }
+    
     const isRandom = randomWords.some(w => query.includes(w));
     if (isRandom) {
         const item = list[Math.floor(Math.random() * list.length)];
@@ -691,11 +783,11 @@ function handleAdvancedSearch(section, query) {
 function handleMetadataSearch(type, query) {
     const all = [].concat(...Object.values(archive));
     const results = all.filter(c => c[type] && c[type].toLowerCase().includes(query));
-    const vocalLabel = type === "meta_author" ? "autore" : 
-                       type === "meta_title" ? "titolo" : type;
+    const vocalLabel = type === "meta_author" ? "autore" : "titolo";
     processSearchResults(results, `per ${vocalLabel} "${query}"`);
 }
 
+// LOGICA CRUCIALE PER INPUT CONCATENATI (FIX)
 function processSearchResults(results, context) {
     if (results.length === 0) {
         speak("Nessun risultato " + context);
@@ -704,19 +796,31 @@ function processSearchResults(results, context) {
         speakEntry(results[0]);
         lastMainOutput = results[0].output;
     } else {
-        let listStr = `Ho trovato ${results.length} risultati: `;
+        // Risultati Multipli
+        let listStr = `Trovati ${results.length} risultati. `;
         results.forEach((r, i) => {
             const title = r.meta_title || r.trigger || "Elemento";
-            listStr += `${i + 1}: ${title}; `; 
+            listStr += `${i + 1}: ${title}. `; 
         });
+        
         appendOutput("Risultati multipli:\n" + listStr);
-        speak(listStr + " Scegli il numero, oppure 'tutti' o 'nessuno'.");
         tempMemory.searchResults = results;
-        appState = "AWAITING_SEARCH_CHOICE";
+        appState = "AWAITING_SEARCH_CHOICE"; // Imposta stato PRIMA di parlare
+
+        // Parla, poi riattiva microfono
+        speak(listStr + " Scegli il numero.", () => {
+            // Callback: eseguito quando il TTS finisce
+            // Riattiva mic SOLO se siamo ancora in attesa
+            if (appState === "AWAITING_SEARCH_CHOICE") {
+                appendOutput("...Attendo scelta numero...");
+                startListening(handleSpeech);
+            }
+        });
     }
 }
 
 function handleSearchChoice(text) {
+    // Uscita
     if (negativeWords.some(w => text.includes(w))) {
         speak("Annullato.");
         appState = "IDLE";
@@ -725,22 +829,28 @@ function handleSearchChoice(text) {
     }
 
     const results = tempMemory.searchResults;
+    if (!results) { appState = "IDLE"; return; }
+
+    // "Tutti"
     if (text.includes("tutti") || text.includes("tutto")) {
-        speak(`Leggo tutti i ${results.length} risultati.`);
-        speechSynthesis.cancel();
-        results.forEach((item, i) => {
-            const intro = new SpeechSynthesisUtterance(`Numero ${i+1}.`);
-            intro.lang = 'it-IT';
-            speechSynthesis.speak(intro);
-            const utter = new SpeechSynthesisUtterance(item.output);
-            utter.lang = 'it-IT';
-            utter.onstart = () => displayEntryDetails(item);
-            speechSynthesis.speak(utter);
-        });
-        appState = "IDLE";
+        speak(`Leggo tutto.`);
+        appState = "IDLE"; // Reset stato per evitare loop
+        
+        let idx = 0;
+        function playNext() {
+            if (idx >= results.length) return;
+            const item = results[idx];
+            displayEntryDetails(item);
+            speak(`Numero ${idx+1}. ` + item.output, () => {
+                idx++;
+                playNext();
+            });
+        }
+        playNext();
         return;
     }
     
+    // Scelta numero
     const choiceNum = parseNumber(text);
     if (choiceNum !== null && choiceNum > 0 && choiceNum <= results.length) {
         const item = results[choiceNum - 1];
@@ -749,7 +859,10 @@ function handleSearchChoice(text) {
         lastMainOutput = item.output;
         appState = "IDLE";
     } else {
-        speak("Numero non valido. Riprova o dì annulla.");
+        // Se non ho capito, chiedo di ripetere (loop controllato)
+        speak("Numero non valido, ripeti o dì annulla.", () => {
+             if (appState === "AWAITING_SEARCH_CHOICE") startListening(handleSpeech);
+        });
     }
 }
 
@@ -768,45 +881,35 @@ document.getElementById('toggleButtons').onclick = () => {
 };
 
 document.getElementById('infoArchive').onclick = () => {
-    const txt = `INFO ARCHIVIO
+    const txt = `INFO ARCHIVIO JSON
 -------------
-Esempio di struttura JSON valida con 2 sezioni:
+Esempio Rubrica per WhatsApp:
 {
-  "conversazione": [
-    { "trigger": "ciao", "output": "Benvenuto.", "tag": "saluti", "meta_title": "", "meta_author": "" },
-    { "trigger": "aiuto", "output": "Chiedimi di cercare.", "tag": "info", "meta_title": "", "meta_author": "" }
+  "rubrica": [
+    { "trigger": "mamma", "output": "+393331234567", "tag": "famiglia" },
+    { "trigger": "ufficio", "output": "+3906123456", "tag": "lavoro" }
   ],
-  "poesie": [
-    { "trigger": "infinito", "output": "Sempre caro mi fu...", "tag": "leopardi", "meta_title": "L'infinito", "meta_author": "Leopardi" },
-    { "trigger": "veglia", "output": "Un'intera nottata...", "tag": "ungaretti", "meta_title": "Veglia", "meta_author": "Ungaretti" }
-  ]
+  "conversazione": [...]
 }`;
     document.getElementById('output').textContent = txt;
 };
 
 document.getElementById('infoCommands').onclick = () => {
-    const txt = `GUIDA COMANDI VOCALI
+    const txt = `GUIDA COMANDI
 --------------------
-1. COMANDI BASE:
-   - "Ripeti": Ripete l'ultimo output.
-   - "Stop": Resetta tutto.
-   - Shortcut "Ctrl+Alt+v": Avvia/Ferma ascolto.
+1. WHATSAPP:
+   - "Invia a [Nome] [Messaggio]" (Il nome deve essere un trigger in archivio).
 
-2. SALVATAGGIO AVANZATO:
-   - "Salva [testo]": Copia (Default: NO firma).
-   - "Salva [testo] con firma": Aggiunge firma.
-   - Punteggiatura automatica: Dì "virgola", "punto", "due punti", "a capo".
+2. TRASCRIZIONE:
+   - "Salva [testo]" (con maiuscole automatiche).
+   - "Emoji cuore", "Emoji sorriso" -> ❤️, 🙂.
+   - "Salva ... con firma".
 
-3. INTERAZIONE DIRETTA (Sezione 'Conversazione'):
-   - Dì solo la parola chiave (es. "Ciao").
+3. RICERCA E ELENCHI:
+   - Se ci sono più risultati, ascolta l'elenco e poi dì il numero.
 
-4. RICERCA AVANZATA:
-   - "Cerca in [sezione] [parola]".
-   - "...autore [nome]" / "...titolo [titolo]".
-
-5. LETTURA:
-   - "Leggi [sezione]" (sequenziale circolare).
-   - "Leggi casuale [tag]".
+4. BASE:
+   - "Stop", "Ripeti".
 `;
     document.getElementById('output').textContent = txt;
 };
@@ -846,35 +949,32 @@ document.getElementById('resetArchive').onclick = () => {
   }
 };
 
-  // Rilascia risorse se l'utente chiude o cambia tab
-window.addEventListener('beforeunload', releaseResources);
+window.addEventListener('beforeunload', () => releaseResources(true));
 document.addEventListener('visibilitychange', () => {
-    if (document.hidden) releaseResources();
+    if (document.hidden) releaseResources(true);
 });
+
 /* ================== TOGGLE AUDIO OUTPUT ================== */
 const muteButton = document.getElementById('muteButton');
 
 function updateMuteButtonUI() {
     if (audioEnabled) {
-        muteButton.textContent = "🔈"; // icona audio attivo
+        muteButton.textContent = "🔈"; 
         muteButton.classList.remove('mute-off');
         muteButton.classList.add('mute-on');
-        appendOutput("Bot: Audio attivo.");
     } else {
-        muteButton.textContent = "🔇"; // icona audio disattivato
+        muteButton.textContent = "🔇"; 
         muteButton.classList.remove('mute-on');
         muteButton.classList.add('mute-off');
-        appendOutput("Bot: Audio disattivato.");
     }
 }
 
-// Al click del bottone mute
 muteButton.onclick = () => {
     audioEnabled = !audioEnabled;
     updateMuteButtonUI();
+    appendOutput("Bot: Audio " + (audioEnabled ? "attivo" : "disattivato"));
 };
 
-// Inizializza lo stato all'avvio
 updateMuteButtonUI();
   
 </script>
