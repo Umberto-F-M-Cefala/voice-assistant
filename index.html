@@ -206,17 +206,31 @@ let textToNumMap = {
   /* ================== FUNZIONE PER RILASCIARE RISORSE ================== */
 function releaseResources() {
     try { speechSynthesis.cancel(); } catch(e) {}
+
     if (currentRecognition) {
-        try { currentRecognition.onend = null; currentRecognition.stop(); } catch(e) {}
-        currentRecognition = null;
+        try {
+            const r = currentRecognition;
+            currentRecognition = null;
+
+            // disattivo qualsiasi callback residuo
+            r.onend = () => {};
+
+            // metodo migliore per interrompere
+            if (typeof r.abort === "function") r.abort();
+            else r.stop();
+
+        } catch(e) {}
     }
+
     appState = "IDLE";
     tempMemory = {};
+
     if (inactivityTimer) {
         clearTimeout(inactivityTimer);
         inactivityTimer = null;
     }
 }
+
 
 let inactivityTimer = null;
 const INACTIVITY_TIMEOUT = 15000; // 15 secondi
