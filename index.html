@@ -19,15 +19,15 @@
     background-color: #fff;
   }
   
-  /* Contenitore Bottoni Mic/Stop */
+  /* Contenitore Bottoni */
   .controls-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.625rem;
-  flex-wrap: wrap;
-}
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.625rem;
+      flex-wrap: wrap;
+  }
 
   /* Icona stato dinamica */
   #statusIconContainer {
@@ -51,33 +51,33 @@
 
   /* Stile Bottoni Principali */
   #micButton {
-  font-size: 3.75rem;
-  width: 7.5rem;
-  height: 7.5rem;
-  border-radius: 50%;
-  border: 0.3125rem solid #007bff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0.625rem;
-  transition: background-color 0.2s, border-color 0.2s;
-}
+      font-size: 3.75rem;
+      width: 7.5rem;
+      height: 7.5rem;
+      border-radius: 50%;
+      border: 0.3125rem solid #007bff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0.625rem;
+      transition: background-color 0.2s, border-color 0.2s;
+  }
   #micButton:hover { background-color: #e2e6ea; }
   #micButton.listening { border-color: #dc3545; background-color: #fdf5f6; }
 
   #stopButton, #muteButton {
-  font-size: 2.25rem;
-  width: 5rem;
-  height: 5rem;
-  border-radius: 1rem;
-  border-width: 0.1875rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0.625rem;
-}
+      font-size: 2.25rem;
+      width: 5rem;
+      height: 5rem;
+      border-radius: 1rem;
+      border-width: 0.1875rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0.625rem;
+  }
   
   #stopButton:hover { background-color: #fdf5f6; }
 
@@ -108,39 +108,31 @@
     background-color: #fff;
   }
 
-
-/* modalità disattivata */
-#muteButton.mute-off {
-    background-color: #e9ecef;
-    border-color: #6c757d;
-    color: #6c757d;
-}
-
-  button:active {
-  transform: scale(0.95);
-  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  /* Stati bottone Mute */
+  #muteButton.mute-off {
+      background-color: #e9ecef;
+      border-color: #6c757d;
+      color: #6c757d;
+  }
+  #muteButton.mute-on {
+      background-color: #fff;
+      border-color: #6c757d;
+      color: #6c757d;
   }
 
-#micButton {
-  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3);
-}
-  #stopButton {
-  border: 0.1875rem solid #dc3545;
-  background: #fff;
-  color: #dc3545;
-}
+  button:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  }
 
-#muteButton {
-  border: 0.1875rem solid #6c757d;
-  background: #fff;
-  color: #6c757d;
-}
+  #micButton { box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3); }
+  #stopButton { border: 0.1875rem solid #dc3545; background: #fff; color: #dc3545; }
+  #muteButton { border: 0.1875rem solid #6c757d; }
 
-@media (max-width: 480px) {
-  #micButton { width: 5.5rem; height: 5.5rem; font-size: 2.8rem; }
-  #stopButton, #muteButton { width: 4rem; height: 4rem; font-size: 1.8rem; }
-    }
-  
+  @media (max-width: 480px) {
+      #micButton { width: 5.5rem; height: 5.5rem; font-size: 2.8rem; }
+      #stopButton, #muteButton { width: 4rem; height: 4rem; font-size: 1.8rem; }
+  }
 </style>
 </head>
 <body>
@@ -167,7 +159,7 @@
 
 <script>
 /* ================== CONFIG E STATO ================== */
-const defaultArchive = { "conversazione": [], "rubrica": [] }; // Aggiunta rubrica come default
+const defaultArchive = { "conversazione": [], "rubrica": [] }; 
 let archive = JSON.parse(localStorage.getItem('archive') || JSON.stringify(defaultArchive));
 
 let appState = "IDLE"; 
@@ -176,7 +168,7 @@ let lastMainOutput = "";
 let currentRecognition = null; 
 const SIGNATURE_TEXT = " - - testo trascritto dall'assistente vocale.";
 let lastInterimResult = "";
-let audioEnabled = true; // output vocale attivo di default
+let audioEnabled = true; 
   
 // Vocabolario
 const copyWords = ["copia", "salva", "trascrivi", "conserva", "riporta", "tieni"];
@@ -190,36 +182,12 @@ const whatsappWords = ["invia", "manda", "spedisci"];
 
 // Mappa Emoji
 const emojiMap = {
-    "cuore": "❤️",
-    "sorriso": "🙂",
-    "risata": "😂",
-    "ok": "👌",
-    "pollice su": "👍",
-    "pollice giù": "👎",
-    "fuoco": "🔥",
-    "stella": "⭐",
-    "sole": "☀️",
-    "luna": "🌙",
-    "bacio": "😘",
-    "abbraccio": "🤗",
-    "festa": "🎉",
-    "tort": "🎂", // prende torta
-    "regalo": "🎁",
-    "musica": "🎵",
-    "occhiolino": "😉",
-    "triste": "😢",
-    "arrabbiato": "😡",
-    "pensoso": "🤔",
-    "applauso": "👏",
-    "preghiera": "🙏",
-    "forza": "💪",
-    "bomba": "💣",
-    "attenzione": "⚠️",
-    "spunta": "✅",
-    "croce": "❌",
-    "fantasma": "👻",
-    "robot": "🤖",
-    "alieno": "👽"
+    "cuore": "❤️", "sorriso": "🙂", "risata": "😂", "ok": "👌", "pollice su": "👍",
+    "pollice giù": "👎", "fuoco": "🔥", "stella": "⭐", "sole": "☀️", "luna": "🌙",
+    "bacio": "😘", "abbraccio": "🤗", "festa": "🎉", "tort": "🎂", "torta": "🎂",
+    "regalo": "🎁", "musica": "🎵", "occhiolino": "😉", "triste": "😢", "arrabbiato": "😡",
+    "pensoso": "🤔", "applauso": "👏", "preghiera": "🙏", "forza": "💪", "bomba": "💣",
+    "attenzione": "⚠️", "spunta": "✅", "croce": "❌", "fantasma": "👻", "robot": "🤖", "alieno": "👽"
 };
 
 /* ================== MAPPA NUMERI ================== */
@@ -237,49 +205,42 @@ let textToNumMap = {
     "cento": 100
 };
 
-/* ================== FUNZIONE PER RILASCIARE RISORSE ================== */
-function releaseResources(fullyStop = true) {
-    try { speechSynthesis.cancel(); } catch(e) {}
+/* ================== FUNZIONI DI CONTROLLO RISORSE ================== */
 
+// Funzione base per stoppare audio e TTS (SENZA resettare la logica dell'app)
+function stopHardwareOnly() {
+    try { speechSynthesis.cancel(); } catch(e) {}
     if (currentRecognition) {
         try {
-            const r = currentRecognition;
-            if(fullyStop) currentRecognition = null;
-            
-            // Rimuovo callback per evitare riavvii indesiderati se stoppo tutto
-            if(fullyStop) r.onend = null;
-            
-            r.stop();
+            currentRecognition.onend = null; // Rimuove callback per evitare loop
+            currentRecognition.stop();
         } catch(e) {}
-    }
-
-    if(fullyStop) {
-        appState = "IDLE";
-        tempMemory = {};
-        document.getElementById('micButton').classList.remove('listening');
-    }
-
-    if (inactivityTimer) {
-        clearTimeout(inactivityTimer);
-        inactivityTimer = null;
+        currentRecognition = null;
     }
 }
 
+// Funzione per reset totale (Bottone Stop / Timeout)
+function stopAndResetApp() {
+    stopHardwareOnly();
+    appState = "IDLE";
+    tempMemory = {};
+    document.getElementById('micButton').classList.remove('listening');
+    if (inactivityTimer) clearTimeout(inactivityTimer);
+    inactivityTimer = null;
+}
 
 let inactivityTimer = null;
-const INACTIVITY_TIMEOUT = 15000; // 15 secondi
+const INACTIVITY_TIMEOUT = 15000; 
 
-function stopAllActivities() {
-    releaseResources(true);
+function handleInactivityTimeout() {
+    stopAndResetApp();
     lastMainOutput = "";
-    appendOutput("Bot: Timeout inattività, microfono e TTS fermati.");
+    appendOutput("Bot: Timeout inattività.");
 }
 
 function resetInactivityTimer() {
     if (inactivityTimer) clearTimeout(inactivityTimer);
-    inactivityTimer = setTimeout(() => {
-        stopAllActivities();
-    }, INACTIVITY_TIMEOUT);
+    inactivityTimer = setTimeout(handleInactivityTimeout, INACTIVITY_TIMEOUT);
 }
   
 function populateNumberMap() {
@@ -305,37 +266,25 @@ function populateNumberMap() {
 }
 populateNumberMap();
 
-/* ================== GESTIONE UI SEZIONI ================== */
+/* ================== UI HELPER ================== */
 function updateSectionList() {
     const listDiv = document.getElementById('sectionsList');
     const sections = Object.keys(archive);
-    
-    if (sections.length === 0) {
-        listDiv.textContent = "Elenco delle sezioni: Nessuna sezione presente";
-        return;
-    }
-
-    const labels = sections.map(sec => {
-        const count = Array.isArray(archive[sec]) ? archive[sec].length : 0;
-        return `${sec} (n. ${count})`;
-    });
-
+    if (sections.length === 0) { listDiv.textContent = "Elenco delle sezioni: Nessuna sezione presente"; return; }
+    const labels = sections.map(sec => `${sec} (n. ${Array.isArray(archive[sec]) ? archive[sec].length : 0})`);
     listDiv.textContent = "Elenco delle sezioni: " + labels.join(" - ");
 }
 updateSectionList();
 
-/* ================== HELPER VISUALIZZAZIONE ================== */
 function setStatusIcon(type) {
     const container = document.getElementById('statusIconContainer');
-    let icon = "";
-    let label = "";
+    let icon = "", label = "";
     switch(type) {
         case 'search': icon = "🔍"; label = "Ricerca"; break;
         case 'conversation': icon = "💬"; label = "Conversazione"; break;
         case 'random': icon = "📖"; label = "Lettura Random"; break;
         case 'transcription': icon = "🪶"; label = "Trascrizione"; break;
         case 'whatsapp': icon = "📱"; label = "WhatsApp"; break;
-        default: icon = ""; 
     }
     container.innerHTML = icon ? `${icon} <span style="font-size:1rem; vertical-align:middle">${label}</span>` : "";
 }
@@ -357,91 +306,58 @@ autore: ${item.meta_author || "-"}
     appendOutput(out);
 }
 
-/* ================== FUNZIONI VOCALI ================== */
+/* ================== AUDIO ================== */
 function speak(text, onEndCallback = null, isEntry = false) {
-
   if (!audioEnabled) { 
       if (!isEntry) appendOutput("Bot (muto): " + text);
       if (onEndCallback) onEndCallback();
       return;
   }
-
-  // Importante: Cancella precedenti utterance per evitare code lunghe
   speechSynthesis.cancel();
-  
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = 'it-IT';
-  
   if (!isEntry) appendOutput("Bot: " + text);
-  
-  if (onEndCallback) {
-      utter.onend = onEndCallback;
-  }
-  
+  if (onEndCallback) utter.onend = onEndCallback;
   speechSynthesis.speak(utter);
 }
 
+function speakEntry(item) { speak(item.output, null, true); }
 
-function speakEntry(item) {
-    speak(item.output, null, true);
-}
-
-/* ================== CONTROLLI PRINCIPALI ================== */
-
+/* ================== CONTROLLI VOCALI ================== */
 function activateListening() {
-    // 1. Ferma TTS
-    if (speechSynthesis.speaking) speechSynthesis.cancel();
-
-    // 2. Stop microfono precedente
-    if (currentRecognition) {
-        currentRecognition.onend = null;
-        currentRecognition.stop();
-        currentRecognition = null;
-    }
-
-    // 3. Avvia
+    // Stop solo hardware, NON resetta appState (così non perdiamo la memoria della scelta)
+    stopHardwareOnly(); 
     startListening(handleSpeech);
+    appState = (appState === "AWAITING_SEARCH_CHOICE") ? "AWAITING_SEARCH_CHOICE" : "LISTENING";
 }
 
 document.getElementById('micButton').onclick = () => {
     const micBtn = document.getElementById('micButton');
-
-    if (appState === "LISTENING" || micBtn.classList.contains('listening')) {
-        // Stop manuale
-        micBtn.classList.remove('listening');
-        appState = "IDLE";
-        
-        if (currentRecognition) {
-            currentRecognition.stop(); 
-            // Nota: onend gestirà la chiusura o l'invio del testo parziale
-        }
-        appendOutput("Ascolto interrotto manualmente.");
+    // Toggle manuale
+    if (micBtn.classList.contains('listening')) {
+        stopAndResetApp(); // Se premo mentre ascolto, resetto tutto
+        appendOutput("Ascolto interrotto.");
         return;
     }
-
     activateListening();
-    appState = "LISTENING";
 };
 
-// Shortcut Ctrl + Alt + v
 document.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'v') {
         e.preventDefault(); 
-        const micBtn = document.getElementById('micButton');
-        micBtn.click();
+        document.getElementById('micButton').click();
     }
 });
 
 document.getElementById('stopButton').onclick = () => {
-    stopAllActivities(); // Resetta tutto
+    stopAndResetApp();
     document.getElementById('output').textContent = "";
     setStatusIcon("");
 };
 
-  
 function startListening(callback) {
     if (!('webkitSpeechRecognition' in window)) {
-        appendOutput("ERRORE: Riconoscimento vocale non supportato.");
+        appendOutput("ERRORE: Browser non supportato.");
         return;
     }
 
@@ -450,17 +366,14 @@ function startListening(callback) {
 
     const r = new webkitSpeechRecognition();
     currentRecognition = r;
-
     r.lang = "it-IT";
     r.interimResults = true;
     r.maxAlternatives = 1;
-
     lastInterimResult = "";
 
     r.onresult = (event) => {
         const text = event.results[0][0].transcript.toLowerCase();
         lastInterimResult = text;
-
         if (event.results[0].isFinal) {
             lastInterimResult = "";
             callback(text);
@@ -468,23 +381,13 @@ function startListening(callback) {
     };
 
     r.onerror = event => {
-        // Ignora "no-speech" se stiamo aspettando una scelta, altrimenti notifica
-        if (event.error !== 'no-speech') {
-             appendOutput("Errore Mic: " + event.error);
-        }
+        if (event.error !== 'no-speech') appendOutput("Errore Mic: " + event.error);
     };
 
     r.onend = () => {
         mic.classList.remove('listening');
         currentRecognition = null;
-
-        // LOGICA CRITICA PER FLUSSI CONCATENATI
-        // Se siamo in attesa di scelta, potrebbe essersi chiuso per silenzio.
-        // Ma non riavviamo all'infinito per la batteria. 
-        // L'utente deve ripremere se passa troppo tempo, 
-        // OPPURE se è appena finito un TTS di prompt, si deve riattivare da solo.
-        
-        // Qui gestiamo solo cleanup. Il riavvio automatico è gestito dalla callback del TTS in processSearchResults
+        // Non resettiamo nulla qui. La logica è gestita dal callback o dal timeout.
     };
 
     r.start();
@@ -492,34 +395,31 @@ function startListening(callback) {
     appendOutput("...In ascolto...");
 }
 
-
-/* ================== LOGICA CENTRALE ================== */
-
+/* ================== LOGICA COMANDI ================== */
 function handleSpeech(text) {
   appendOutput("Tu: " + text);
   resetInactivityTimer();
   
-  // GESTIONE INPUT CONCATENATO (SCELTA RISULTATI)
+  // *** FIX IMPORTANTE: GESTIONE SCELTA ***
   if (appState === "AWAITING_SEARCH_CHOICE") {
       handleSearchChoice(text);
       return;
   }
 
-  // 1. COMANDI DI SISTEMA
+  // 1. Ripeti
   if (text === "ripeti") {
-      if (lastMainOutput) speak("Ripeto: " + lastMainOutput);
-      else speak("Non c'è nulla da ripetere.");
+      speak(lastMainOutput ? "Ripeto: " + lastMainOutput : "Nulla da ripetere.");
       return;
   }
 
-  // 2. WHATSAPP (Priorità alta)
+  // 2. WhatsApp
   if (whatsappWords.some(w => text.startsWith(w))) {
       setStatusIcon('whatsapp');
       handleWhatsapp(text);
       return;
   }
 
-  // 3. COPIA DIRETTA / TRASCRIZIONE
+  // 3. Copia/Salva
   const commandWord = copyWords.find(w => text.startsWith(w));
   if (commandWord) {
       setStatusIcon('transcription');
@@ -527,52 +427,39 @@ function handleSpeech(text) {
       return;
   }
 
-  // 4. LETTURA LOOP / RANDOM
+  // 4. Lettura
   if (readWords.some(w => text.startsWith(w))) {
       setStatusIcon('random');
       if (handleRead(text)) return;
   }
 
-  // 5. RICERCA METADATI
+  // 5. Metadati (autore/titolo)
   if (text.includes("autore") || text.includes("titolo")) {
       setStatusIcon('search');
       let type = text.includes("autore") ? "meta_author" : "meta_title";
       let splitter = text.includes("autore") ? "autore" : "titolo";
       let query = text.split(splitter)[1].trim();
-      if (query) {
-          handleMetadataSearch(type, query);
-          return;
-      }
+      if (query) { handleMetadataSearch(type, query); return; }
   }
 
-  // 6. RICERCA AVANZATA (Cerca in...)
+  // 6. Ricerca Avanzata (Cerca in...)
   const searchPattern = new RegExp(`(${searchVerbs.join('|')})\\s+(${searchPreps.join('|')})\\s+([a-zA-Z0-9_]+)\\s+(.*)`, 'i');
   const match = text.match(searchPattern);
   if (match) {
       setStatusIcon('search');
       const section = match[3].toLowerCase();
       const query = match[4].trim();
-      if (archive[section]) {
-          handleAdvancedSearch(section, query);
-          return;
-      } else {
-          speak(`La sezione "${section}" non esiste.`);
-          return;
-      }
+      if (archive[section]) { handleAdvancedSearch(section, query); return; } 
+      else { speak(`Sezione "${section}" inesistente.`); return; }
   }
 
-  // 7. RICERCA DIRETTA (Trigger puro)
-  // Cerca in tutte le sezioni, priorità a conversazione
+  // 7. Ricerca Diretta (Trigger)
   let found = null;
-  // Prima conversazione
-  if (archive.conversazione) {
-      found = archive.conversazione.find(cmd => text.includes(cmd.trigger.toLowerCase()));
-  }
-  // Se non trovato, cerca altrove
+  if (archive.conversazione) found = archive.conversazione.find(c => text.includes(c.trigger.toLowerCase()));
   if (!found) {
       for (let sec in archive) {
           if (sec === "conversazione") continue;
-          found = archive[sec].find(cmd => text.includes(cmd.trigger.toLowerCase()));
+          found = archive[sec].find(c => text.includes(c.trigger.toLowerCase()));
           if (found) break;
       }
   }
@@ -585,109 +472,73 @@ function handleSpeech(text) {
       return;
   }
 
-  // 8. NON RICONOSCIUTO
+  // Non riconosciuto
   lastMainOutput = text;
   setStatusIcon('');
   appendOutput("(Testo non riconosciuto. Dì 'Salva', 'Ripeti' o 'Invia a...')");
 }
 
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
-
-// Helper formattazione testo (maiuscole ed emoji)
 function formatText(str) {
     let s = str;
-
-    // 1. Sostituzione Emoji (es: "emoji cuore")
     s = s.replace(/emoji\s+(\w+(\s\w+)?)/gi, (match, p1) => {
         let key = p1.toLowerCase().trim();
         return emojiMap[key] ? emojiMap[key] : match;
     });
-
-    // 2. Maiuscola dopo i punti (. ! ?) e all'inizio assoluto
-    // Regex: trova inizio stringa O punteggiatura seguita da spazi, poi un carattere
     s = s.replace(/(^\s*\w|[.!?]\s*\w)/g, c => c.toUpperCase());
-
     return s;
 }
 
 function parseNumber(text) {
     if (!text) return null;
-    let t = text.toLowerCase().trim().replace(/[^\wàèéìòù0-9 ]+/g, "");
+    let t = text.toLowerCase().trim().replace(/[^\wàèéìòù0-9 ]+/g, ""); // pulizia
     
-    // Cifra
     const digitMatch = t.match(/\d+/);
     if (digitMatch) return parseInt(digitMatch[0]);
 
-    // "numero 5"
     const afterNumero = t.match(/numero\s+(\d+)/);
     if (afterNumero) return parseInt(afterNumero[1]);
 
-    // Parole
+    // Match preciso per evitare falsi positivi (es. "nessuno" vs "uno")
     for (const [word, value] of Object.entries(textToNumMap)) {
-        if (t === word || t.includes(word)) return value; 
+        // Regex word boundary: \bparola\b
+        const regex = new RegExp(`\\b${word}\\b`, 'i');
+        if (regex.test(t)) return value;
     }
     return null;
 }
 
-// Integrazione WhatsApp
 function handleWhatsapp(text) {
-    // Regex: invia [a/al/...] [nome] [messaggio]
-    // Strategia: togliamo il comando iniziale, poi cerchiamo il contatto più lungo corrispondente
     let cleanText = text.replace(/^(invia|manda|spedisci)\s+(a|al|allo|alla)\s+/i, "").trim();
-    
-    if (!cleanText) {
-        speak("A chi devo inviare?");
-        return;
-    }
+    if (!cleanText) { speak("A chi devo inviare?"); return; }
 
-    // Cerchiamo un contatto che corrisponda all'inizio della stringa
-    let bestMatch = null;
-    let bestLen = 0;
-    let messageBody = "";
-
-    // Scansiona tutto l'archivio
+    let bestMatch = null, bestLen = 0;
     for (let sec in archive) {
         archive[sec].forEach(item => {
             let trg = item.trigger.toLowerCase();
-            if (cleanText.startsWith(trg)) {
-                if (trg.length > bestLen) {
-                    bestLen = trg.length;
-                    bestMatch = item;
-                }
+            if (cleanText.startsWith(trg) && trg.length > bestLen) {
+                bestLen = trg.length; bestMatch = item;
             }
         });
     }
 
     if (bestMatch) {
-        // Estrai il messaggio (tutto ciò che c'è dopo il nome)
-        messageBody = cleanText.substring(bestLen).trim();
-        // Capitalizza il messaggio
+        let messageBody = cleanText.substring(bestLen).trim();
         if (messageBody) messageBody = formatText(messageBody);
-
-        let number = bestMatch.output.replace(/[^0-9+]/g, ""); // Pulisci numero
+        let number = bestMatch.output.replace(/[^0-9+]/g, "");
         
-        if (!messageBody) {
-             speak(`Contatto ${bestMatch.trigger} trovato, ma il messaggio è vuoto.`);
-             return;
-        }
+        if (!messageBody) { speak("Messaggio vuoto."); return; }
 
         speak(`Apro WhatsApp per ${bestMatch.trigger}.`);
-        appendOutput(`Bot: Apro WA per ${bestMatch.trigger} (${number}) con: "${messageBody}"`);
-        
-        setTimeout(() => {
-            window.open(`https://wa.me/${number}?text=${encodeURIComponent(messageBody)}`, '_blank');
-        }, 1500);
-
+        appendOutput(`Bot: Apro WA per ${bestMatch.trigger} -> "${messageBody}"`);
+        setTimeout(() => window.open(`https://wa.me/${number}?text=${encodeURIComponent(messageBody)}`, '_blank'), 1500);
     } else {
-        speak("Contatto non trovato nell'archivio.");
+        speak("Contatto non trovato.");
     }
 }
 
-
 function handleCopyCommand(text, commandWord) {
     let content = text.substring(commandWord.length).trim();
-    
-    // Firma
     let useSignature = false;
     if (content.includes("con firma") || content.includes("aggiungi firma")) {
         useSignature = true;
@@ -695,27 +546,15 @@ function handleCopyCommand(text, commandWord) {
     }
     
     if (!content && lastMainOutput) content = lastMainOutput;
-    else if (!content) { speak("Non c'è nulla da salvare."); return; }
+    else if (!content) { speak("Nulla da salvare."); return; }
 
-    // Sostituzione Punteggiatura vocale
-    content = content.replace(/\bvirgola\b/gi, ",")
-                     .replace(/\bpunto\b/gi, ".")
-                     .replace(/\bdue punti\b/gi, ":")
-                     .replace(/\bpunto e virgola\b/gi, ";")
-                     .replace(/\bpunto esclamativo\b/gi, "!")
-                     .replace(/\bpunto interrogativo\b/gi, "?")
+    content = content.replace(/\bvirgola\b/gi, ",").replace(/\bpunto\b/gi, ".").replace(/\bdue punti\b/gi, ":")
+                     .replace(/\bpunto e virgola\b/gi, ";").replace(/\bpunto esclamativo\b/gi, "!").replace(/\bpunto interrogativo\b/gi, "?")
                      .replace(/\ba capo\b/gi, "\n");
-
-    // Applicazione Formattazione Avanzata (Maiuscole + Emoji)
     content = formatText(content);
-
-    // Pulizia spazi
-    content = content.replace(/\s+([,.:;!?])/g, '$1'); // via spazi pre-punteggiatura
-    content = content.replace(/([,.:;!?])\s*/g, '$1 '); // spazio post-punteggiatura
-    content = content.replace(/\s\s+/g, ' ').trim();
+    content = content.replace(/\s+([,.:;!?])/g, '$1').replace(/([,.:;!?])\s*/g, '$1 ').replace(/\s\s+/g, ' ').trim();
 
     const finalString = useSignature ? content + SIGNATURE_TEXT : content;
-    
     navigator.clipboard.writeText(finalString).then(() => {
         speak(useSignature ? "Salvato con firma." : "Salvato.");
         appendOutput(`📋 Appunti: "${finalString}"`);
@@ -728,34 +567,20 @@ function handleRead(text) {
         const allEntries = [].concat(...Object.values(archive));
         if(allEntries.length === 0) { speak("Archivio vuoto."); return true; }
         const item = allEntries[Math.floor(Math.random() * allEntries.length)];
-        displayEntryDetails(item);
-        speakEntry(item);
-        return true;
+        displayEntryDetails(item); speakEntry(item); return true;
     }
-    
     const sectionMatch = Object.keys(archive).find(sec => text.includes(sec));
     if (sectionMatch) {
         const list = archive[sectionMatch];
-        if (!list || list.length === 0) {
-            speak(`La sezione ${sectionMatch} è vuota.`);
-            return true;
-        }
-        
+        if (!list || list.length === 0) { speak(`Sezione ${sectionMatch} vuota.`); return true; }
         speak(`Leggo ${sectionMatch}.`);
-        
         let index = 0;
         function speakNext() {
-            if (index >= list.length || appState !== "LISTENING") return; // Stop se l'utente ferma
-            
+            if (index >= list.length || appState !== "LISTENING") return;
             const item = list[index];
             displayEntryDetails(item);
-            
-            speak(item.output, () => {
-                index++;
-                if (index < list.length) speakNext();
-            });
+            speak(item.output, () => { index++; speakNext(); });
         }
-        // Piccola pausa prima di iniziare
         setTimeout(speakNext, 1000);
         return true;
     }
@@ -764,30 +589,16 @@ function handleRead(text) {
 
 function handleAdvancedSearch(section, query) {
     const list = archive[section];
-    if (!list) { speak("Sezione inesistente."); return; }
-    
-    const isRandom = randomWords.some(w => query.includes(w));
-    if (isRandom) {
-        const item = list[Math.floor(Math.random() * list.length)];
-        displayEntryDetails(item);
-        speakEntry(item);
-        return;
-    }
-    const results = list.filter(c => 
-        (c.trigger && c.trigger.toLowerCase().includes(query)) || 
-        (c.output && c.output.toLowerCase().includes(query))
-    );
+    const results = list.filter(c => (c.trigger && c.trigger.toLowerCase().includes(query)) || (c.output && c.output.toLowerCase().includes(query)));
     processSearchResults(results, `in ${section} per "${query}"`);
 }
 
 function handleMetadataSearch(type, query) {
     const all = [].concat(...Object.values(archive));
     const results = all.filter(c => c[type] && c[type].toLowerCase().includes(query));
-    const vocalLabel = type === "meta_author" ? "autore" : "titolo";
-    processSearchResults(results, `per ${vocalLabel} "${query}"`);
+    processSearchResults(results, `per ${type === "meta_author" ? "autore" : "titolo"} "${query}"`);
 }
 
-// LOGICA CRUCIALE PER INPUT CONCATENATI (FIX)
 function processSearchResults(results, context) {
     if (results.length === 0) {
         speak("Nessun risultato " + context);
@@ -796,23 +607,22 @@ function processSearchResults(results, context) {
         speakEntry(results[0]);
         lastMainOutput = results[0].output;
     } else {
-        // Risultati Multipli
         let listStr = `Trovati ${results.length} risultati. `;
-        results.forEach((r, i) => {
-            const title = r.meta_title || r.trigger || "Elemento";
-            listStr += `${i + 1}: ${title}. `; 
-        });
+        results.forEach((r, i) => listStr += `${i + 1}: ${r.meta_title || r.trigger || "Elemento"}. `);
         
         appendOutput("Risultati multipli:\n" + listStr);
         tempMemory.searchResults = results;
-        appState = "AWAITING_SEARCH_CHOICE"; // Imposta stato PRIMA di parlare
+        
+        // Impostiamo lo stato PRIMA di parlare
+        appState = "AWAITING_SEARCH_CHOICE"; 
 
-        // Parla, poi riattiva microfono
         speak(listStr + " Scegli il numero.", () => {
-            // Callback: eseguito quando il TTS finisce
-            // Riattiva mic SOLO se siamo ancora in attesa
+            // Callback fine TTS:
+            // Controlliamo se siamo ancora in attesa (l'utente potrebbe aver premuto stop nel frattempo)
             if (appState === "AWAITING_SEARCH_CHOICE") {
                 appendOutput("...Attendo scelta numero...");
+                // Avviamo ascolto senza resettare lo stato
+                stopHardwareOnly(); 
                 startListening(handleSpeech);
             }
         });
@@ -820,163 +630,83 @@ function processSearchResults(results, context) {
 }
 
 function handleSearchChoice(text) {
-    // Uscita
     if (negativeWords.some(w => text.includes(w))) {
         speak("Annullato.");
-        appState = "IDLE";
-        tempMemory = {};
+        stopAndResetApp();
         return;
     }
 
     const results = tempMemory.searchResults;
-    if (!results) { appState = "IDLE"; return; }
+    if (!results) { stopAndResetApp(); return; }
 
-    // "Tutti"
     if (text.includes("tutti") || text.includes("tutto")) {
         speak(`Leggo tutto.`);
-        appState = "IDLE"; // Reset stato per evitare loop
-        
+        appState = "IDLE"; // Reset stato per evitare loop, ma continua lettura
         let idx = 0;
         function playNext() {
             if (idx >= results.length) return;
-            const item = results[idx];
-            displayEntryDetails(item);
-            speak(`Numero ${idx+1}. ` + item.output, () => {
-                idx++;
-                playNext();
-            });
+            displayEntryDetails(results[idx]);
+            speak(`Numero ${idx+1}. ` + results[idx].output, () => { idx++; playNext(); });
         }
         playNext();
         return;
     }
     
-    // Scelta numero
     const choiceNum = parseNumber(text);
     if (choiceNum !== null && choiceNum > 0 && choiceNum <= results.length) {
         const item = results[choiceNum - 1];
         displayEntryDetails(item);
         speakEntry(item);
         lastMainOutput = item.output;
-        appState = "IDLE";
+        appState = "IDLE"; // Scelta fatta, torno a IDLE
     } else {
-        // Se non ho capito, chiedo di ripetere (loop controllato)
-        speak("Numero non valido, ripeti o dì annulla.", () => {
-             if (appState === "AWAITING_SEARCH_CHOICE") startListening(handleSpeech);
+        // Se non capisco, richiedo. IMPORTANTE: non resettare appState qui
+        speak("Numero non valido, ripeti.", () => {
+             if (appState === "AWAITING_SEARCH_CHOICE") {
+                 stopHardwareOnly();
+                 startListening(handleSpeech);
+             }
         });
     }
 }
 
-/* ================== GESTIONE EXTRA UI ================== */
-
+/* ================== EXTRA UI ================== */
 document.getElementById('toggleButtons').onclick = () => {
     const extra = document.getElementById('extraButtons');
-    const btn = document.getElementById('toggleButtons');
-    if (extra.style.display === 'none' || !extra.style.display) {
-        extra.style.display = 'block';
-        btn.textContent = '⬆️ Chiudi Opzioni';
-    } else {
-        extra.style.display = 'none';
-        btn.textContent = '⬇️ Opzioni';
-    }
+    extra.style.display = (extra.style.display === 'block') ? 'none' : 'block';
 };
-
-document.getElementById('infoArchive').onclick = () => {
-    const txt = `INFO ARCHIVIO JSON
--------------
-Esempio Rubrica per WhatsApp:
-{
-  "rubrica": [
-    { "trigger": "mamma", "output": "+393331234567", "tag": "famiglia" },
-    { "trigger": "ufficio", "output": "+3906123456", "tag": "lavoro" }
-  ],
-  "conversazione": [...]
-}`;
-    document.getElementById('output').textContent = txt;
-};
-
-document.getElementById('infoCommands').onclick = () => {
-    const txt = `GUIDA COMANDI
---------------------
-1. WHATSAPP:
-   - "Invia a [Nome] [Messaggio]" (Il nome deve essere un trigger in archivio).
-
-2. TRASCRIZIONE:
-   - "Salva [testo]" (con maiuscole automatiche).
-   - "Emoji cuore", "Emoji sorriso" -> ❤️, 🙂.
-   - "Salva ... con firma".
-
-3. RICERCA E ELENCHI:
-   - Se ci sono più risultati, ascolta l'elenco e poi dì il numero.
-
-4. BASE:
-   - "Stop", "Ripeti".
-`;
-    document.getElementById('output').textContent = txt;
-};
-
+document.getElementById('infoArchive').onclick = () => document.getElementById('output').textContent = JSON.stringify(archive, null, 2);
+document.getElementById('infoCommands').onclick = () => document.getElementById('output').textContent = "Comandi: Salva..., Cerca..., Invia a..., Leggi...";
 document.getElementById('exportCommands').onclick = () => {
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(archive, null, 2));
   const a = document.createElement('a');
-  a.href = dataStr;
-  a.download = "archivio_assistente.json";
-  a.click();
+  a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(archive, null, 2));
+  a.download = "archivio.json"; a.click();
 };
-
 document.getElementById('importFile').onchange = (e) => {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      const json = JSON.parse(ev.target.result);
-      for(let k in json) {
-          if (!archive[k]) archive[k] = [];
-          json[k].forEach(item => archive[k].push(item));
-      }
-      localStorage.setItem('archive', JSON.stringify(archive));
-      updateSectionList(); 
-      appendOutput(`Bot: Importazione completata.`);
-    } catch(err) { appendOutput("Errore JSON: " + err.message); }
+  const r = new FileReader();
+  r.onload = ev => { 
+      try { 
+          const j = JSON.parse(ev.target.result); 
+          for(let k in j) { if(!archive[k]) archive[k]=[]; j[k].forEach(i=>archive[k].push(i)); }
+          localStorage.setItem('archive', JSON.stringify(archive)); updateSectionList(); appendOutput("Importato.");
+      } catch(e) { appendOutput("Errore JSON"); }
   };
-  reader.readAsText(file);
+  if(e.target.files[0]) r.readAsText(e.target.files[0]);
 };
-
 document.getElementById('resetArchive').onclick = () => {
-  if(confirm("Reset archivio?")) {
-    archive = JSON.parse(JSON.stringify(defaultArchive));
-    localStorage.setItem('archive', JSON.stringify(archive));
-    updateSectionList(); 
-    appendOutput("Bot: Archivio resettato.");
-  }
+    if(confirm("Reset?")) { archive=JSON.parse(JSON.stringify(defaultArchive)); localStorage.setItem('archive', JSON.stringify(archive)); updateSectionList(); }
 };
 
-window.addEventListener('beforeunload', () => releaseResources(true));
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) releaseResources(true);
-});
+window.addEventListener('beforeunload', () => stopAndResetApp());
+document.addEventListener('visibilitychange', () => { if(document.hidden) stopAndResetApp(); });
 
-/* ================== TOGGLE AUDIO OUTPUT ================== */
 const muteButton = document.getElementById('muteButton');
-
 function updateMuteButtonUI() {
-    if (audioEnabled) {
-        muteButton.textContent = "🔈"; 
-        muteButton.classList.remove('mute-off');
-        muteButton.classList.add('mute-on');
-    } else {
-        muteButton.textContent = "🔇"; 
-        muteButton.classList.remove('mute-on');
-        muteButton.classList.add('mute-off');
-    }
+    muteButton.textContent = audioEnabled ? "🔈" : "🔇";
+    muteButton.className = audioEnabled ? "mute-on" : "mute-off";
 }
-
-muteButton.onclick = () => {
-    audioEnabled = !audioEnabled;
-    updateMuteButtonUI();
-    appendOutput("Bot: Audio " + (audioEnabled ? "attivo" : "disattivato"));
-};
-
+muteButton.onclick = () => { audioEnabled = !audioEnabled; updateMuteButtonUI(); };
 updateMuteButtonUI();
-  
 </script>
-</body>
+</body> 
 </html>
