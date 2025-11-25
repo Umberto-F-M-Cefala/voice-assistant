@@ -611,14 +611,27 @@ function handleRead(text) {
         const startIndex = Math.floor(Math.random() * list.length);
         speak(`Leggo ${sectionMatch} partendo dall'elemento ${startIndex + 1}.`);
         speechSynthesis.cancel();
-        for (let i = 0; i < list.length; i++) {
-            const idx = (startIndex + i) % list.length;
-            const item = list[idx];
-            const utter = new SpeechSynthesisUtterance(item.output);
-            utter.lang = 'it-IT';
-            utter.onstart = () => displayEntryDetails(item);
-            speechSynthesis.speak(utter);
-        }
+        let index = 0;
+
+function speakNext() {
+    const idx = (startIndex + index) % list.length;
+    const item = list[idx];
+
+    displayEntryDetails(item);
+
+    const utter = new SpeechSynthesisUtterance(item.output);
+    utter.lang = 'it-IT';
+
+    utter.onend = () => {
+        index++;
+        if (index < list.length) speakNext();
+    };
+
+    speechSynthesis.speak(utter);
+}
+
+speakNext();
+      
         return true;
     }
     return false;
