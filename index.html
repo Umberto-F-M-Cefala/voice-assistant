@@ -187,7 +187,7 @@ const SIGNATURE_TEXT = " // trascritto dall'assistente vocale";
 const copyWords = ["copia", "salva", "trascrivi", "conserva", "memorizza"];
 const affirmativeWords = ["sì", "va bene", "ok", "conferma", "esatto", "tutti", "tutto"];
 const negativeWords = ["no", "cancella", "annulla", "ferma", "basta"];
-const searchVerbs = ["cerca", "trova", "dimmi", "leggi"];
+const searchVerbs = ["cerca", "trova", "dimmi", "scegli"];
 const searchPreps = ["in", "su", "nel", "nella", "nelle", "nei"];
 const whatsappWords = ["invia", "manda", "spedisci", "scrivi"]; 
 const readWords = ["leggi", "recita"];
@@ -690,11 +690,12 @@ function parseNumber(text) {
 }
 
 function displayEntryDetails(item) {
-    const out = `
-----------------
-Trigger: ${item.trigger || "?"}
-Contenuto: ${item.output ? item.output.substring(0,50)+"..." : "..."}
-Sezione: ${item.tag || "-"}
+    const out = `----------------
+Ricerca: ${item.trigger || "N/A"}
+Contenuto: ${item.output || "N/A"}
+Tag: ${item.tag || "-"}
+Titolo: ${item.meta_title || "-"}
+Autore: ${item.meta_author || "-"}
 ----------------`;
     appendOutput(out);
 }
