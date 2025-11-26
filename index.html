@@ -195,10 +195,10 @@ const readWords = ["leggi", "recita"];
 const emojiMap = {
     "cuore": "❤️", "sorriso": "🙂", "risata": "😂", "ok": "👌", "pollice su": "👍",
     "pollice giù": "👎", "fuoco": "🔥", "stella": "⭐", "sole": "☀️", "luna": "🌙",
-    "bacio": "😘", "abbraccio": "🤗", "festa": "🎉", "tort": "🎂", "torta": "🎂",
-    "regalo": "🎁", "musica": "🎵", "occhiolino": "😉", "triste": "😢", "arrabbiato": "😡",
+    "bacio": "💋", "abbraccio": "🤗", "festa": "🎉", "torta": "🎂",
+    "regalo": "🎁", "musica": "🎵", "occhiolino": "😉", "triste": "😞", "arrabbiato": "😡",
     "pensoso": "🤔", "applauso": "👏", "preghiera": "🙏", "forza": "💪", "bomba": "💣",
-    "attenzione": "⚠️", "spunta": "✅", "croce": "❌", "fantasma": "👻", "robot": "🤖", "alieno": "👽"
+    "pericolo": "⚠️", "spunta": "✅", "croce": "❌", "fantasma": "👻", "robot": "🤖", "alieno": "👽"
 };
 
 let textToNumMap = {};
@@ -695,6 +695,7 @@ function formatText(str) {
     s = s.replace(/\bvirgola\b/gi, ",").replace(/\bpunto\b/gi, ".")
          .replace(/\bdue punti\b/gi, ":").replace(/\bpunto interrogativo\b/gi, "?")
          .replace(/\bpunto esclamativo\b/gi, "!").replace(/\ba capo\b/gi, "\n");
+    s = s.replace(/,\s+\n/g, ",\n"); // toglie spazio se c'è un a capo
     return s;
 }
 
