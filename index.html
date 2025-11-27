@@ -465,9 +465,10 @@ function handleSpeechInput(text) {
         return;
     }
 
-    // FALLBACK
-    speak("Non ho capito. Puoi dire salva, cerca, invia whatsapp, o leggi.");
-}
+    // FALLBACK (Ricerca Globale Automatica)
+    // Invece di dare errore, proviamo a cercare il testo in tutte le sezioni
+    handleGlobalSearchFallback(text);
+  }
 
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
 
@@ -682,6 +683,66 @@ function handleMetadataSearch(type, query) {
     }
 }
 
+function handleGlobalSearchFallback(query) {
+    let allResults = [];
+    let resultsBySection = {};
+    const q = query.toLowerCase().trim();
+
+    // 1. Scansiona TUTTE le sezioni dell'archivio
+    for (let section in archive) {
+        // Filtra gli elementi che contengono la query in trigger, output, titolo o autore
+        let matches = archive[section].filter(item => {
+            const t = (item.trigger || "").toLowerCase();
+            const o = (item.output || "").toLowerCase();
+            const mt = (item.meta_title || "").toLowerCase();
+            const ma = (item.meta_author || "").toLowerCase();
+            return t.includes(q) || o.includes(q) || mt.includes(q) || ma.includes(q);
+        });
+
+        // Se ci sono match in questa sezione, salvali
+        if (matches.length > 0) {
+            resultsBySection[section] = matches;
+            // Aggiungiamo alla lista piatta per permettere la selezione numerica (1, 2, 3...)
+            allResults = allResults.concat(matches);
+        }
+    }
+
+    // 2. NESSUN RISULTATO TROVATO
+    if (allResults.length === 0) {
+         speak("Non ho capito e non ho trovato nulla.");
+         return;
+    }
+
+    // 3. RISULTATI TROVATI: Costruiamo la risposta raggruppata
+    tempMemory.searchResults = allResults; // Salviamo la lista per la scelta (es. "Numero 5")
+    appState = "AWAITING_SEARCH_CHOICE";   // Attiviamo la modalità scelta
+
+    let verbalOutput = `Ho trovato ${allResults.length} risultati. `;
+    let visualOutput = "";
+    
+    // Contatore globale unico (così l'utente dice "5" e non "3 della seconda sezione")
+    let globalCounter = 1;
+
+    for (let sec in resultsBySection) {
+        // Aggiunge intestazione sezione al parlato e al testo
+        verbalOutput += `Nella sezione ${sec}: `;
+        visualOutput += `\n--- SEZIONE: ${sec.toUpperCase()} ---\n`;
+
+        resultsBySection[sec].forEach(item => {
+            // Cosa dire a voce: "Numero X: [trigger]"
+            verbalOutput += `Numero ${globalCounter}: ${item.trigger || "elemento senza nome"}. `;
+            
+            // Cosa scrivere a video
+            visualOutput += `${globalCounter}. ${item.trigger || "N/A"} (Titolo: ${item.meta_title || "-"}) \n`;
+            
+            globalCounter++;
+        });
+    }
+
+    appendOutput(visualOutput);
+    speak(verbalOutput + " Quale numero leggo?");
+  }
+  
 /* ================== UTILITIES ================== */
 function formatText(str) {
     let s = str;
