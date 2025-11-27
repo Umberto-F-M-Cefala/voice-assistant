@@ -758,6 +758,7 @@ function formatText(str) {
          .replace(/\bpunto esclamativo\b/gi, "!").replace(/\ba capo\b/gi, "\n");
     s = s.replace(/\s*\n\s*/g, "\n"); // toglie spazio prima e dopo a capo
     s = s.replace(/\s*,/g, ","); // toglie eventuali spazi prima della virgola 
+    s = s.replace(/\s*\./g, "."); // toglie spazi prima del punto
 
     return s;
 }
