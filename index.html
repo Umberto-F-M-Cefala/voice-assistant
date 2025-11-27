@@ -260,7 +260,7 @@ function speak(text, onEndCallback = null, isEntry = false) {
     stopAllAudio(); // Interrompe eventuale parlato precedente
     
     if (!audioEnabled) {
-        if (!isEntry) appendOutput("Assistente impostato su muto");
+        if (!isEntry) appendOutput("- Assistente impostato su muto -");
         if (onEndCallback) onEndCallback();
         return;
     }
@@ -727,11 +727,11 @@ function handleGlobalSearchFallback(query) {
         visualOutput += `\n--- SEZIONE: ${sec.toUpperCase()} ---\n`;
 
         resultsBySection[sec].forEach(item => {
-            // Cosa dire a voce: "Numero X: [trigger]"
-            verbalOutput += `Numero ${globalCounter}: ${item.trigger || "elemento senza nome"}. `;
+            // Cosa dire a voce: "Numero X: titolo o trigger"
+            verbalOutput += `Numero ${globalCounter}: ${item.meta_title || item.trigger || "elemento senza nome"}. `;
             
             // Cosa scrivere a video
-            visualOutput += `${globalCounter}. ${item.trigger || "N/A"} (Titolo: ${item.meta_title || "-"}) \n`;
+            visualOutput += `${globalCounter}. ${item.meta_title ? "Titolo: " + item.meta_title : item.trigger ? "Ricerca: " + item.trigger : "-"}\n`;
             
             globalCounter++;
         });
