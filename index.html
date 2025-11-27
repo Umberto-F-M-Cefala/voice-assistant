@@ -695,7 +695,7 @@ function formatText(str) {
     s = s.replace(/\bvirgola\b/gi, ",").replace(/\bpunto\b/gi, ".")
          .replace(/\bdue punti\b/gi, ":").replace(/\bpunto interrogativo\b/gi, "?")
          .replace(/\bpunto esclamativo\b/gi, "!").replace(/\ba capo\b/gi, "\n");
-    s = s.replace(/,\s+\n/g, ",\n"); // toglie spazio se c'è un a capo
+    s = s.replace(/,\s*\n\s*/g, ",\n"); // toglie spazio se c'è un a capo
     return s;
 }
 
