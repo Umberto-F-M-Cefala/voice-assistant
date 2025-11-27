@@ -260,12 +260,10 @@ function speak(text, onEndCallback = null, isEntry = false) {
     stopAllAudio(); // Interrompe eventuale parlato precedente
     
     if (!audioEnabled) {
-        if (!isEntry) appendOutput("Bot (muto): " + text);
+        if (!isEntry) appendOutput("Assistente impostato su muto");
         if (onEndCallback) onEndCallback();
         return;
     }
-
-    if (!isEntry) appendOutput("Bot: " + text);
 
     // Preparazione coda di lettura
     synthesisQueue = splitTextIntoChunks(text);
@@ -391,8 +389,7 @@ function startListening() {
 /* ================== INTELLIGENZA E COMANDI ================== */
 
 function handleSpeechInput(text) {
-    appendOutput("Tu: " + text);
-
+    
     // GESTIONE SELEZIONE LISTA (Contestuale)
     if (appState === "AWAITING_SEARCH_CHOICE" || tempMemory.searchResults) {
         // Se l'utente dice un numero mentre c'è una lista attiva
