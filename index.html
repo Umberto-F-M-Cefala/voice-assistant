@@ -554,7 +554,7 @@ function handleSaveCommand(text, commandWord) {
 }
 
 function handleRead(text) {
-    // 1. CASO RANDOM SINGOLO (preso da tutti gli archivi)
+    // 1. CASO RANDOM SINGOLO (rimane invariato)
     if (text.includes("casuale") || text.includes("random")) {
         const all = [].concat(...Object.values(archive));
         if (all.length === 0) { speak("Archivio vuoto"); return true; }
@@ -566,7 +566,7 @@ function handleRead(text) {
         return true;
     }
 
-    // 2. CASO LETTURA SEZIONE (Sequenziale / Loop)
+    // 2. CASO LETTURA SEZIONE (A BLOCCHI DI 5)
     const sectionMatch = Object.keys(archive).find(sec => text.includes(sec));
     if (sectionMatch) {
         const list = archive[sectionMatch];
@@ -575,28 +575,57 @@ function handleRead(text) {
             return true;
         }
 
-        // Calcola un punto di partenza casuale ma legge tutto sequenzialmente
-        const startIndex = Math.floor(Math.random() * list.length);
-        
-        speak(`Leggo la sezione ${sectionMatch} partendo dall'elemento numero ${startIndex + 1}`);
+        // Inizializza la memoria per la paginazione
+        tempMemory.readingList = list;
+        tempMemory.readingIndex = 0; // Parte dall'inizio (o puoi mettere random)
+        tempMemory.readingSection = sectionMatch;
 
-        // Costruiamo un unico testo lungo per sfruttare il motore Android ottimizzato
-        // Invece di fare un ciclo for che blocca il browser, uniamo i testi.
-        let fullTextSequence = "";
-        
-        for (let i = 0; i < list.length; i++) {
-            const idx = (startIndex + i) % list.length; // Logica circolare
-            const item = list[idx];
-            
-            // Aggiungiamo una piccola pausa logica nel testo
-            fullTextSequence += ` Elemento ${i + 1}: ${item.trigger}. ${item.output}. \n`;
-        }
-        
-        // Passiamo tutto al gestore code (che lo spezetterà per Android)
-        speak(fullTextSequence);
+        speak(`Inizio la lettura di ${sectionMatch}.`);
+        readNextBatch(); // Avvia il primo blocco
         return true;
     }
     return false;
+}
+
+function readNextBatch() {
+    const list = tempMemory.readingList;
+    const idx = tempMemory.readingIndex;
+    const BATCH_SIZE = 5;
+
+    // Se abbiamo finito la lista
+    if (idx >= list.length) {
+        speak("Ho letto tutti gli elementi della sezione.");
+        appState = "IDLE";
+        tempMemory = {};
+        return;
+    }
+
+    // Prendi i prossimi 5 elementi
+    const chunk = list.slice(idx, idx + BATCH_SIZE);
+    let speechText = "";
+    let visualText = `--- LETTURA PARZIALE (${idx + 1} a ${Math.min(idx + BATCH_SIZE, list.length)}) ---\n`;
+
+    chunk.forEach((item, i) => {
+        speechText += `Elemento ${idx + i + 1}: ${item.trigger}. ${item.output}. \n`;
+        visualText += `${idx + i + 1}. ${item.trigger} \n`;
+    });
+
+    // Aggiorna indice per la prossima volta
+    tempMemory.readingIndex += BATCH_SIZE;
+    
+    // Aggiorna output visivo e salvabile
+    appendOutput(visualText);
+    lastMainOutput = visualText; // Cosi se dice "Salva" salva questo elenco
+
+    // Parla e chiedi conferma se ce ne sono altri
+    if (tempMemory.readingIndex < list.length) {
+        speak(speechText + " Vuoi che continui con i prossimi 5?");
+        appState = "AWAITING_MORE_CONTENT";
+    } else {
+        speak(speechText + " Lettura completata.");
+        appState = "IDLE";
+        tempMemory = {};
+    }
 }
   
 function handleAdvancedSearch(section, query) {
