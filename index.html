@@ -794,6 +794,14 @@ function handleGlobalSearchFallback(query) {
     lastMainOutput = visualOutput; // Permette di dire "Salva" per salvare la lista completa
     speak(verbalOutput + " Quale numero leggo?");
   }
+
+// Funzione per mostrare suggerimenti che NON vengono salvati col comando "Copia/Salva"
+function appendHints(text) {
+    const out = document.getElementById('output');
+    // Aggiunge una riga visivamente distinta
+    out.innerHTML += `<div style="color:#666; font-size:0.85em; margin-top:5px; font-style:italic;">💡 ${text}</div>`;
+    out.scrollTop = out.scrollHeight;
+}
   
 /* ================== UTILITIES ================== */
 function formatText(str) {
