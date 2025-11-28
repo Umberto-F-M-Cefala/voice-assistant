@@ -607,7 +607,7 @@ function readNextBatch() {
 
     chunk.forEach((item, i) => {
         speechText += `Elemento ${idx + i + 1}: ${item.trigger}. ${item.output}. \n`;
-        visualText += `${idx + i + 1}. ${item.trigger} \n`;
+        visualText += `${idx + i + 1}. ${item.meta_title || item.trigger || "-"} \n Contenuto: ${item.output}. \n \n`;
     });
 
     // Aggiorna indice per la prossima volta
