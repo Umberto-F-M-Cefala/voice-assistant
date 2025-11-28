@@ -159,10 +159,10 @@
 <div id="statusIconContainer"></div> 
 <div id="output"></div>
 
-<button id="toggleButtons">⬇️ Opzioni Avanzate</button>
+<button id="toggleButtons">⬇️ Opzioni e Info</button>
 <div id="extraButtons">
+  <button class="secondary-btn" id="infoCommands">Info Comandi</button> 
   <button class="secondary-btn" id="infoArchive">Info Archivio</button> 
-  <button class="secondary-btn" id="infoCommands">Lista Comandi</button> 
   <button class="secondary-btn" id="exportCommands">Esporta JSON</button>
   <input type="file" id="importFile" accept=".json">
   <button class="secondary-btn" id="resetArchive" style="color:red; border-color:red;">Reset Archivio</button>
@@ -202,7 +202,19 @@ const emojiMap = {
     "pericolo": "⚠️", "spunta": "✅", "croce": "❌", "fantasma": "👻", "robot": "🤖", "alieno": "👽"
 };
 
-let textToNumMap = {};
+let textToNumMap = {
+    "un": 1, "uno": 1, "primo": 1,
+    "due": 2, "secondo": 2,
+    "tre": 3, "terzo": 3,
+    "quattro": 4, "quarto": 4,
+    "cinque": 5, "quinto": 5,
+    "sei": 6, "sesto": 6,
+    "sette": 7, "settimo": 7,
+    "otto": 8, "ottavo": 8,
+    "nove": 9, "nono": 9,
+    "dieci": 10, "decimo": 10,
+    "cento": 100
+};
 function populateNumberMap() {
     const units = ["", "uno", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove"];
     const tens = ["", "dieci", "venti", "trenta", "quaranta", "cinquanta", "sessanta", "settanta", "ottanta", "novanta"];
@@ -622,7 +634,7 @@ function readNextBatch() {
         speak(speechText + " Vuoi che continui con i prossimi 5?");
         appState = "AWAITING_MORE_CONTENT";
     } else {
-        speak(speechText + " Lettura completata.");
+        speak(speechText + " Lettura completata");
         appState = "IDLE";
         tempMemory = {};
     }
@@ -779,6 +791,7 @@ function handleGlobalSearchFallback(query) {
     }
 
     appendOutput(visualOutput);
+    lastMainOutput = visualOutput; // Permette di dire "Salva" per salvare la lista completa
     speak(verbalOutput + " Quale numero leggo?");
   }
   
