@@ -372,7 +372,7 @@ function startListening() {
     };
 
     r.onerror = (event) => {
-        if (event.error !== 'no-speech') appendOutput("⚠️ Mic: " + event.error);
+        if (event.error !== 'no-speech') appendOutput("⚠️ Microfono " + event.error);
     };
 
     r.onend = () => {
@@ -422,7 +422,7 @@ function handleSpeechInput(text) {
     // 4. RIPETI
     if (text === "ripeti") {
         if (lastMainOutput) speak("Ripeto: " + lastMainOutput);
-        else speak("Nulla da ripetere.");
+        else speak("Nulla da ripetere");
         return;
     }
 
@@ -493,7 +493,7 @@ function handleWhatsapp(text) {
     // Tentativo di separare destinatario dal messaggio
     // Cerchiamo il match più lungo tra i trigger della sezione whatsapp
     const waList = archive['whatsapp'] || [];
-    if (waList.length === 0) { speak("La sezione whatsapp è vuota."); return; }
+    if (waList.length === 0) { speak("La sezione whatsapp è vuota"); return; }
 
     let bestMatch = null;
     let bestLen = 0;
@@ -514,7 +514,7 @@ function handleWhatsapp(text) {
         
         let number = bestMatch.output.replace(/[^0-9+]/g, ""); // Pulisce numero
         
-        if (!messageBody) { speak("Messaggio vuoto. Riprova."); return; }
+        if (!messageBody) { speak("Messaggio vuoto. Riprova"); return; }
 
         speak(`Apro WhatsApp per ${bestMatch.trigger}.`);
         appendOutput(`📤 WhatsApp: A ${bestMatch.trigger} (${number})\nMsg: "${messageBody}"`);
@@ -523,7 +523,7 @@ function handleWhatsapp(text) {
             window.open(`https://wa.me/${number}?text=${encodeURIComponent(messageBody)}`, '_blank');
         }, 1500);
     } else {
-        speak("Contatto non trovato nella sezione whatsapp.");
+        speak("Contatto non trovato nella sezione whatsapp");
     }
 }
 
@@ -547,17 +547,17 @@ function handleSaveCommand(text, commandWord) {
     const finalString = useSignature ? content + SIGNATURE_TEXT : content;
     
     navigator.clipboard.writeText(finalString).then(() => {
-        speak("Salvato negli appunti.");
+        speak("Salvato negli appunti");
         appendOutput(`💾 Copiato: "${finalString}"`);
         lastMainOutput = content; // Aggiorna il contesto con ciò che si è salvato
-    }).catch(e => speak("Errore copia."));
+    }).catch(e => speak("Errore nel salvataggio"));
 }
 
 function handleRead(text) {
     // 1. CASO RANDOM SINGOLO (preso da tutti gli archivi)
     if (text.includes("casuale") || text.includes("random")) {
         const all = [].concat(...Object.values(archive));
-        if (all.length === 0) { speak("Archivio vuoto."); return true; }
+        if (all.length === 0) { speak("Archivio vuoto"); return true; }
         
         const item = all[Math.floor(Math.random() * all.length)];
         displayEntryDetails(item);
@@ -571,14 +571,14 @@ function handleRead(text) {
     if (sectionMatch) {
         const list = archive[sectionMatch];
         if (!list || list.length === 0) {
-            speak(`La sezione ${sectionMatch} è vuota.`);
+            speak(`La sezione ${sectionMatch} è vuota`);
             return true;
         }
 
         // Calcola un punto di partenza casuale ma legge tutto sequenzialmente
         const startIndex = Math.floor(Math.random() * list.length);
         
-        speak(`Leggo la sezione ${sectionMatch} partendo dall'elemento numero ${startIndex + 1}.`);
+        speak(`Leggo la sezione ${sectionMatch} partendo dall'elemento numero ${startIndex + 1}`);
 
         // Costruiamo un unico testo lungo per sfruttare il motore Android ottimizzato
         // Invece di fare un ciclo for che blocca il browser, uniamo i testi.
@@ -601,7 +601,7 @@ function handleRead(text) {
   
 function handleAdvancedSearch(section, query) {
     const list = archive[section];
-    if (!list) { speak("Sezione inesistente."); return; }
+    if (!list) { speak("Sezione inesistente"); return; }
 
     // Filtra (se query vuota, prende tutto)
     const results = list.filter(c => 
@@ -610,7 +610,7 @@ function handleAdvancedSearch(section, query) {
     );
 
     if (results.length === 0) {
-        speak(`Nessun risultato in ${section}.`);
+        speak(`Nessun risultato in ${section}`);
     } else if (results.length === 1) {
         displayEntryDetails(results[0]);
         speakEntry(results[0]);
@@ -625,14 +625,14 @@ function handleAdvancedSearch(section, query) {
         
         appendOutput("📋 Risultati:\n" + results.map((r,i) => `${i+1}. ${r.trigger}`).join("\n"));
         
-        speak(listStr + " Scegli un numero o dì 'tutti'.");
+        speak(listStr + " Scegli un numero o dì 'tutti'");
         // Nota: se l'utente preme Mic durante la lista, interrompe e può dire "due".
     }
 }
 
 function handleSearchChoice(text) {
     if (negativeWords.some(w => text.includes(w))) {
-        speak("Annullato.");
+        speak("Annullato");
         tempMemory.searchResults = null;
         appState = "IDLE";
         return;
@@ -661,7 +661,7 @@ function handleSearchChoice(text) {
         // ma resettiamo appState per permettere comandi normali come "salva"
         appState = "IDLE"; 
     } else {
-        speak("Numero non valido. Riprova.");
+        speak("Numero non valido. Riprova");
     }
 }
 
@@ -677,7 +677,7 @@ function handleMetadataSearch(type, query) {
         appendOutput(out);
         speak(out + " Quale leggo?");
     } else {
-        speak("Nessun riscontro.");
+        speak("Nessun riscontro");
     }
 }
 
@@ -707,7 +707,7 @@ function handleGlobalSearchFallback(query) {
 
     // 2. NESSUN RISULTATO TROVATO
     if (allResults.length === 0) {
-         speak("Non ho capito e non ho trovato nulla.");
+         speak("Non ho capito e non ho trovato nulla");
          return;
     }
 
