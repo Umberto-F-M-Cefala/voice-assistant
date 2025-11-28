@@ -193,6 +193,61 @@ const searchPreps = ["in", "su", "nel", "nella", "nelle", "nei"];
 const whatsappWords = ["invia", "manda", "spedisci", "scrivi"]; 
 const readWords = ["leggi", "recita"];
 
+
+const NOMI_ITALIANI = new Set([
+  "alessandro","andrea","antonio","angelo","aurelio","alberto","aldo","alfredo",
+  "bruno","bartolomeo","bernardo","biagio",
+  "carlo","corrado","claudio","cesare","cristiano","cristian","carmine","costantino",
+  "daniele","dario","davide","diego","domenico","donato",
+  "enrico","emilio","emanuele","erik","ettore","edoardo","elia","elio",
+  "federico","fabio","francesco","filippo","flavio","fabrizio","fausto",
+  "gabriele","giuseppe","giovanni","giacomo","giorgio","gianluca","giulio","giuliano","gianni","graziano",
+  "luca","luigi","lorenzo","leonardo","livio","ludovico",
+  "marco","mario","matteo","mattia","massimo","maurizio","michele","mirko","marcello","manuele",
+  "nicola","niccolo","nicolò","nino",
+  "paolo","pietro","pasquale","piero","pablo",
+  "riccardo","roberto","renato","raffaele","raffaello","rino","romano",
+  "salvatore","simone","stefano","samuele","sandro","silvano","silvio","saverio",
+  "tommaso","tiziano","teo","tino",
+  "ugo","umberto",
+  "valerio","vittorio","vito","vincenzo","virgilio",
+  "walter","william",
+  "zaccaria",
+
+  // femminili
+  "anna","alessandra","adriana","amalia","ambra","anita","angela","antonella",
+  "beatrice","bianca","bruna","barbara",
+  "chiara","camilla","carla","caterina","cristina","cinzia","clelia",
+  "daniela","debora","denise","diana",
+  "elena","eleonora","erika","eva","emanuela",
+  "francesca","filomena","flora",
+  "giulia","giorgia","gabriella","giovanna","greta",
+  "ilaria","irene","isabella",
+  "jessica",
+  "laura","luisa","lucia","lia","linda","lorena",
+  "marta","marina","maria","martina","margherita","monica","miriana","michela",
+  "nadia","nika","nicoletta","noemi",
+  "ornella",
+  "paola","patrizia","pamela","patricia",
+  "roberta","romina","rosa","rosanna","rosaria","rossella","raffaella",
+  "sara","simona","silvia","serena","sabrina",
+  "tiziana","teresa",
+  "valentina","valeria","vanessa","vera","veronica","vittoria","virginia",
+  "ylenia",
+  "zara"
+]);
+
+const CITTA_ITALIANE = new Set([
+  "roma","milano","napoli","torino","palermo","genova","bologna","firenze","bari","catania",
+  "venezia","verona","messina","padova","trieste","brescia","parma","taranto","prato",
+  "modena","reggio emilia","perugia","livorno","ravenna","cagliari","foggia","rimini",
+  "salerno","sassari","pescara","novara","piacenza","ancona","andria","udine","terni",
+  "bolzano","la spezia","como","arezzo","lecce","trento","udine","cesena","pesaro",
+  "lucca","treviso","pisa","viterbo","ragusa","siracusa","potenza","campobasso","aosta",
+  "matera","siena","crotone","lamezia terme","asti","alessandria","cuneo","lodi",
+  "mantova","giugliano","marano","torre del greco","avellino"
+]);
+  
 const emojiMap = {
     "cuore": "❤️", "sorriso": "🙂", "risata": "😂", "ok": "👌", "pollice su": "👍",
     "pollice giù": "👎", "fuoco": "🔥", "stella": "⭐", "sole": "☀️", "luna": "🌙",
@@ -805,23 +860,54 @@ function appendHints(text) {
   
 /* ================== UTILITIES ================== */
 function formatText(str) {
-    let s = str;
-    s = s.replace(/emoji\s+(\w+(\s\w+)?)/gi, (match, p1) => {
-        let key = p1.toLowerCase().trim();
-        return emojiMap[key] ? emojiMap[key] : match;
-    });
-    // Capitalizzazione base
-    s = s.replace(/(^\s*\w|[.!?]\s*\w)/g, c => c.toUpperCase());
-    // Punteggiatura vocale
-    s = s.replace(/\bvirgola\b/gi, ",").replace(/\bpunto\b/gi, ".")
-         .replace(/\bdue punti\b/gi, ":").replace(/\bpunto interrogativo\b/gi, "?")
-         .replace(/\bpunto esclamativo\b/gi, "!").replace(/\ba capo\b/gi, "\n");
-    s = s.replace(/\s*\n\s*/g, "\n"); // toglie spazio prima e dopo a capo
-    s = s.replace(/\s*,/g, ","); // toglie eventuali spazi prima della virgola 
-    s = s.replace(/\s*\./g, "."); // toglie spazi prima del punto
+    let s = str.trim();
 
-    return s;
+    // 1. EMOJI vocali
+    s = s.replace(/\bemoji\s+([\w\s]+)\b/gi, (match, key) => {
+        key = key.toLowerCase().trim();
+        return emojiMap[key] || match;
+    });
+
+    // 2. Punteggiatura vocale → simboli
+    const punctuationMap = [
+        { regex: /\bpunto interrogativo\b/gi, char: "?" },
+        { regex: /\bpunto esclamativo\b/gi, char: "!" },
+        { regex: /\bdue punti\b/gi, char: ":" },
+        { regex: /\bvirgola\b/gi, char: "," },
+        { regex: /\bpunto\b/gi, char: "." },
+        { regex: /\ba capo\b/gi, char: "\n" }
+    ];
+
+    for (const p of punctuationMap) {
+        s = s.replace(p.regex, p.char);
+    }
+
+    // 3. Normalizzazione spazi e punteggiatura
+    s = s.replace(/\s+([,.!?])/g, "$1");  // niente spazio prima della punteggiatura
+    s = s.replace(/([,.!?])(?=\S)/g, "$1 "); // assicura spazio dopo punteggiatura (tranne prima di newline)
+    s = s.replace(/([,.!?])\s+\n/g, "$1\n"); // niente spazio prima delle newline
+    s = s.replace(/\s*\n\s*/g, "\n");
+
+    // 4. Capitalizzazione frasi
+    s = s.replace(/(^|[.!?]\s+)([a-z])/g, (m, before, char) => before + char.toUpperCase());
+
+    // 5. Capitalizzazione NOMI ITALIANI
+    const nomiRegex = new RegExp(`\\b(${[...NOMI_ITALIANI].join("|")})\\b`, "gi");
+    s = s.replace(nomiRegex, m => m.charAt(0).toUpperCase() + m.slice(1));
+
+    // 6. Capitalizzazione CITTA ITALIANE
+    const cittaRegex = new RegExp(`\\b(${[...CITTA_ITALIANE]
+        .sort((a,b)=>b.length-a.length) // evita match parziali (es: "terme" in "Lamezia Terme")
+        .join("|")
+        .replace(/\s+/g, "\\s+")})\\b`, "gi");
+
+    s = s.replace(cittaRegex, m =>
+        m.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+    );
+
+    return s.trim();
 }
+
 
 function parseNumber(text) {
     if (!text) return null;
