@@ -744,7 +744,7 @@ function handleGlobalSearchFallback(query) {
     tempMemory.searchResults = allResults; // Salviamo la lista per la scelta (es. "Numero 5")
     appState = "AWAITING_SEARCH_CHOICE";   // Attiviamo la modalità scelta
 
-    let verbalOutput = `Ho trovato ${allResults.length} risultati. `;
+    let verbalOutput = `Ho trovato ${allResults.length} risultati`;
     let visualOutput = "";
     
     // Contatore globale unico (così l'utente dice "5" e non "3 della seconda sezione")
@@ -808,11 +808,11 @@ function parseNumber(text) {
 
 function displayEntryDetails(item) {
     const out = `----------------
-Ricerca: ${item.trigger || "N/A"}
-Contenuto: ${item.output || "N/A"}
-Tag: ${item.tag || "-"}
 Titolo: ${item.meta_title || "-"}
 Autore: ${item.meta_author || "-"}
+Contenuto: ${item.output || "N/A"}
+Ricerca: ${item.trigger || "N/A"}
+Tag: ${item.tag || "-"}
 ----------------`;
     appendOutput(out);
 }
