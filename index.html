@@ -260,7 +260,7 @@ function speak(text, onEndCallback = null, isEntry = false) {
     stopAllAudio(); // Interrompe eventuale parlato precedente
     
     if (!audioEnabled) {
-        if (!isEntry) appendOutput("- Assistente impostato su muto -");
+        if (!isEntry) appendOutput("🔇 Assistente impostato su muto 🔇");
         if (onEndCallback) onEndCallback();
         return;
     }
@@ -341,7 +341,7 @@ function stopAndResetApp() {
     micBtn.classList.remove('listening');
     setStatusIcon("");
     document.getElementById('output').textContent = "";
-    appendOutput("\n--- Reset ---");
+    appendOutput("🗑️ Elimino gli input e termino l'ascolto");
 }
 
 function startListening() {
@@ -351,7 +351,7 @@ function startListening() {
     }
 
     if (!('webkitSpeechRecognition' in window)) {
-        appendOutput("Errore: Browser non supportato (Usa Chrome/Android).");
+        appendOutput("⚠️ Browser non supportato. Utilizza Android con il browser Chrome.");
         return;
     }
 
@@ -363,7 +363,7 @@ function startListening() {
     r.onstart = () => {
         appState = "LISTENING";
         micBtn.classList.add('listening');
-        appendOutput("...Ascolto...");
+        appendOutput("⏳ Attendo istruzioni");
     };
 
     r.onresult = (event) => {
@@ -372,7 +372,7 @@ function startListening() {
     };
 
     r.onerror = (event) => {
-        if (event.error !== 'no-speech') appendOutput("Errore Mic: " + event.error);
+        if (event.error !== 'no-speech') appendOutput("⚠️ Mic: " + event.error);
     };
 
     r.onend = () => {
