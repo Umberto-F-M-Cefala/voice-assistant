@@ -653,7 +653,7 @@ function handleAdvancedSearch(section, query) {
         results.forEach((r, i) => listStr += `Numero ${i + 1}: ${r.trigger}. `);
         
         // Formattazione visiva con "a capo"
-        let visualList = `📋 Risultati in "${section.toUpperCase()}":\n`;
+        let visualList = `📋 Risultati trovati in "${section.toUpperCase()}":\n`;
         visualList += results.map((r,i) => `${i+1}. ${r.meta_title|| r.trigger || "-"}`).join("\n");
   
         appendOutput(visualList);
@@ -708,7 +708,14 @@ function handleMetadataSearch(type, query) {
         appState = "AWAITING_SEARCH_CHOICE";
         let out = `Trovati ${results.length} per ${query}. `;
         results.forEach((r, i) => out += `${i+1}: ${r.meta_title || r.trigger}. `);
-        appendOutput(out);
+      
+        // Formattazione visiva con "a capo"
+        let visualList2 = `📋 Risultati per "${query.toUpperCase()}":\n`;
+        visualList2 += results.map((r,i) => `${i+1}. ${r.meta_title|| r.trigger || "-"}`).join("\n");
+  
+        appendOutput(visualList2);
+        lastMainOutput = visualList2; // Permette di dire "Salva" per salvare la lista
+      
         speak(out + " Quale leggo?");
     } else {
         speak("Nessun riscontro");
