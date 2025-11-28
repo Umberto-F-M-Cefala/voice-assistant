@@ -652,8 +652,13 @@ function handleAdvancedSearch(section, query) {
         let listStr = `Trovati ${results.length} risultati. `;
         results.forEach((r, i) => listStr += `Numero ${i + 1}: ${r.trigger}. `);
         
-        appendOutput("📋 Risultati:\n" + results.map((r,i) => `${i+1}. ${r.trigger}`).join("\n"));
-        
+        // Formattazione visiva con "a capo"
+        let visualList = `📋 Risultati in "${section.toUpperCase()}":\n`;
+        visualList += results.map((r,i) => `${i+1}. ${r.meta_title|| r.trigger || "-"}`).join("\n");
+  
+        appendOutput(visualList);
+        lastMainOutput = visualList; // Permette di dire "Salva" per salvare la lista
+      
         speak(listStr + " Scegli un numero o dì 'tutti'");
         // Nota: se l'utente preme Mic durante la lista, interrompe e può dire "due".
     }
