@@ -787,11 +787,11 @@ function handleMetadataSearch(type, query) {
         results.forEach((r, i) => out += `${i+1}: ${r.meta_title || r.trigger}. `);
       
         // Formattazione visiva con "a capo"
-        let visualList2 = `📋 Risultati per "${query.toUpperCase()}":\n`;
-        visualList2 += results.map((r,i) => `${i+1}. ${r.meta_title|| r.trigger || "-"}`).join("\n");
+        let visualList = `📋 Risultati per "${query.toUpperCase()}":\n`;
+        visualList += results.map((r,i) => `${i+1}. ${r.meta_title|| r.trigger || "-"}`).join("\n");
   
-        appendOutput(visualList2);
-        lastMainOutput = visualList2; // Permette di dire "Salva" per salvare la lista
+        appendOutput(visualList);
+        lastMainOutput = visualList; // Permette di dire "Salva" per salvare la lista
       
         speak(out + " Quale leggo?");
     } else {
