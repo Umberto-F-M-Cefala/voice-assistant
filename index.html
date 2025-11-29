@@ -396,7 +396,7 @@ function speakEntry(item) { speak(item.output, null, true); }
 function showAvailableCommands() {
     appendHints(
         "Comandi disponibili: " +
-        "• Ripeti  • Salva  • Salva con firma  • Invia whatsapp a [nome] [messaggio]  • Stop"
+        "• Ripeti  • Salva • Invia whatsapp a [nome] [messaggio]"
     );
 }
 
@@ -470,6 +470,7 @@ function startListening() {
     r.onresult = (event) => {
         const text = event.results[0][0].transcript.toLowerCase().trim();
         handleSpeechInput(text);
+      showAvailableCommands(); //mostra i suggerimenti dei comandi
     };
 
     r.onerror = (event) => {
@@ -574,8 +575,6 @@ function handleSpeechInput(text) {
   // VW1iZXJ0byBGLiBNLiBDZWZhbMOh
 
     handleGlobalSearchFallback(text);
-
-  showAvailableCommands(); //mostra i suggerimenti dei comandi
   }
 
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
