@@ -815,6 +815,8 @@ function handleGlobalSearchFallback(query) {
 
     // 2. NESSUN RISULTATO TROVATO
     if (allResults.length === 0) {
+         tempMemory.pendingSaveText = query; // Salviamo il testo originale
+         appState = "AWAITING_SAVE_CONFIRMATION";
          speak("Non ho capito e non ho trovato nulla");
          return;
     }
