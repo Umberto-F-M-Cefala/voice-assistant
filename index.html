@@ -170,7 +170,7 @@
 
 <script>
 /* ================== CONFIGURAZIONE & STATO ================== */
-const defaultArchive = { "conversazione": [], "rubrica": [], "whatsapp": [] }; 
+const defaultArchive = { "conversazione": [], "whatsapp": [] }; 
 let archive = JSON.parse(localStorage.getItem('archive') || JSON.stringify(defaultArchive));
 
 // Stati applicazione
@@ -251,10 +251,32 @@ const CITTA_ITALIANE = new Set([
 const emojiMap = {
     "cuore": "❤️", "sorriso": "🙂", "risata": "😂", "ok": "👌", "pollice su": "👍",
     "pollice giù": "👎", "fuoco": "🔥", "stella": "⭐", "sole": "☀️", "luna": "🌙",
-    "bacio": "💋", "abbraccio": "🤗", "festa": "🎉", "torta": "🎂",
-    "regalo": "🎁", "musica": "🎵", "occhiolino": "😉", "triste": "😞", "arrabbiato": "😡",
-    "pensoso": "🤔", "applauso": "👏", "preghiera": "🙏", "forza": "💪", "bomba": "💣",
-    "pericolo": "⚠️", "spunta": "✅", "croce": "❌", "fantasma": "👻", "robot": "🤖", "alieno": "👽"
+    "bacio": "💋", "abbraccio": "🤗", "festa": "🎉", "torta": "🎂", "regalo": "🎁",
+    "musica": "🎵", "occhiolino": "😉", "triste": "😞", "arrabbiato": "😡", "pensoso": "🤔",
+    "applauso": "👏", "preghiera": "🙏", "forza": "💪", "bomba": "💣", "pericolo": "⚠️",
+    "spunta": "✅", "croce": "❌", "fantasma": "👻", "robot": "🤖", "alieno": "👽",
+    "cucciolo": "🐶", "gatto": "🐱", "coniglio": "🐰", "orso": "🐻", "panda": "🐼",
+    "elefante": "🐘", "leone": "🦁", "unicorno": "🦄", "pesce": "🐟", "delfino": "🐬",
+    "coccinella": "🐞", "ape": "🐝", "farfalla": "🦋", "ragno": "🕷️", "cavallo": "🐴",
+    "arcobaleno": "🌈", "neve": "❄️", "pioggia": "🌧️", "fulmine": "⚡", "vento": "🌬️",
+    "albero": "🌳", "fiore": "🌸", "foglia": "🍃", "cactus": "🌵", "fungo": "🍄",
+    "cibo": "🍔", "pizza": "🍕", "panino": "🥪", "gelato": "🍨", "cioccolato": "🍫",
+    "bevanda": "☕", "birra": "🍺", "vino": "🍷", "cocktail": "🍸", "acqua": "💧",
+    "macchina": "🚗", "aereo": "✈️", "treno": "🚆", "barca": "⛵", "bicicletta": "🚲",
+    "autobus": "🚌", "camion": "🚚", "ambulanza": "🚑", "polizia": "👮", "dottore": "👩‍⚕️",
+    "studente": "👨‍🎓", "ballerino": "💃", "cantante": "🎤", "fotografo": "📸", "pittore": "🎨",
+    "libro": "📖", "penna": "✏️", "matita": "🖊️", "chiave": "🔑", "lucchetto": "🔒",
+    "carta": "📝", "orologio": "⏰", "telefono": "📱", "computer": "💻", "televisore": "📺",
+    "bandiera": "🚩", "medaglia": "🏅", "trofeo": "🏆", "pallone": "⚽", "basket": "🏀",
+    "tennis": "🎾", "volley": "🏐", "rugby": "🏉", "skateboard": "🛹", "yoga": "🧘",
+    "cuoco": "👨‍🍳", "cameriere": "👩‍🍳", "poliziotto": "👮‍♂️", "pompieri": "👩‍🚒",
+    "scientista": "👩‍🔬", "ingegnere": "👷‍♂️", "astronauta": "👩‍🚀", "re": "🤴", "regina": "👸",
+    "principe": "🤴", "principessa": "👸", "angelo": "👼", "diavolo": "😈", "scheletro": "💀",
+    "cimitero": "🪦", "croce latina": "✝️", "stella david": "✡️", "yin yang": "☯️",
+    "cuore spezzato": "💔", "abbraccio stretto": "🤝", "mano alzata": "✋", "dito medio": "🖕",
+    "occhi": "👀", "orecchio": "👂", "naso": "👃", "bocca": "👄", "lingua": "👅",
+    "scarpa": "👟", "camicia": "👕", "pantaloni": "👖", "vestito": "👗", "cappello": "🎩",
+    "ombrello": "☂️", "zaino": "🎒", "borsa": "👜", "anello": "💍", "collana": "📿"
 };
 
 let textToNumMap = {
@@ -1024,7 +1046,7 @@ muteBtn.onclick = () => {
     if(!audioEnabled) stopAllAudio();
 };
 muteBtn.className = "mute-on"; // Init
-showAvailableCommands(); //mostra i suggerimenti dei comandi
+
 </script>
 </body>
 </html>
