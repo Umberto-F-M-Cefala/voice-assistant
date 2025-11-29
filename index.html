@@ -497,6 +497,7 @@ function handleSpeechInput(text) {
     if (text === "ripeti") {
         if (lastMainOutput) speak("Ripeto: " + lastMainOutput);
         else speak("Nulla da ripetere");
+        appendOutput("Nulla da ripetere");
         return;
     }
 
@@ -588,7 +589,7 @@ function handleWhatsapp(text) {
         
         let number = bestMatch.output.replace(/[^0-9+]/g, ""); // Pulisce numero
         
-        if (!messageBody) { speak("Messaggio vuoto. Riprova"); return; }
+        if (!messageBody) { speak("Messaggio vuoto. Riprova"); appendOutput("Messaggio vuoto. Riprova"); return; }
 
         speak(`Apro WhatsApp per ${bestMatch.trigger}.`);
         appendOutput(`📤 WhatsApp: A ${bestMatch.trigger} (${number})\nMsg: "${messageBody}"`);
@@ -646,6 +647,7 @@ function handleRead(text) {
         const list = archive[sectionMatch];
         if (!list || list.length === 0) {
             speak(`La sezione ${sectionMatch} è vuota`);
+            appendOutput(`La sezione ${sectionMatch} è vuota`);
             return true;
         }
 
@@ -694,6 +696,7 @@ function readNextBatch() {
     // Parla e chiedi conferma se ce ne sono altri
     if (tempMemory.readingIndex < list.length) {
         speak(speechText + " Vuoi che continui con i prossimi 5?");
+        appendOutput("Vuoi che continui con i prossimi 5?");
         appState = "AWAITING_MORE_CONTENT";
     } else {
         speak(speechText + " Lettura completata");
@@ -793,6 +796,7 @@ function handleMetadataSearch(type, query) {
         speak(out + " Quale leggo?");
     } else {
         speak("Nessun riscontro");
+        appendOutput("Nessun riscontro");
     }
 }
 
@@ -825,6 +829,7 @@ function handleGlobalSearchFallback(query) {
          tempMemory.pendingSaveText = query; // Salviamo il testo originale
          appState = "AWAITING_SAVE_CONFIRMATION";
          speak("Non ho capito e non ho trovato nulla");
+         appendOutput("Non ho capito e non ho trovato nulla");
          return;
     }
 
