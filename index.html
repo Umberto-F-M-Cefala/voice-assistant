@@ -523,12 +523,16 @@ function handleSpeechInput(text) {
     }
 
     // 4. RIPETI
-    if (text === "ripeti") {
-        if (lastMainOutput) speak("Ripeto: " + lastMainOutput);
-        else speak("Nulla da ripetere");
+if (text === "ripeti") {
+    if (lastMainOutput) {
+        speak("Ripeto: " + lastMainOutput);
+        appendOutput("Ripeto... ");
+    } else {
+        speak("Nulla da ripetere");
         appendOutput("Nulla da ripetere");
-        return;
     }
+    return;
+}
 
     // 5. LETTURA / RICERCA GENERICA
     if (readWords.some(w => text.startsWith(w))) {
