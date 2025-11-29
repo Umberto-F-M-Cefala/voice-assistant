@@ -325,8 +325,6 @@ function splitTextIntoChunks(text) {
 
 function speak(text, onEndCallback = null, isEntry = false) {
     stopAllAudio(); // Interrompe eventuale parlato precedente
-
-showAvailableCommands(); //mostra i suggerimenti dei comandi
   
     if (!audioEnabled) {
         if (!isEntry) appendOutput("🔇 Assistente impostato su muto 🔇");
@@ -1026,7 +1024,7 @@ muteBtn.onclick = () => {
     if(!audioEnabled) stopAllAudio();
 };
 muteBtn.className = "mute-on"; // Init
-
+showAvailableCommands(); //mostra i suggerimenti dei comandi
 </script>
 </body>
 </html>
