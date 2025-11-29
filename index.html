@@ -368,6 +368,13 @@ function speak(text, onEndCallback = null, isEntry = false) {
 
 function speakEntry(item) { speak(item.output, null, true); }
 
+function showAvailableCommands() {
+    appendHints(
+        "Comandi disponibili: " +
+        "• Ripeti  • Salva  • Salva con firma  • Invia whatsapp a [nome] [messaggio]  • Stop"
+    );
+}
+
 /* ================== GESTIONE MICROFONO E LOGICA PULSANTI ================== */
 
 const micBtn = document.getElementById('micButton');
@@ -950,6 +957,9 @@ function appendOutput(text) {
     const out = document.getElementById('output');
     out.textContent += text + "\n";
     out.scrollTop = out.scrollHeight;
+
+    // Mostra i comandi utilizzabili dopo ogni output
+    showAvailableCommands();
 }
 
 function setStatusIcon(type) {
