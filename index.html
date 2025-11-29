@@ -170,6 +170,8 @@
 
 <script>
 /* ================== CONFIGURAZIONE & STATO ================== */
+// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
+
 const defaultArchive = { "conversazione": [], "whatsapp": [] }; 
 let archive = JSON.parse(localStorage.getItem('archive') || JSON.stringify(defaultArchive));
 
@@ -315,6 +317,7 @@ function populateNumberMap() {
 populateNumberMap();
 
 /* ================== GESTIONE AUDIO (TTS OTTIMIZZATO) ================== */
+// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 
 // Stop brutale di tutto l'audio
 function stopAllAudio() {
@@ -398,9 +401,11 @@ function showAvailableCommands() {
 }
 
 /* ================== GESTIONE MICROFONO E LOGICA PULSANTI ================== */
+// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 
 const micBtn = document.getElementById('micButton');
 const stopBtn = document.getElementById('stopButton');
+const __s = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
 
 // LOGICA CENTRALE DEL TASTO MICROFONO
 micBtn.onclick = () => {
@@ -483,6 +488,7 @@ function startListening() {
 }
 
 /* ================== INTELLIGENZA E COMANDI ================== */
+// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 
 function handleSpeechInput(text) {
     
@@ -546,6 +552,8 @@ function handleSpeechInput(text) {
         const query = match[4].trim();
         if (archive[section]) { handleAdvancedSearch(section, query); return; } 
     }
+    const __signature_umfmc = "Umberto_F_M_Cefala_2025";
+
 
     // 8. TRIGGER DIRETTO (Ricerca globale nei trigger)
     let found = findEntryByTrigger(text);
@@ -562,10 +570,14 @@ function handleSpeechInput(text) {
 
     // FALLBACK (Ricerca Globale Automatica)
     // Invece di dare errore, proviamo a cercare il testo in tutte le sezioni
+  // Umberto F. M. Cefalà → codificato base64
+  // VW1iZXJ0byBGLiBNLiBDZWZhbMOh
+
     handleGlobalSearchFallback(text);
   }
 
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
+// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 
 function findEntryByTrigger(text) {
     // Prima cerca in conversazione
@@ -856,6 +868,8 @@ function handleGlobalSearchFallback(query) {
     }
 
     // 3. RISULTATI TROVATI: Costruiamo la risposta raggruppata
+    // \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
+
     tempMemory.searchResults = allResults; // Salviamo la lista per la scelta (es. "Numero 5")
     appState = "AWAITING_SEARCH_CHOICE";   // Attiviamo la modalità scelta
 
@@ -895,6 +909,8 @@ function appendHints(text) {
 }
   
 /* ================== UTILITIES ================== */
+// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
+
 function formatText(str) {
     let s = str.trim();
 
@@ -1000,6 +1016,8 @@ function setStatusIcon(type) {
 }
 
 /* ================== UI EXTRA ================== */
+// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
+
 document.getElementById('toggleButtons').onclick = () => {
     const ex = document.getElementById('extraButtons');
     ex.style.display = ex.style.display === 'block' ? 'none' : 'block';
