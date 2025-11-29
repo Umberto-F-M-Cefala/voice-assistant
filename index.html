@@ -962,9 +962,6 @@ function appendOutput(text) {
     const out = document.getElementById('output');
     out.textContent += text + "\n";
     out.scrollTop = out.scrollHeight;
-
-    // Mostra i comandi utilizzabili dopo ogni output
-    showAvailableCommands();
 }
 
 function setStatusIcon(type) {
