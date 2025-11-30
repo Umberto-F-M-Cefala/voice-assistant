@@ -1104,7 +1104,90 @@ document.getElementById('toggleButtons').onclick = () => {
     const ex = document.getElementById('extraButtons');
     ex.style.display = ex.style.display === 'block' ? 'none' : 'block';
 };
-document.getElementById('infoArchive').onclick = () => appendOutput(JSON.stringify(archive, null, 2));
+document.getElementById('infoArchive').onclick = () => {
+    const txt = `Come creare l'Archivio (File JSON)
+
+(Per chi vuole inserire i propri dati)
+
+L'archivio è come un libro di ricette o una rubrica. Si scrive in un formato chiamato JSON, che è semplice testo ma con regole precise di punteggiatura. Puoi crearlo usando una qualsiasi app Note o Blocco Note sul cellulare o PC.
+
+1. La Struttura (Lo Scheletro)
+
+Immagina l'archivio come una scatola che contiene diverse cartelle (le sezioni). Ogni cartella contiene dei foglietti (gli elementi).
+
+La struttura base deve essere sempre questa:
+JSON
+
+{
+  "conversazione": [],
+  "whatsapp": [],
+  "poesie": [],
+  "ricette": []
+}
+
+Le parole tra virgolette a sinistra (es. poesie) sono i nomi delle sezioni. Puoi inventarne di nuove (es. lavoro, barzellette).
+
+2. Come inserire un Elemento (Il contenuto)
+
+Dentro le parentesi quadre [] di ogni sezione, devi inserire i dati tra parentesi graffe {}. Ecco gli ingredienti fondamentali per ogni elemento:
+
+trigger: È la parola chiave. Se dici questa parola, l'assistente trova questo elemento.
+
+output: È quello che l'assistente risponderà o leggerà.
+
+meta_title (Opzionale): Il titolo utile per gli elenchi.
+
+Esempio Pratico:
+
+{
+  "whatsapp": [
+    {
+      "trigger": "mamma",
+      "output": "+393331234567"
+    },
+    {
+      "trigger": "luigi",
+      "output": "+393479999999"
+    }
+  ],
+  "poesie": [
+    {
+      "trigger": "infinito",
+      "output": "Sempre caro mi fu quest'ermo colle...",
+      "meta_title": "L'Infinito di Leopardi"
+    }
+  ],
+  "ricette": [
+    {
+      "trigger": "carbonara",
+      "output": "Per la carbonara servono uova, guanciale, pecorino e pepe.",
+      "meta_title": "Pasta alla Carbonara"
+    }
+  ]
+}
+
+3. Regole d'oro per non sbagliare
+
+Virgolette: ogni testo deve essere racchiuso tra virgolette inglesi " ". Non usare virgolette curve.
+
+Virgole: se aggiungi più elementi, metti una virgola tra una parentesi chiusa } e quella aperta { successiva. L'ultimo elemento NON deve avere la virgola finale.
+
+Numeri WhatsApp: nella sezione whatsapp, nel campo output devi mettere solo il numero di telefono con prefisso +39, senza spazi.
+
+Estensione file: quando salvi il file, assicurati che finisca con .json. Se il telefono lo salva come .txt, rinominalo.
+
+4. Come caricarlo
+
+Apri l'assistente vocale.
+Premi Opzioni e Info.
+Tocca Scegli file.
+Seleziona il file mio_archivio.json che hai creato.
+Se appare Import completato, sei pronto!
+
+Ora prova a dire: Cerca carbonara o Invia whatsapp a Mamma ciao.`
+    document.getElementById('output').textContent = txt;
+};
+  
 document.getElementById('infoCommands').onclick = () => {
     const txt = `Guida all'uso dell'Assistente Vocale
 (Per chi usa l'applicazione)
