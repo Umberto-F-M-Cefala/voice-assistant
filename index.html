@@ -375,7 +375,7 @@ function speak(text, onEndCallback = null, isEntry = false) {
     stopAllAudio(); // Interrompe eventuale parlato precedente
   
     if (!audioEnabled) {
-        if (!isEntry) appendOutput("🔇 Assistente impostato su muto 🔇");
+        if (!isEntry) appendOutput("🔇 Assistente impostato su muto 🔇", "hint-text");
         if (onEndCallback) onEndCallback();
         return;
     }
@@ -477,7 +477,7 @@ function stopAndResetApp() {
     const out = document.getElementById('output');
     out.innerHTML = ""; // Cancella tutto il testo precedente
  
-    appendOutput("🗑️ Elimino gli input e termino l'ascolto");
+    appendOutput("🗑️ Elimino gli input e termino l'ascolto", "listening-status");
   
 }
 
