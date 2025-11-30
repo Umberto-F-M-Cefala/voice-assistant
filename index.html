@@ -1105,7 +1105,88 @@ document.getElementById('toggleButtons').onclick = () => {
     ex.style.display = ex.style.display === 'block' ? 'none' : 'block';
 };
 document.getElementById('infoArchive').onclick = () => appendOutput(JSON.stringify(archive, null, 2));
-document.getElementById('infoCommands').onclick = () => appendOutput("Comandi: Salva, Copia con firma, Invia whatsapp a..., Cerca in [sezione], Leggi [sezione], Ripeti, Stop.");
+document.getElementById('infoCommands').onclick = () => {
+    const txt = `Guida all'uso dell'Assistente Vocale
+(Per chi usa l'applicazione)
+
+Questa applicazione è un maggiordomo virtuale che ascolta la tua voce, risponde a domande, legge testi e può inviare messaggi WhatsApp o salvare appunti. Non serve digitare nulla, basta parlare.
+
+1. Requisiti fondamentali (Cosa serve)
+
+Per far funzionare l'assistente correttamente, devi rispettare queste semplici regole:
+
+Dispositivo: Funziona meglio su smartphone Android o su PC (computer).
+
+Browser (Programma per navigare): Devi usare Google Chrome. Altri browser (come Firefox, Safari su iPhone o Samsung Internet) potrebbero non supportare il riconoscimento vocale avanzato usato qui.
+
+
+2. I Pulsanti Principali
+
+Appena apri la pagina, vedrai tre grandi pulsanti colorati. Ecco cosa fanno:
+
+🎙️ Il Microfono (Grande, al centro):
+Tocca una volta: diventa rosso e inizia ad ascoltare. Parla chiaramente.
+Tocca mentre parla: se l'assistente sta parlando e vuoi interromperlo per dire subito qualcos'altro, tocca il microfono. Lui starà zitto e ascolterà te.
+
+⏹️ Il Quadrato (Stop):
+È il tasto di emergenza o Reset. Se l'assistente si incanta, sta parlando troppo o vuoi ricominciare da zero, premi qui. Cancella tutto il testo a schermo e ferma l'audio.
+
+🔈 L'Altoparlante (Muto):
+Serve per zittire la voce dell'assistente.
+Se l'icona è 🔈 (acceso), l'assistente leggerà le risposte ad alta voce.
+Se l'icona è 🔇 (spento), l'assistente scriverà solo il testo sullo schermo senza parlare.
+
+3. Come usare i Comandi Vocali
+
+Non devi imparare codici strani, basta parlare in modo naturale. Ecco cosa puoi dire:
+
+A. Senza Archivio (Appena aperta)
+
+Anche se non hai caricato nessun dato, l'assistente sa già fare alcune cose utili:
+
+Scrivere e Salvare appunti:
+Dì qualsiasi frase (es: Ricordami di comprare il latte).
+Lui scriverà il testo.
+Dì Salva o Copia: copierà il testo negli appunti del telefono.
+
+WhatsApp (Invio diretto):
+Dì: Invia whatsapp a [Nome] [Messaggio].
+Esempio: Invia whatsapp a Mamma sto arrivando per cena.
+Nota: funziona solo se hai caricato dei contatti nella sezione WhatsApp.
+
+Ripetizione:
+Dì Ripeti: l'assistente rileggerà l'ultima frase che ha detto.
+
+B. Con Archivio Caricato (Funzioni Avanzate)
+
+Una volta caricato il file dei dati, puoi interrogare la tua memoria personale:
+
+Ricerca Libera:
+Dì una parola chiave (es: Manzoni, Ricetta pizza).
+Lui cercherà in tutto l'archivio.
+Se trova un solo risultato, te lo legge.
+Se ne trova molti, ti mostra un elenco numerato.
+
+Scegliere dall'elenco:
+Se l'assistente dice Ho trovato 3 risultati, quale leggo?, tu rispondi col numero.
+Dì Uno, Due, Il primo, Ventitre. Capisce i numeri anche pronunciati.
+Dì Tutti per leggerli tutti di fila.
+
+Lettura Casuale:
+Dì: Leggi una cosa a caso o Random. Pescherà un contenuto casuale dall'archivio.
+
+4. Il Menu Opzioni (Caricare i dati)
+
+Sotto la zona del testo c'è un pulsante grigio ⬇️ Opzioni e Info. Premilo per vedere i comandi di gestione:
+
+Scegli file (o Importa): carichi il tuo file .json. I dati vengono salvati nella memoria del telefono e restano anche se chiudi la pagina.
+
+Esporta JSON: scarica il file aggiornato.
+
+Reset Archivio: cancella tutto e riporta l'assistente allo stato iniziale.`
+    document.getElementById('output').textContent = txt;
+};
+  
 document.getElementById('exportCommands').onclick = () => {
     const a = document.createElement('a');
     a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(archive, null, 2));
