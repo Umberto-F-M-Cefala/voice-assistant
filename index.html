@@ -25,16 +25,16 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 15px;
-      margin-bottom: 10px;
+      gap: 0.9375rem;
+      margin-bottom: 0.625rem;
       flex-wrap: wrap;
   }
 
   /* Icona stato dinamica */
   #statusIconContainer {
       font-size: 2rem;
-      margin-top: 10px;
-      min-height: 40px;
+      margin-top: 0.625rem;
+      min-height: 2.5rem;
   }
 
   /* Elenco Sezioni */
@@ -42,11 +42,11 @@
       font-size: 0.85rem;
       color: #555;
       background-color: #e9ecef;
-      padding: 8px;
-      border-radius: 6px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ced4da;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      margin-top: 0.625rem;
+      margin-bottom: 0.625rem;
+      border: 0.0625rem solid #ced4da;
       word-wrap: break-word;
   }
 
@@ -62,15 +62,15 @@
       width: 7rem;
       height: 7rem;
       border-radius: 50%;
-      border: 6px solid #007bff;
+      border: 0.375rem solid #007bff;
       background-color: white;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 10px;
+      margin: 0.625rem;
       transition: all 0.2s ease-in-out;
-      box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+      box-shadow: 0 0.25rem 0.625rem rgba(0, 123, 255, 0.3);
   }
   
   /* Stati Microfono */
@@ -83,7 +83,7 @@
   
   @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
-      70% { box-shadow: 0 0 0 15px rgba(220, 53, 69, 0); }
+      70% { box-shadow: 0 0 0 0.9375rem rgba(220, 53, 69, 0); }
       100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
   }
 
@@ -91,8 +91,8 @@
       font-size: 2rem;
       width: 4.5rem;
       height: 4.5rem;
-      border-radius: 12px;
-      border-width: 3px;
+      border-radius: 0.75rem;
+      border-width: 0.1875rem;
       border-style: solid;
       cursor: pointer;
       display: flex;
@@ -111,32 +111,51 @@
 
   /* Output Text Box */
   #output { 
-    margin-top: 15px; 
+    margin-top: 0.9375rem; 
     white-space: pre-wrap; 
     text-align: left; 
     background: #fff; 
-    padding: 15px; 
-    border-radius: 8px; 
-    min-height: 150px; 
+    padding: 0.9375rem; 
+    border-radius: 0.5rem; 
+    min-height: 9.375rem; 
     max-height: 60vh;
     overflow-y: auto;
-    border: 1px solid #ddd;
+    border: 0.0625rem solid #ddd;
     font-size: 1rem;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+    box-shadow: inset 0 0 0.3125rem rgba(0,0,0,0.05);
   }
   
   /* Menu Opzioni */
-  input, select, button.secondary-btn { margin: 5px; padding: 10px; font-size: 1rem; }
+  input, select, button.secondary-btn { 
+      margin: 0.3125rem; 
+      padding: 0.625rem; 
+      font-size: 1rem; 
+  }
   
   #toggleButtons {
-    cursor: pointer; margin-top: 15px; padding: 10px 20px; width: 100%; max-width: 300px;
-    border: none; background-color: #6c757d; color: white; border-radius: 6px;
-    font-weight: bold; font-size: 1rem;
+    cursor: pointer; 
+    margin-top: 0.9375rem; 
+    padding: 0.625rem 1.25rem; 
+    width: 100%; 
+    max-width: 18.75rem;
+    border: none; 
+    background-color: #6c757d; 
+    color: white; 
+    border-radius: 0.375rem;
+    font-weight: bold; 
+    font-size: 1rem;
   }
 
   #extraButtons {
-    display: none; border: 1px solid #ccc; border-radius: 6px; padding: 10px;
-    margin-top: 10px; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto;
+    display: none; 
+    border: 0.0625rem solid #ccc; 
+    border-radius: 0.375rem; 
+    padding: 0.625rem;
+    margin-top: 0.625rem; 
+    width: 100%; 
+    max-width: 25rem; 
+    margin-left: auto; 
+    margin-right: auto;
     background-color: #fff;
   }
 
@@ -395,7 +414,7 @@ function speakEntry(item) { speak(item.output, null, true); }
 
 function showAvailableCommands() {
     appendHints(
-        "Comandi disponibili: " +
+        "💡 Comandi disponibili: " +
         "• Ripeti  • Salva • Invia whatsapp a [nome] [messaggio]"
     );
 }
@@ -431,18 +450,31 @@ stopBtn.onclick = () => {
 };
 
 function stopAndResetApp() {
+   // 1. Ferma audio e sintesi vocale
     stopAllAudio();
+
+    // 2. Ferma il riconoscimento vocale se attivo
     if (currentRecognition) {
-        currentRecognition.onend = null; // Evita callback residui
+        currentRecognition.onend = null; // Evita che onend riparta o dia errori
         currentRecognition.stop();
         currentRecognition = null;
     }
+
+    // 3. Reset delle variabili di stato
     appState = "IDLE";
-    tempMemory = {};
-    micBtn.classList.remove('listening');
-    setStatusIcon("");
-    document.getElementById('output').textContent = "";
+    tempMemory = {}; // Dimentica ricerche o liste precedenti
+    lastMainOutput = ""; // blocca comando "Ripeti"
+
+    // 4. Reset Interfaccia Visiva
+    micBtn.classList.remove('listening'); // Toglie l'animazione rossa
+    setStatusIcon(""); // Rimuove icone di stato (es. WhatsApp, Ricerca)
+
+    // 5. PULIZIA TOTALE DELLO SCHERMO
+    const out = document.getElementById('output');
+    out.innerHTML = ""; // Cancella tutto il testo precedente
+ 
     appendOutput("🗑️ Elimino gli input e termino l'ascolto");
+  
 }
 
 function startListening() {
@@ -461,16 +493,23 @@ function startListening() {
     r.interimResults = false; // Ottimizzazione CPU: elabora solo finale
     r.maxAlternatives = 1;
 
-    r.onstart = () => {
+  r.onstart = () => {
         appState = "LISTENING";
         micBtn.classList.add('listening');
-        appendOutput("⏳ Attendo istruzioni");
+        // Usa la classe speciale per poterlo rimuovere dopo
+        appendOutput("⏳ Attendo istruzioni...", "listening-status");
     };
 
-    r.onresult = (event) => {
+   r.onresult = (event) => {
+        // Rimuove la scritta "Attendo istruzioni"
+        const tempStatus = document.getElementById('tempListeningStatus');
+        if (tempStatus) tempStatus.remove();
+
         const text = event.results[0][0].transcript.toLowerCase().trim();
         handleSpeechInput(text);
-      showAvailableCommands(); //mostra i suggerimenti dei comandi
+        
+        // Mostra i comandi DOPO aver gestito l'input
+        showAvailableCommands();
     };
 
     r.onerror = (event) => {
@@ -909,9 +948,23 @@ function handleGlobalSearchFallback(query) {
 
 // Funzione per mostrare suggerimenti che NON vengono salvati col comando "Copia/Salva"
 function appendHints(text) {
+    
     const out = document.getElementById('output');
-    // Aggiunge una riga visivamente distinta
-    out.innerHTML += `<div style="color:#666; font-size:0.85em; margin-top:5px; font-style:italic;">💡 ${text}</div>`;
+    
+    // Crea il div dei suggerimenti
+    const div = document.createElement('div');
+    div.innerHTML = text; // Usa innerHTML per formattazione leggera se serve
+    div.className = 'hint-text'; // Classe fondamentale per la rimozione
+    
+// Stile inline per distinguerlo
+div.style.color = "#666";
+div.style.fontSize = "0.85rem";
+div.style.fontStyle = "italic";
+div.style.marginTop = "0.625rem";
+div.style.borderTop = "0.0625rem dashed #ccc"; 
+div.style.paddingTop = "0.3125rem";
+
+    out.appendChild(div);
     out.scrollTop = out.scrollHeight;
 }
   
@@ -1003,9 +1056,27 @@ function updateSectionList() {
 }
 updateSectionList();
 
-function appendOutput(text) {
+function appendOutput(text, className = "") {
     const out = document.getElementById('output');
-    out.textContent += text + "\n";
+
+    // 1. Rimuovi eventuali "suggerimenti" vecchi (quelli con classe 'hint-text')
+    const oldHints = out.querySelectorAll('.hint-text');
+    oldHints.forEach(el => el.remove());
+
+    // 2. Crea il nuovo elemento
+    const div = document.createElement('div');
+    div.textContent = text;
+    // Mantiene la formattazione a capo
+    div.style.whiteSpace = "pre-wrap"; 
+    div.style.marginBottom = "1rem"; // Un po' di spazio tra i messaggi
+    
+    if (className) {
+        div.className = className;
+        // Se è un messaggio di stato temporaneo (es. Attendo istruzioni), diamogli un ID specifico
+        if (className === 'listening-status') div.id = 'tempListeningStatus';
+    }
+
+    out.appendChild(div);
     out.scrollTop = out.scrollHeight;
 }
 
