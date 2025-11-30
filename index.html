@@ -37,6 +37,10 @@
       min-height: 2.5rem;
   }
 
+    #autore {
+      font-size: 0.85rem;
+      color: #555;
+  }
   /* Elenco Sezioni */
   #sectionsList {
       font-size: 0.85rem;
@@ -172,7 +176,7 @@
 <button id="stopButton" aria-label="Reset totale">⏹️</button>
 <button id="muteButton" aria-label="Attiva/Disattiva audio">🔈</button>
 </div>  
- <p id="sectionsList">Assistente vocale di Umberto F. M. Cefalà</p>
+ <p id="autore">Assistente vocale di Umberto F. M. Cefalà</p>
 
 <div id="sectionsList">Caricamento...</div>
 <div id="statusIconContainer"></div> 
@@ -301,7 +305,7 @@ const emojiMap = {
 };
 
 let textToNumMap = {
-    "un": 1, "uno": 1, "primo": 1,
+    "un": 1, "uno": 1, "Uno": 1, "primo": 1,
     "due": 2, "secondo": 2,
     "tre": 3, "terzo": 3,
     "quattro": 4, "quarto": 4,
