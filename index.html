@@ -502,8 +502,7 @@ function startListening() {
         appState = "LISTENING";
         micBtn.classList.add('listening');
         // Usa la classe speciale per poterlo rimuovere dopo
-        appendOutput("⏳ Attendo ...", "listening-status");
-        appendOutput("⏳ Attendo istruzioni...", "tempListeningStatus");
+        appendOutput("⏳ Attendo istruzioni...", "listening-status");
     };
 
    r.onresult = (event) => {
