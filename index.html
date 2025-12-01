@@ -496,12 +496,14 @@ function startListening() {
     r.lang = "it-IT";
     r.interimResults = false; // Ottimizzazione CPU: elabora solo finale
     r.maxAlternatives = 1;
-
+    r.continuous = false; //blocca riconoscimento continuo per ridurre cpu
+  
   r.onstart = () => {
         appState = "LISTENING";
         micBtn.classList.add('listening');
         // Usa la classe speciale per poterlo rimuovere dopo
-        appendOutput("⏳ Attendo istruzioni...", "listening-status");
+        appendOutput("⏳ Attendo ...", "listening-status");
+        appendOutput("⏳ Attendo istruzioni...", "tempListeningStatus");
     };
 
    r.onresult = (event) => {
@@ -510,6 +512,8 @@ function startListening() {
         if (tempStatus) tempStatus.remove();
 
         const text = event.results[0][0].transcript.toLowerCase().trim();
+        r.stop(); // interrompe subito la registrazione
+     
         handleSpeechInput(text);
         
         // Mostra i comandi DOPO aver gestito l'input
@@ -527,6 +531,7 @@ function startListening() {
         if(appState === "LISTENING") appState = "IDLE";
     };
 
+   if (currentRecognition) return; //protezione se già attivo 
     currentRecognition = r;
     r.start();
 }
