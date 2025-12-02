@@ -876,7 +876,9 @@ Tag: ${item.tag || "-"}
         combinedOutput += visualOut + "\n";
 
         // --- OUTPUT VOCALE ---
-        verbalOutput += `Numero ${globalCounter}: ${item.meta_title}. ${item.output}. <break time="500ms"/>`;
+        await speak(`Numero ${globalCounter}: ${item.meta_title}. ${item.output}.`);
+        await new Promise(r => setTimeout(r, 500));  // PAUSA
+
         globalCounter++;
     });
 
