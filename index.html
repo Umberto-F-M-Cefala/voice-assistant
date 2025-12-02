@@ -501,6 +501,11 @@ function startListening() {
   r.onstart = () => {
         appState = "LISTENING";
         micBtn.classList.add('listening');
+
+            // Rimuove la scritta "Attendo istruzioni"
+        const tempStatus = document.getElementById('tempListeningStatus');
+        if (tempStatus) tempStatus.remove();
+
         // Usa la classe speciale per poterlo rimuovere dopo
         appendOutput("⏳ Attendo istruzioni...", "listening-status");
     };
@@ -928,6 +933,7 @@ function handleGlobalSearchFallback(query) {
          appState = "AWAITING_SAVE_CONFIRMATION";
          speak("Non ho capito e non ho trovato nulla");
          appendOutput("Non ho capito e non ho trovato nulla");
+         appendOutput("Questo è quello che ho sentito: " + query);
          return;
     }
 
@@ -960,12 +966,12 @@ function handleGlobalSearchFallback(query) {
     }
 
     appendOutput(visualOutput);
-    lastMainOutput = visualOutput; // Permette di dire "Salva" per salvare la lista completa
     speak(verbalOutput + " Quale numero leggo?");
+    lastMainOutput = visualOutput; // Permette di dire "Salva" per salvare la lista completa
     appendOutput("Quale numero leggo?");
   }
 
-// Funzione per mostrare suggerimenti che NON vengono salvati col comando "Copia/Salva"
+// Funzione per mostrare suggerimenti 
 function appendHints(text) {
     
     const out = document.getElementById('output');
