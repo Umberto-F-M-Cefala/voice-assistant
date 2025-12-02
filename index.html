@@ -835,7 +835,7 @@ function handleAdvancedSearch(section, query) {
       
         speak(listStr + " Scegli un numero o dì tutti");
         appendOutput("Scegli un numero o dì tutti");
-        // Nota: se l'utente preme Mic durante la lista, interrompe e può dire "due".
+        // se l'utente preme Mic durante la lista, interrompe e può dire il numero.
     }
 }
 
@@ -853,15 +853,43 @@ function handleSearchChoice(text) {
 
     // Opzione "Tutti"
     if (text.includes("tutti") || text.includes("tutto")) {
-        speak("Leggo tutti i risultati");
-        appendOutput("Leggo tutti i risultati.");
-        let combinedOutput = results.map(r => r.output).join(". \nNuovo elemento: ");
-        lastMainOutput = combinedOutput;
-        speak(combinedOutput);
-        appState = "IDLE";
-      appendOutput("Tutti i risultati:\n" + listStr);
-        return;
-    }
+
+    speak("Leggo tutti i risultati");
+    appendOutput("Leggo tutti i risultati.");
+
+    let combinedOutput = "";     // ciò che verrà letto tutto di seguito
+    let verbalOutput = "";       // ciò che la voce dirà in forma semplificata
+    let globalCounter = 1;       // contatore per la lettura
+
+    results.forEach(item => {
+
+        // --- OUTPUT VISIVO (come displayEntryDetails) ---
+        const visualOut = `----------------
+Titolo: ${item.meta_title || "-"}
+Autore: ${item.meta_author || "-"}
+Contenuto: ${item.output || "N/A"}
+Ricerca: ${item.trigger || "N/A"}
+Tag: ${item.tag || "-"}
+----------------`;
+
+        appendOutput(visualOut);
+        combinedOutput += visualOut + "\n";
+
+        // --- OUTPUT VOCALE ---
+        verbalOutput += `Numero ${globalCounter}: ${item.meta_title || item.trigger || "elemento senza nome"}. `;
+        globalCounter++;
+    });
+
+    // Parla solo il riepilogo vocale
+    speak(verbalOutput);
+
+    // output testuale completo
+    lastMainOutput = combinedOutput;
+    appState = "IDLE";
+
+    return;
+}
+
 
     const choiceNum = parseNumber(text);
     if (choiceNum !== null && choiceNum > 0 && choiceNum <= results.length) {
