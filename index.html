@@ -876,7 +876,7 @@ Tag: ${item.tag || "-"}
         combinedOutput += visualOut + "\n";
 
         // --- OUTPUT VOCALE ---
-        verbalOutput += `Numero ${globalCounter}: ${item.meta_title || item.trigger || "elemento senza nome"}. `;
+        verbalOutput += `Numero ${globalCounter}: ${item.meta_title}. ${item.output}`;
         globalCounter++;
     });
 
