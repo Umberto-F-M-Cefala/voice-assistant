@@ -851,20 +851,29 @@ function handleSearchChoice(text) {
     const results = tempMemory.searchResults;
     if (!results) { appState = "IDLE"; return; }
 
-    // Opzione "Tutti"
-    if (text.includes("tutti") || text.includes("tutto")) {
+    // Funzione speak() che ritorna una Promise e permette di aspettare la fine della lettura
+function speakAsync(text) {
+    return new Promise(resolve => {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.onend = resolve;
+        speechSynthesis.speak(utter);
+    });
+}
+
+// Opzione "Tutti"
+if (text.includes("tutti") || text.includes("tutto")) {
 
     speak("Leggo tutti i risultati");
     appendOutput("Leggo tutti i risultati.");
 
-    let combinedOutput = "";     // ciò che verrà letto tutto di seguito
-    let verbalOutput = "";       // ciò che la voce dirà in forma semplificata
-    let globalCounter = 1;       // contatore per la lettura
+    let combinedOutput = "";     // output testuale completo
+    let globalCounter = 1;       // contatore
 
-    results.forEach(item => {
+    (async () => { // IIFE async per usare await dentro
+        for (const item of results) {
 
-        // --- OUTPUT VISIVO (come displayEntryDetails) ---
-        const visualOut = `----------------
+            // --- OUTPUT VISIVO ---
+            const visualOut = `----------------
 Numero: ${globalCounter}
 Titolo: ${item.meta_title || "-"}
 Autore: ${item.meta_author || "-"}
@@ -873,24 +882,25 @@ Ricerca: ${item.trigger || "N/A"}
 Tag: ${item.tag || "-"}
 ----------------`;
 
-        appendOutput(visualOut);
-        combinedOutput += visualOut + "\n";
+            appendOutput(visualOut);
+            combinedOutput += visualOut + "\n";
 
-        // --- OUTPUT VOCALE ---
-        verbalOutput += `Numero ${globalCounter} ${item.meta_title} ${item.output}`;
-                    
-        globalCounter++;
-    });
+            // --- OUTPUT VOCALE ---
+            const verbalText = `Numero ${globalCounter}. ${item.meta_title}. ${item.output}.`;
+            await speakAsync(verbalText); // legge un elemento alla volta
+            await new Promise(r => setTimeout(r, 300)); // pausa 300ms tra i risultati
 
-    // Parla solo il riepilogo vocale
-    speak(verbalOutput);
+            globalCounter++;
+        }
 
-    // output testuale completo
-    lastMainOutput = combinedOutput;
-    appState = "IDLE";
+        // Salvo l'output completo
+        lastMainOutput = combinedOutput;
+        appState = "IDLE";
+    })();
 
     return;
 }
+
 
 
     const choiceNum = parseNumber(text);
