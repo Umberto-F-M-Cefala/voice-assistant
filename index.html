@@ -865,6 +865,7 @@ function handleSearchChoice(text) {
 
         // --- OUTPUT VISIVO (come displayEntryDetails) ---
         const visualOut = `----------------
+Numero: ${globalCounter}
 Titolo: ${item.meta_title || "-"}
 Autore: ${item.meta_author || "-"}
 Contenuto: ${item.output || "N/A"}
@@ -876,9 +877,8 @@ Tag: ${item.tag || "-"}
         combinedOutput += visualOut + "\n";
 
         // --- OUTPUT VOCALE ---
-        await speak(`Numero ${globalCounter}: ${item.meta_title}. ${item.output}.`);
-        await new Promise(r => setTimeout(r, 500));  // PAUSA
-
+        verbalOutput += `Numero ${globalCounter} ${item.meta_title} ${item.output}`;
+                    
         globalCounter++;
     });
 
