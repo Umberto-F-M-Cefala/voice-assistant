@@ -859,6 +859,7 @@ function handleSearchChoice(text) {
         lastMainOutput = combinedOutput;
         speak(combinedOutput);
         appState = "IDLE";
+      appendOutput("Tutti i risultati:\n" + listStr);
         return;
     }
 
