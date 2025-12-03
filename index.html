@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+^<!DOCTYPE html>
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -423,6 +423,30 @@ let textToNumMap = {
     "cento": 100
 };
 
+  const STATES = {
+    IDLE: "IDLE",
+    LISTENING: "LISTENING",
+    PROCESSING: "PROCESSING",
+    AWAITING_SEARCH_CHOICE: "AWAITING_SEARCH_CHOICE",
+    AWAITING_SAVE_CONFIRMATION: "AWAITING_SAVE_CONFIRMATION"
+};
+
+let appState = STATES.IDLE;
+
+  function setState(newState) {
+    console.log("STATE →", newState);
+    appState = newState;
+
+    // opzioni utili:
+    if (newState !== STATES.LISTENING) {
+        micBtn.classList.remove('listening');
+    }
+
+    if (newState === STATES.IDLE) {
+        setStatusIcon("");
+    }
+}
+
   
 function populateNumberMap() {
     const units = ["", "uno", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove"];
@@ -620,9 +644,9 @@ function startListening() {
     r.continuous = false; //blocca riconoscimento continuo per ridurre cpu
   
   r.onstart = () => {
-        appState = "LISTENING";
-        micBtn.classList.add('listening');
-
+        setState(STATES.LISTENING);
+          micBtn.classList.add('listening');
+    
             // Rimuove la scritta "Attendo istruzioni"
         const tempStatus = document.getElementById('tempListeningStatus');
         if (tempStatus) tempStatus.remove();
@@ -636,13 +660,14 @@ function startListening() {
         const tempStatus = document.getElementById('tempListeningStatus');
         if (tempStatus) tempStatus.remove();
 
-        const text = event.results[0][0].transcript.toLowerCase().trim();
-        r.stop(); // interrompe subito la registrazione
-     
-        handleSpeechInput(text);
-        
-        // Mostra i comandi DOPO aver gestito l'input
-        showAvailableCommands();
+       const text = event.results[0][0].transcript.toLowerCase().trim();
+
+    r.stop();     
+    setState(STATES.PROCESSING);
+
+    handleSpeechInput(text);
+    showAvailableCommands();
+  
     };
 
     r.onerror = (event) => {
@@ -651,9 +676,10 @@ function startListening() {
 
     r.onend = () => {
         micBtn.classList.remove('listening');
-        currentRecognition = null;
-        // Se stato è listening ma è finito senza input validi, torna idle o gestisci qui
-        if(appState === "LISTENING") appState = "IDLE";
+    if (appState === STATES.LISTENING) {
+        setState(STATES.IDLE);
+    }
+    currentRecognition = null;
     };
 
    if (currentRecognition) return; //protezione se già attivo 
@@ -665,337 +691,604 @@ function startListening() {
 // \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 
 function handleSpeechInput(text) {
-    
-    // GESTIONE SELEZIONE LISTA (Contestuale)
-    if (appState === "AWAITING_SEARCH_CHOICE" || tempMemory.searchResults) {
-        // Se l'utente dice un numero mentre c'è una lista attiva
-        const num = parseNumber(text);
-        if (num !== null || text.includes("tutti") || text.includes("tutto")) {
-            handleSearchChoice(text);
-            return;
-        }
-        // Se non è un numero, prosegue come comando normale (es. "Annulla" o nuovo comando)
-    }
 
-    // 1. COMANDI GLOBALI
-    if (text === "stop" || text === "basta" || text === "fermati") { stopAndResetApp(); return; }
-    
-    // 2. WHATSAPP (Priorità alta, sezione ristretta)
-    if (whatsappWords.some(w => text.startsWith(w))) {
-        setStatusIcon('whatsapp');
-        handleWhatsapp(text);
+    console.log("INPUT:", text, " | STATE:", appState);
+
+    // Normalizzazione
+    if (!text || typeof text !== "string") {
+        speak("Non ho sentito nulla");
+        appendOutput("Non ho sentito nulla");
         return;
     }
 
-    // 3. SALVA / COPIA
+    text = text.toLowerCase().trim();
+
+    /* ========================
+       1. GESTIONE STATI SPECIALI
+    ========================= */
+
+    // --- SCEGLI UN RISULTATO (liste di ricerca) ---
+    if (appState === STATES.AWAITING_SEARCH_CHOICE) {
+        return handleSearchChoice(text);
+    }
+
+    // --- CONFERMA SALVATAGGIO FALLBACK ---
+    if (appState === STATES.AWAITING_SAVE_CONFIRMATION) {
+        return handleSaveConfirmation(text);
+    }
+
+
+    /* ========================
+       2. STATO GENERALE (IDLE o PROCESSING)
+    ========================= */
+
+    // Da qui in poi gestiamo i comandi normali
+    // e ogni comando, se valido, termina in IDLE
+    setState(STATES.PROCESSING);
+
+    /* ========== PRIORITÀ 1: WHATSAPP ========== */
+    if (whatsappWords.some(w => text.startsWith(w))) {
+        setStatusIcon('whatsapp');
+        handleWhatsapp(text);
+        return setState(STATES.IDLE);
+    }
+
+    /* ========== PRIORITÀ 2: SALVA / COPIA ========== */
     const saveCmd = copyWords.find(w => text.startsWith(w));
     if (saveCmd) {
         setStatusIcon('transcription');
         handleSaveCommand(text, saveCmd);
-        return;
+        return setState(STATES.IDLE);
     }
 
-    // 4. RIPETI
-if (text === "ripeti") {
-    if (lastMainOutput) {
-        speak("Ripeto: " + lastMainOutput);
-        appendOutput("Ripeto... ");
-    } else {
-        speak("Nulla da ripetere");
-        appendOutput("Nulla da ripetere");
+    /* ========== PRIORITÀ 3: RIPETI ========== */
+    if (text === "ripeti") {
+        if (lastMainOutput) {
+            speak("Ripeto: " + lastMainOutput);
+            appendOutput("Ripeto...");
+        } else {
+            speak("Nulla da ripetere");
+            appendOutput("Nulla da ripetere");
+        }
+        return setState(STATES.IDLE);
     }
-    return;
-}
 
-    // 5. LETTURA / RICERCA GENERICA
+    /* ========== PRIORITÀ 4: LETTURA RANDOM / LEGGI ========== */
     if (readWords.some(w => text.startsWith(w))) {
         setStatusIcon('random');
-        if (handleRead(text)) return;
+        const ok = handleRead(text);
+        return setState(STATES.IDLE);
     }
 
-    // 6. METADATI (Autore/Titolo)
+    /* ========== PRIORITÀ 5: METADATI (AUTORE/TITOLO) ========== */
     if (text.includes("autore") || text.includes("titolo")) {
         setStatusIcon('search');
+
         let type = text.includes("autore") ? "meta_author" : "meta_title";
         let query = text.replace(/.*(autore|titolo)\s+/i, "").trim();
-        if (query) { handleMetadataSearch(type, query); return; }
+
+        if (query) {
+            handleMetadataSearch(type, query);
+            // handleMetadataSearch passa automaticamente in AWAITING_SEARCH_CHOICE
+            return;
+        }
+        return setState(STATES.IDLE);
     }
 
-    // 7. RICERCA AVANZATA ("Cerca in [sezione] [query]")
-    const searchPattern = new RegExp(`(${searchVerbs.join('|')})\\s+(${searchPreps.join('|')})\\s+([a-zA-Z0-9_]+)\\s+(.*)`, 'i');
+    /* ========== PRIORITÀ 6: RICERCA AVANZATA (cerca in X ...) ========== */
+    const searchPattern = new RegExp(
+        `(${searchVerbs.join('|')})\\s+(${searchPreps.join('|')})\\s+([a-zA-Z0-9_]+)\\s+(.*)`,
+        'i'
+    );
+
     const match = text.match(searchPattern);
     if (match) {
         setStatusIcon('search');
         const section = match[3].toLowerCase();
         const query = match[4].trim();
-        if (archive[section]) { handleAdvancedSearch(section, query); return; } 
+
+        if (archive[section]) {
+            handleAdvancedSearch(section, query);
+            // handleAdvancedSearch imposta AWAITING_SEARCH_CHOICE se serve
+            return;
+        }
     }
-    const __signature_umfmc = "Umberto_F_M_Cefala_2025";
 
-
-    // 8. TRIGGER DIRETTO (Ricerca globale nei trigger)
+    /* ========== PRIORITÀ 7: TRIGGER DIRETTO ========== */
     let found = findEntryByTrigger(text);
     if (found) {
         setStatusIcon('conversation');
         displayEntryDetails(found);
         speakEntry(found);
         lastMainOutput = found.output;
-        // Pulisco eventuale memoria di ricerca precedente per non fare confusione
-        tempMemory.searchResults = null;
-        appState = "IDLE";
-        return;
+
+        tempMemory.searchResults = null; // pulizia
+        return setState(STATES.IDLE);
     }
 
-    // FALLBACK (Ricerca Globale Automatica)
-    // Invece di dare errore, proviamo a cercare il testo in tutte le sezioni
-  // Umberto F. M. Cefalà → codificato base64
-  // VW1iZXJ0byBGLiBNLiBDZWZhbMOh
-
+    /* ========== PRIORITÀ 8: RICERCA GLOBALE FALLBACK ========== */
     handleGlobalSearchFallback(text);
-  }
+    // fallback può entrare in AWAITING_SEARCH_CHOICE o AWAITING_SAVE_CONFIRMATION
+}
+
+function handleNormalCommand(text) {
+
+    // Normalizzazione
+    if (!text || typeof text !== "string") return setState(STATES.IDLE);
+    text = text.toLowerCase().trim();
+
+    console.log("NormalCommand:", text);
+
+    /* ===========================================
+       1. PRIORITÀ MASSIMA: WHATSAPP
+       =========================================== */
+    if (whatsappWords.some(w => text.startsWith(w))) {
+        setStatusIcon('whatsapp');
+        handleWhatsapp(text);
+        return setState(STATES.IDLE);
+    }
+
+
+    /* ===========================================
+       2. SALVA / COPIA
+       =========================================== */
+    const saveCmd = copyWords.find(w => text.startsWith(w));
+    if (saveCmd) {
+        setStatusIcon('transcription');
+        handleSaveCommand(text, saveCmd);
+        return setState(STATES.IDLE);
+    }
+
+
+    /* ===========================================
+       3. RIPETI
+       =========================================== */
+    if (text === "ripeti") {
+        if (lastMainOutput) {
+            speak("Ripeto: " + lastMainOutput);
+            appendOutput("Ripeto...");
+        } else {
+            speak("Nulla da ripetere");
+            appendOutput("Nulla da ripetere");
+        }
+        return setState(STATES.IDLE);
+    }
+
+
+    /* ===========================================
+       4. LETTURA RANDOM ("leggi", "leggimi", ecc.)
+       =========================================== */
+    if (readWords.some(w => text.startsWith(w))) {
+        setStatusIcon('random');
+        const ok = handleRead(text);
+        return setState(STATES.IDLE);
+    }
+
+
+    /* ===========================================
+       5. METADATI (autore / titolo)
+       =========================================== */
+    if (text.includes("autore") || text.includes("titolo")) {
+
+        setStatusIcon('search');
+
+        let type = text.includes("autore") ? "meta_author" : "meta_title";
+        let query = text.replace(/.*(autore|titolo)\s+/i, "").trim();
+
+        if (query) {
+            handleMetadataSearch(type, query);
+            // Questa funzione imposta AWAITING_SEARCH_CHOICE da sola
+            return;
+        }
+
+        return setState(STATES.IDLE);
+    }
+
+
+    /* ===========================================
+       6. RICERCA AVANZATA (cerca in X [query])
+       =========================================== */
+    const searchPattern = new RegExp(
+        `(${searchVerbs.join('|')})\\s+(${searchPreps.join('|')})\\s+([a-zA-Z0-9_]+)\\s+(.*)`,
+        'i'
+    );
+
+    const match = text.match(searchPattern);
+
+    if (match) {
+        setStatusIcon('search');
+
+        const section = match[3].toLowerCase();
+        const query = match[4].trim();
+
+        if (archive[section]) {
+            handleAdvancedSearch(section, query);
+            // può impostare AWAITING_SEARCH_CHOICE
+            return;
+        }
+    }
+
+
+    /* ===========================================
+       7. TRIGGER DIRETTO
+       =========================================== */
+    let found = findEntryByTrigger(text);
+
+    if (found) {
+        setStatusIcon('conversation');
+
+        displayEntryDetails(found);
+        speakEntry(found);
+
+        lastMainOutput = found.output;
+        tempMemory.searchResults = null;
+
+        return setState(STATES.IDLE);
+    }
+
+
+    /* ===========================================
+       8. FALLBACK (RICERCA GLOBALE)
+       =========================================== */
+    handleGlobalSearchFallback(text);
+    // Può entrare in AWAITING_SEARCH_CHOICE o AWAITING_SAVE_CONFIRMATION
+
+}
 
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
 // \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 
 function findEntryByTrigger(text) {
-    // Prima cerca in conversazione
-    if (archive.conversazione) {
-        let f = archive.conversazione.find(c => text.includes(c.trigger.toLowerCase()));
-        if (f) return f;
+
+    if (!text || typeof text !== "string") return null;
+    text = text.toLowerCase();
+
+    let bestMatch = null;
+    let highestScore = 0;
+
+    /* =======================================================
+       1) PRIORITÀ ASSOLUTA: SEZIONE "conversazione"
+       -------------------------------------------------------
+       - prima si cerca in conversazione
+       - ogni match della sezione conversazione vince su tutto
+    ======================================================== */
+    if (archive.conversazione && Array.isArray(archive.conversazione)) {
+        for (const item of archive.conversazione) {
+            if (!item.trigger) continue;
+
+            const trg = item.trigger.toLowerCase();
+            const score = scoreTriggerMatch(text, trg);
+
+            if (score > highestScore) {
+                highestScore = score;
+                bestMatch = item;
+            }
+        }
+
+        if (bestMatch) return bestMatch; // match trovato in conversazione
     }
-    // Poi cerca altrove
+
+
+    /* =======================================================
+       2) SEZIONI NORMALI (tutte le altre)
+    ======================================================== */
     for (let sec in archive) {
         if (sec === "conversazione") continue;
-        let f = archive[sec].find(c => text.includes(c.trigger.toLowerCase()));
-        if (f) return f;
+
+        for (const item of archive[sec]) {
+            if (!item.trigger) continue;
+
+            const trg = item.trigger.toLowerCase();
+            const score = scoreTriggerMatch(text, trg);
+
+            if (score > highestScore) {
+                highestScore = score;
+                bestMatch = item;
+            }
+        }
     }
-    return null;
+
+    // ritorna il miglior candidato oppure null
+    return bestMatch;
 }
 
 function handleWhatsapp(text) {
-    // Logica: "Invia a [Nome] [Messaggio]"
-    // Cerca SOLO in archive['whatsapp']
-    let cleanText = text.replace(/^(invia|manda|spedisci|scrivi)\s+(a|al|allo|alla)\s+/i, "").trim();
-    
-    // Tentativo di separare destinatario dal messaggio
-    // Cerchiamo il match più lungo tra i trigger della sezione whatsapp
-    const waList = archive['whatsapp'] || [];
-    if (waList.length === 0) { speak("La sezione whatsapp è vuota"); appendOutput("La sezione whatsapp è vuota"); return; }
 
-    let bestMatch = null;
-    let bestLen = 0;
+    console.log("WHATSAPP INPUT:", text);
 
-    waList.forEach(item => {
-        let trg = item.trigger.toLowerCase();
-        // Controlla se il testo inizia con il trigger (es. "mamma")
-        if (cleanText.startsWith(trg) && trg.length > bestLen) {
-            bestLen = trg.length;
-            bestMatch = item;
+    // Varianti WhatsApp
+    const prefixes = [
+        "whatsapp",
+        "invia whatsapp",
+        "manda whatsapp",
+        "invia un whatsapp",
+        "manda un whatsapp",
+        "scrivi un whatsapp",
+        "scrivi whatsapp"
+    ];
+
+    // 1) Rimuovo il prefisso
+    let command = text;
+    for (const p of prefixes) {
+        if (command.startsWith(p)) {
+            command = command.replace(p, "").trim();
+            break;
         }
-    });
-
-    if (bestMatch) {
-        let messageBody = cleanText.substring(bestLen).trim();
-        // Pulizia messaggio
-        if (messageBody) messageBody = formatText(messageBody);
-        
-        let number = bestMatch.output.replace(/[^0-9+]/g, ""); // Pulisce numero
-        
-        if (!messageBody) { speak("Messaggio vuoto. Riprova"); appendOutput("Messaggio vuoto. Riprova"); return; }
-
-        speak(`Apro WhatsApp per ${bestMatch.trigger}.`);
-        appendOutput(`📤 WhatsApp: A ${bestMatch.trigger} (${number})\nMsg: "${messageBody}"`);
-        
-        setTimeout(() => {
-            window.open(`https://wa.me/${number}?text=${encodeURIComponent(messageBody)}`, '_blank');
-        }, 1500);
-    } else {
-        speak("Contatto non trovato nella sezione whatsapp");
-       appendOutput("Contatto non trovato nella sezione whatsapp");
     }
+
+    // Esempi formato:
+    // "a luca: ciao come stai"
+    // "per giulia manda questo messaggio: arrivo"
+    // "a marco"
+    // "a marco nota vocale"
+    // "nota vocale a marco: ciao"
+
+    /* ============================================================
+       2) IDENTIFICO PERSONA E MESSAGGIO
+    ============================================================ */
+
+    // Possibili pattern indicativi
+    const toRegex = /^(a|per)\s+([a-zA-Z0-9àèéìòùç ]+)(:|\s|$)/i; // "a luca", "per giulia"
+    const colonSplit = command.split(":"); // es. "a luca: ciao"
+
+    let person = null;
+    let message = null;
+    let isVoiceNote = false;
+
+
+    /* ------------------------------------------------------------
+       2A) Riconoscimento “nota vocale”
+    ------------------------------------------------------------ */
+    if (command.includes("nota vocale") || command.includes("vocale")) {
+        isVoiceNote = true;
+        command = command.replace("nota vocale", "")
+                         .replace("vocale", "").trim();
+    }
+
+
+    /* ------------------------------------------------------------
+       2B) Estrazione persona con pattern "a Luca"
+    ------------------------------------------------------------ */
+    const toMatch = command.match(toRegex);
+    if (toMatch) {
+        person = toMatch[2].trim();
+        command = command.replace(toMatch[0], "").trim();
+    }
+
+
+    /* ------------------------------------------------------------
+       2C) Estrazione messaggio dopo il “:”
+    ------------------------------------------------------------ */
+    if (!message && colonSplit.length > 1) {
+        const rightSide = colonSplit.slice(1).join(":").trim();
+        if (rightSide.length > 0) {
+            message = rightSide;
+        }
+    }
+
+    /* ------------------------------------------------------------
+       2D) Se non c’è “:”, il resto della frase è il messaggio
+    ------------------------------------------------------------ */
+    if (!message && command && command.length > 0) {
+        message = command.trim();
+    }
+
+
+    /* ============================================================
+       3) GENERAZIONE PROMPT DI CONTROLLO
+    ============================================================ */
+
+    // Caso: manca la persona
+    if (!person) {
+        speak("A chi devo inviare il messaggio WhatsApp?");
+        appendOutput("❓ Manca il destinatario.");
+        return;
+    }
+
+    // Caso: manca il contenuto
+    if (!message && !isVoiceNote) {
+        speak(`Cosa devo dire a ${person}?`);
+        appendOutput(`❓ Manca il contenuto del messaggio per ${person}.`);
+        return;
+    }
+
+
+    /* ============================================================
+       4) COSTRUZIONE BLOCCO PROMPT PER L'ASSISTANT
+    ============================================================ */
+
+    let actionType = isVoiceNote ? "voice_note" : "text_message";
+
+    // Contenuto da mostrare
+    let outputMsg = isVoiceNote
+        ? `Nota vocale per ${person}`
+        : `Messaggio per ${person}: ${message}`;
+
+    appendOutput("📨 " + outputMsg);
+    appendTrigger("whatsapp");
+
+
+    /* ============================================================
+       5) PROMPT PER L'ASSISTANT (chiaro e rigido)
+    ============================================================ */
+
+    let prompt = `
+Prepara un messaggio WhatsApp.
+
+Destinatario: ${person}
+Tipo: ${isVoiceNote ? "NOTA VOCALE" : "MESSAGGIO TESTUALE"}
+Contenuto: ${message ? message : "(detta nota vocale)"} 
+`;
+
+    // comunica all'assistente cosa deve fare
+    speak(`Sto preparando il messaggio per ${person}.`);
+    sendToAssistant(JSON.stringify({ action: "whatsapp_send", person, message, type: actionType }));
 }
 
 function handleSaveCommand(text, commandWord) {
-    let content = text.substring(commandWord.length).trim();
-    let useSignature = false;
-    
-    // Se l'utente dice solo "Salva", prende l'ultimo output
-    if (!content && lastMainOutput) {
-        content = lastMainOutput;
-    } else if (!content) {
-      speak("Non c'è nulla da salvare"); 
-      appendOutput("Non c'è nulla da salvare"); 
-      return;
-    }
+    console.log("SAVE INPUT:", text, "| CMD:", commandWord);
 
-    if (content.includes("con firma")) {
-        useSignature = true;
-        content = content.replace("con firma", "").trim();
-    }
+    // 1) Rimuovo il comando iniziale (salva, memorizza, registra, ecc.)
+    let content = text.replace(new RegExp("^" + commandWord + "\\s*", "i"), "").trim();
 
-    content = formatText(content);
-    const finalString = useSignature ? content + SIGNATURE_TEXT : content;
-    
-    navigator.clipboard.writeText(finalString).then(() => {
-        speak("Salvato negli appunti");
-        appendOutput(`💾 Copiato: "${finalString}"`);
-        lastMainOutput = content; // Aggiorna il contesto con ciò che si è salvato
-    }).catch(e => speak("Errore nel salvataggio"));
-}
-
-function handleRead(text) {
-    // 1. CASO RANDOM SINGOLO (rimane invariato)
-    if (text.includes("casuale") || text.includes("random")) {
-        const all = [].concat(...Object.values(archive));
-        if (all.length === 0) { speak("Archivio vuoto"); appendOutput("Archivio vuoto"); return true; }
-        
-        const item = all[Math.floor(Math.random() * all.length)];
-        displayEntryDetails(item);
-        speakEntry(item);
-        lastMainOutput = item.output;
-        return true;
-    }
-
-    // 2. CASO LETTURA SEZIONE (A BLOCCHI DI 5)
-    const sectionMatch = Object.keys(archive).find(sec => text.includes(sec));
-    if (sectionMatch) {
-        const list = archive[sectionMatch];
-        if (!list || list.length === 0) {
-            speak(`La sezione ${sectionMatch} è vuota`);
-            appendOutput(`La sezione ${sectionMatch} è vuota`);
-            return true;
-        }
-
-        // Inizializza la memoria per la paginazione
-        tempMemory.readingList = list;
-        tempMemory.readingIndex = 0; // Parte dall'inizio (o puoi mettere random)
-        tempMemory.readingSection = sectionMatch;
-
-        speak(`Inizio la lettura di ${sectionMatch}.`);
-       appendOutput("Archivio vuoto");
-        readNextBatch(); // Avvia il primo blocco
-        return true;
-    }
-    return false;
-}
-
-function readNextBatch() {
-    const list = tempMemory.readingList;
-    const idx = tempMemory.readingIndex;
-    const BATCH_SIZE = 5;
-
-    // Se abbiamo finito la lista
-    if (idx >= list.length) {
-        speak("Ho letto tutti gli elementi della sezione.");
-        appState = "IDLE";
-        tempMemory = {};
+    /* ============================================================
+       2) CASO: nessun contenuto dopo il comando
+       ============================================================ */
+    if (!content || content.length < 2) {
+        speak("Cosa vuoi salvare?");
+        appendOutput("❓ Nessun contenuto da salvare.");
         return;
     }
 
-    // Prendi i prossimi 5 elementi
-    const chunk = list.slice(idx, idx + BATCH_SIZE);
-    let speechText = "";
-    let visualText = `--- LETTURA PARZIALE (${idx + 1} a ${Math.min(idx + BATCH_SIZE, list.length)}) ---\n`;
+    /* ============================================================
+       3) Normalizzo la stringa
+       ============================================================ */
+    content = content.trim();
 
-    chunk.forEach((item, i) => {
-        speechText += `Elemento ${idx + i + 1}: ${item.trigger}. ${item.output}. \n`;
-        visualText += `${idx + i + 1}. ${item.meta_title || item.trigger || "-"} \n Contenuto: ${item.output}. \n \n`;
+    /* ============================================================
+       4) Salvataggio effettivo
+       ============================================================ */
+    speak("Ho salvato la frase.");
+    appendOutput("💾 Salvato:", content);
+
+    // Salva in memoria temporanea (il tuo codice già lo usa)
+    tempMemory.lastSaved = content;
+
+    // Eventuale feedback visivo
+    appendTrigger("save");
+
+    // Rimaniamo in IDLE
+    setState(STATES.IDLE);
+}
+
+
+function handleAdvancedSearch(section, query) {
+    console.log("ADVANCED SEARCH:", section, "| QUERY:", query);
+
+    const list = archive[section];
+    if (!list) {
+        speak("La sezione indicata non esiste.");
+        appendOutput("❌ Sezione inesistente: " + section);
+        return;
+    }
+
+    // Normalizza query
+    const q = query.toLowerCase().trim();
+
+    // Filtra risultati
+    const results = list.filter(item => {
+        const t = (item.trigger || "").toLowerCase();
+        const o = (item.output || "").toLowerCase();
+        const mt = (item.meta_title || "").toLowerCase();
+        const ma = (item.meta_author || "").toLowerCase();
+        return t.includes(q) || o.includes(q) || mt.includes(q) || ma.includes(q);
     });
 
-    // Aggiorna indice per la prossima volta
-    tempMemory.readingIndex += BATCH_SIZE;
-    
-    // Aggiorna output visivo e salvabile
-    appendOutput(visualText);
-    lastMainOutput = visualText; // Cosi se dice "Salva" salva questo elenco
-
-    // Parla e chiedi conferma se ce ne sono altri
-    if (tempMemory.readingIndex < list.length) {
-        speak(speechText + " Vuoi che continui con i prossimi 5?");
-        appendOutput("Vuoi che continui con i prossimi 5?");
-        appState = "AWAITING_MORE_CONTENT";
-    } else {
-        speak(speechText + " Lettura completata");
-       appendOutput("Lettura completata");
-        appState = "IDLE";
-        tempMemory = {};
-    }
-}
-  
-function handleAdvancedSearch(section, query) {
-    const list = archive[section];
-    if (!list) { speak("Sezione inesistente"); appendOutput("Sezione inesistente"); return; }
-
-    // Filtra (se query vuota, prende tutto)
-    const results = list.filter(c => 
-        (c.trigger && c.trigger.toLowerCase().includes(query)) || 
-        (c.output && c.output.toLowerCase().includes(query))
-    );
-
+    /* ============================================================
+       1) NESSUN RISULTATO
+       ============================================================ */
     if (results.length === 0) {
-        speak(`Nessun risultato in ${section}`);
-        appendOutput(`Nessun risultato in ${section}`);
-    } else if (results.length === 1) {
-        displayEntryDetails(results[0]);
-        speakEntry(results[0]);
-        lastMainOutput = results[0].output;
-    } else {
-        // RISULTATI MULTIPLI
-        tempMemory.searchResults = results;
-        appState = "AWAITING_SEARCH_CHOICE"; // Imposta stato attesa
-        
-        let listStr = `Trovati ${results.length} risultati. `;
-        results.forEach((r, i) => listStr += `Numero ${i + 1}: ${r.trigger}. `);
-        
-        // Formattazione visiva con "a capo"
-        let visualList = `📋 Risultati trovati in "${section.toUpperCase()}":\n`;
-        visualList += results.map((r,i) => `${i+1}. ${r.meta_title|| r.trigger || "-"}`).join("\n");
-  
-        appendOutput(visualList);
-        lastMainOutput = visualList; // Permette di dire "Salva" per salvare la lista
-      
-        speak(listStr + " Scegli un numero o dì tutti");
-        appendOutput("Scegli un numero o dì tutti");
-        // se l'utente preme Mic durante la lista, interrompe e può dire il numero.
-    }
-}
-
-function handleSearchChoice(text) {
-    if (negativeWords.some(w => text.includes(w))) {
-        speak("Annullato");
-        appendOutput("Annullato");
-        tempMemory.searchResults = null;
-        appState = "IDLE";
+        speak("Nessun risultato trovato in " + section);
+        appendOutput(`❌ Nessun risultato in "${section}" per: ${query}`);
         return;
     }
 
-    const results = tempMemory.searchResults;
-    if (!results) { appState = "IDLE"; return; }
+    /* ============================================================
+       2) UN SOLO RISULTATO
+       ============================================================ */
+    if (results.length === 1) {
+        const item = results[0];
 
-    // Funzione speak() che ritorna una Promise e permette di aspettare la fine della lettura
+        displayEntryDetails(item);
+        speakEntry(item);
+
+        lastMainOutput = item.output;
+        tempMemory.searchResults = null;
+
+        setState(STATES.IDLE);
+        return;
+    }
+
+    /* ============================================================
+       3) MOLTI RISULTATI → attiva AWAITING_CHOICE
+       ============================================================ */
+
+    tempMemory.searchResults = results;
+    setState(STATES.AWAITING_CHOICE);
+
+    // Costruzione lista visiva (numerata)
+    let visualList =
+        `📋 Risultati trovati in "${section.toUpperCase()}" (${results.length} elementi):\n\n` +
+        results
+            .map((r, i) =>
+                `${i + 1}. ${r.meta_title || r.trigger || "-"}`
+            )
+            .join("\n");
+
+    appendOutput(visualList);
+    lastMainOutput = visualList;
+
+    // Costruzione parlato
+    let verbal = `Ho trovato ${results.length} risultati in ${section}. `;
+    results.forEach((r, i) => {
+        verbal += `Numero ${i + 1}: ${r.meta_title || r.trigger || "voce senza titolo"}. `;
+    });
+
+    speak(verbal + "Quale numero vuoi leggere?");
+    appendOutput("👉 Dimmi un numero oppure dì: tutti");
+}
+
+// =====================
+// Funzione TTS asincrona
+// =====================
 function speakAsync(text) {
     return new Promise(resolve => {
+        if (!text || !text.trim()) {
+            resolve();
+            return;
+        }
+
+        // Interrompe eventuale parlato in corso
+        if (speechSynthesis.speaking || speechSynthesis.pending) {
+            speechSynthesis.cancel();
+        }
+
         const utter = new SpeechSynthesisUtterance(text);
-        utter.onend = resolve;
+        utter.lang = "it-IT";
+        utter.rate = 1.0;
+
+        utter.onend = () => resolve();
+        utter.onerror = () => {
+            console.error("TTS error in speakAsync()");
+            resolve();
+        };
+
         speechSynthesis.speak(utter);
     });
 }
 
-// Opzione "Tutti"
-if (text.includes("tutti") || text.includes("tutto")) {
+// =====================
+// Legge tutti i risultati
+// =====================
+async function readAllResults(results, userText) {
+    if (!results || results.length === 0) {
+        speak("Nessun risultato da leggere.");
+        appendOutput("⚠️ Nessun risultato disponibile.");
+        return;
+    }
 
-    speak("Leggo tutti i risultati");
-    appendOutput("Leggo tutti i risultati.");
+    // Avviso iniziale
+    speak("Leggo tutti i risultati.");
+    appendOutput("📖 Leggo tutti i risultati...");
+    setState(STATES.READING_ALL);
 
-    let combinedOutput = "";     // output testuale completo
-    let globalCounter = 1;       // contatore
+    let combinedOutput = "";
+    let counter = 1;
 
-    (async () => { // IIFE async per usare await dentro
-        for (const item of results) {
-
-            // --- OUTPUT VISIVO ---
-            const visualOut = `----------------
-Numero: ${globalCounter}
+    for (const item of results) {
+        // Output visivo
+        const visualOut = `----------------
+Numero: ${counter}
 Titolo: ${item.meta_title || "-"}
 Autore: ${item.meta_author || "-"}
 Contenuto: ${item.output || "N/A"}
@@ -1003,42 +1296,61 @@ Ricerca: ${item.trigger || "N/A"}
 Tag: ${item.tag || "-"}
 ----------------`;
 
-            appendOutput(visualOut);
-            combinedOutput += visualOut + "\n";
+        appendOutput(visualOut);
+        combinedOutput += visualOut + "\n";
 
-            // --- OUTPUT VOCALE ---
-            const verbalText = `Numero ${globalCounter}. ${item.meta_title}. ${item.output}.`;
-            await speakAsync(verbalText); // legge un elemento alla volta
-            await new Promise(r => setTimeout(r, 300)); // pausa 300ms tra i risultati
+        // Output vocale
+        const verbalText = `Numero ${counter}. ` +
+            `${item.meta_title ? item.meta_title + ". " : ""}` +
+            `${item.output || ""}`;
 
-            globalCounter++;
-        }
+        await speakAsync(verbalText);
+        await new Promise(r => setTimeout(r, 300)); // breve pausa
+        counter++;
+    }
 
-        // Salvo l'output completo
-        lastMainOutput = combinedOutput;
-        appState = "IDLE";
-    })();
+    // Salvataggio output principale
+    lastMainOutput = combinedOutput;
 
-    return;
-}
+    // Pulizia risultati temporanei
+    tempMemory.searchResults = null;
 
+    // Feedback fine lettura
+    speak("Ho finito di leggere tutti i risultati.");
+    appendOutput("✅ Fine lettura di tutti i risultati.");
 
-
-    const choiceNum = parseNumber(text);
+    // =====================
+    // Gestione scelta numerica
+    // =====================
+    const choiceNum = parseNumber(userText);
     if (choiceNum !== null && choiceNum > 0 && choiceNum <= results.length) {
         const item = results[choiceNum - 1];
+
         displayEntryDetails(item);
         speakEntry(item);
-        appendOutput("Numero: " + item);
+        appendOutput(`Numero selezionato: ${choiceNum}`);
         lastMainOutput = item.output;
-        // Non puliamo tempMemory subito se volesse sceglierne un altro, 
-        // ma resettiamo appState per permettere comandi normali come "salva"
-        appState = "IDLE"; 
-    } else {
+
+        // Non cancelliamo tempMemory subito se l'utente volesse altri comandi
+        setState(STATES.IDLE);
+    } else if (userText.match(/\d+/)) {
+        // L'utente ha detto un numero fuori range
         speak("Numero non valido. Riprova");
-        appendOutput("Numero non valido. Riprova");
+        appendOutput("⚠️ Numero non valido. Riprova");
+        setState(STATES.IDLE);
+    } else {
+        // Nessuna scelta numerica specifica: ritorna a IDLE
+        setState(STATES.IDLE);
     }
 }
+
+// =====================
+// Esempio utilizzo
+// =====================
+if (userText.includes("tutti") || userText.includes("tutto")) {
+    readAllResults(results, userText);
+}
+
 
 function handleMetadataSearch(type, query) {
     const all = [].concat(...Object.values(archive));
