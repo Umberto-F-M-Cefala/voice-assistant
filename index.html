@@ -434,20 +434,46 @@ let textToNumMap = {
 
 let appState = STATES.IDLE;
 
-  function setState(newState) {
+function setState(newState) {
     console.log("STATE →", newState);
     appState = newState;
 
-    // opzioni utili:
-    if (newState !== STATES.LISTENING) {
-        micBtn.classList.remove('listening');
-    }
+    const micBtn = document.getElementById('micButton');
+    const statusDiv = document.getElementById('statusIconContainer');
+    const outputDiv = document.getElementById('output');
 
-    if (newState === STATES.IDLE) {
-        setStatusIcon("");
+    // Reset visivo standard
+    micBtn.classList.remove('listening');
+    statusDiv.innerHTML = ""; 
+
+    switch (newState) {
+        case STATES.IDLE:
+            break; 
+        
+        case STATES.LISTENING:
+            micBtn.classList.add('listening');
+            break;
+            
+        case STATES.PROCESSING:
+            // Svuota i suggerimenti visivi prima di un nuovo processing
+            outputDiv.querySelectorAll('.hint-text').forEach(el => el.remove());
+            break;
+
+        case STATES.AWAITING_SEARCH_CHOICE:
+            setStatusIcon('search'); // Imposta icona ricerca
+            appendHints("Suggerimento: Pronuncia un numero (es. 'due') o 'tutti' per leggere tutto. Oppure 'annulla'.");
+            break;
+
+        case STATES.AWAITING_SAVE_CONFIRMATION:
+            setStatusIcon('transcription'); // Imposta icona salvataggio
+            appendHints("Suggerimento: Pronuncia 'sì' per salvare l'ultima frase non capita, oppure 'annulla'.");
+            break;
+            
+        case STATES.READING_ALL:
+            // Gestito all'interno della funzione readAllResults
+            break;
     }
 }
-
   
 function populateNumberMap() {
     const units = ["", "uno", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove"];
@@ -668,7 +694,7 @@ function startListening() {
 
     handleSpeechInput(text);
     showAvailableCommands();
-  
+ 
     };
 
     r.onerror = (event) => {
@@ -691,6 +717,106 @@ function startListening() {
 /* ================== INTELLIGENZA E COMANDI ================== */
 // \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 
+/**
+ * Gestisce l'input dell'utente (testo) quando si attende la scelta da una lista di ricerca.
+ * L'utente può dire un numero, 'tutti' o 'annulla'.
+ */
+function handleSearchChoice(text) {
+    const results = tempMemory.searchResults;
+
+    // 1. ANNULLA
+    if (negativeWords.some(w => text.includes(w))) {
+        speak("Ricerca annullata.");
+        appendOutput("❌ Ricerca annullata.");
+        // Pulisci lo stato e la memoria
+        tempMemory.searchResults = null;
+        return setState(STATES.IDLE);
+    }
+    
+    if (!results || results.length === 0) {
+        // Fallback: se la lista è vuota (non dovrebbe succedere se lo stato è impostato correttamente)
+        speak("Nessun risultato disponibile da scegliere.");
+        return setState(STATES.IDLE);
+    }
+
+    // 2. LEGGI TUTTI
+    if (affirmativeWords.some(w => text.includes(w) && (text.includes("tutti") || text.includes("tutto")))) {
+        // La funzione readAllResults imposterà lo stato READING_ALL e poi tornerà a IDLE
+        readAllResults(results, text); 
+        tempMemory.searchResults = null; // Pulisci la memoria
+        return; // Non tornare subito a IDLE, attendi la fine della lettura
+    }
+
+    // 3. SCELTA NUMERICA
+    const number = parseNumber(text);
+    if (number > 0 && number <= results.length) {
+        const selectedIndex = number - 1;
+        const selectedItem = results[selectedIndex];
+        
+        speak(`Hai scelto il numero ${number}.`);
+        displayEntryDetails(selectedItem); // Mostra i dettagli
+        speakEntry(selectedItem);         // Leggi il contenuto
+        
+        lastMainOutput = selectedItem.output;
+        tempMemory.searchResults = null; // Pulisci la memoria
+        return setState(STATES.IDLE);
+    } 
+    
+    // 4. RICHIESTA NON RICONOSCIUTA
+    speak("Per favore, scegli un numero valido o dì 'tutti' oppure 'annulla'.");
+    appendOutput("❗ Scelta non valida. Riprova: un numero, 'tutti', o 'annulla'.");
+    // Rimane nello stato AWAITING_SEARCH_CHOICE
+}
+
+
+  /**
+ * Gestisce l'input dell'utente quando si attende la conferma di salvataggio (sì/no).
+ */
+function handleSaveConfirmation(text) {
+    const pendingText = tempMemory.pendingSaveText;
+
+    if (!pendingText) {
+        speak("Non c'è nulla in attesa di salvataggio.");
+        return setState(STATES.IDLE);
+    }
+    
+    // 1. CONFERMA (Salva)
+    if (affirmativeWords.some(w => text.includes(w))) {
+        // Riutilizza la logica di handleSaveCommand, ma senza il comando 'salva'
+        const contentToSave = formatText(pendingText);
+
+        // Aggiungi alla sezione 'conversazione'
+        archive.conversazione.push({
+            trigger: contentToSave,
+            output: "Trascritta da input non capito.",
+            meta_title: "Non Riconosciuto",
+            meta_author: "Sistema",
+            tag: "salvato"
+        });
+        localStorage.setItem('archive', JSON.stringify(archive));
+        updateSectionList();
+        
+        speak("Ho salvato la frase nell'archivio conversazione.");
+        appendOutput(`✅ Salvato il testo non riconosciuto: "${pendingText}"`);
+        
+        tempMemory.pendingSaveText = null;
+        return setState(STATES.IDLE);
+    }
+    
+    // 2. ANNULLA
+    if (negativeWords.some(w => text.includes(w))) {
+        speak("Salvataggio annullato.");
+        appendOutput("❌ Salvataggio annullato.");
+        tempMemory.pendingSaveText = null;
+        return setState(STATES.IDLE);
+    }
+    
+    // 3. RICHIESTA NON RICONOSCIUTA
+    speak("Per favore, dì 'sì' per salvare o 'annulla'.");
+    appendOutput("❗ Risposta non chiara. Dì 'sì' o 'annulla'.");
+    // Rimane nello stato AWAITING_SAVE_CONFIRMATION
+}
+  
 function handleSpeechInput(text) {
 
     console.log("INPUT:", text, " | STATE:", appState);
