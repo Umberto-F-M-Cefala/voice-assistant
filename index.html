@@ -327,7 +327,14 @@ function handleSpeechInput(text) {
         handleWhatsapp(content);
         return setState(STATES.IDLE);
     }
+ 
+   // --- WHATSAPP invio input già registrato ---
+    if (text === "invia whatsapp" || text === "whatsapp") {
+        speak("Non ho nulla"); 
+        return setState(STATES.IDLE);
+    }
 
+  
     // --- NUOVO: MESSAGGIO (Con Emoji Automatiche) ---
     if (text.startsWith("messaggio")) {
         let content = text.replace(/^messaggio\s*/i, "").trim();
