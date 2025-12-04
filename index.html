@@ -269,7 +269,7 @@ function startListening() {
     };
 
     r.onerror = (e) => {
-        if (e.error !== 'no-speech') appendOutput("⚠️ Errore Mic: " + e.error);
+        if (e.error !== 'no-speech') appendOutput("⚠️ Errore microfono: " + e.error);
         setState(STATES.IDLE);
     };
 
@@ -467,7 +467,7 @@ function searchArchive(query) {
 function handleSearchResults(results, query) {
     if (results.length === 0) {
         speak("Nessun risultato. Vuoi salvare questo testo?");
-        appendOutput(`❓ Nessun risultato per "${query}". Salvare? (Dì 'sì' o 'annulla')`);
+        appendOutput(`Nessun risultato per "${query}". Lo devo salvare?`);
         tempMemory.pendingText = query;
         setState(STATES.AWAITING_CONFIRM);
     } else if (results.length === 1) {
@@ -515,7 +515,7 @@ function handleChoiceInput(text) {
 }
 
 function handleConfirmInput(text) {
-    if (text.includes("sì") || text.includes("conferma") || text.includes("ok")) {
+    if (text.includes("salva")) {
         const formatted = formatText(tempMemory.pendingText, false);
         saveToArchive(formatted, "Da Ricerca Fallita");
         speak("Salvato.");
