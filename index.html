@@ -199,7 +199,7 @@ const defaultArchive = { "conversazione": [], "whatsapp": [] };
 let archive = JSON.parse(localStorage.getItem('archive') || JSON.stringify(defaultArchive));
 
 // Stati applicazione
-let appState = "IDLE"; // IDLE, LISTENING, SPEAKING, AWAITING_SEARCH_CHOICE
+
 let tempMemory = {}; 
 let lastMainOutput = ""; 
 let currentRecognition = null; 
@@ -207,7 +207,7 @@ let audioEnabled = false;
 let isSpeaking = false;
 let synthesisQueue = []; // Coda per i chunk di testo (Android fix)
 
-const SIGNATURE_TEXT = " // trascritto dall'assistente vocale";
+const SIGNATURE_TEXT = " // _trascritto dall'assistente vocale_";
 
 // Vocabolario
 const copyWords = ["copia", "salva", "trascrivi", "conserva", "memorizza"];
@@ -428,7 +428,8 @@ let textToNumMap = {
     LISTENING: "LISTENING",
     PROCESSING: "PROCESSING",
     AWAITING_SEARCH_CHOICE: "AWAITING_SEARCH_CHOICE",
-    AWAITING_SAVE_CONFIRMATION: "AWAITING_SAVE_CONFIRMATION"
+    AWAITING_SAVE_CONFIRMATION: "AWAITING_SAVE_CONFIRMATION",
+    READING_ALL: "READING_ALL"
 };
 
 let appState = STATES.IDLE;
