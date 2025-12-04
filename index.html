@@ -341,7 +341,7 @@ function handleSpeechInput(text) {
         // Salviamo in conversazione
         saveToArchive(formatted, "Messaggio Emoji");
         speak("Messaggio creato: " + formatted);
-        appendOutput(`💌 <b>Messaggio:</b> ${formatted}`);
+        appendOutput(`<b>Messaggio:</b> ${formatted}`);
         return setState(STATES.IDLE);
     }
 
@@ -413,7 +413,7 @@ function handleWhatsapp(text) {
         speak("Cosa devo inviare?");
         return;
     }
-    const msg = formatText(text, true) + " [Assistente Vocale]";
+    const msg = formatText(text, true) + " // _trascritto dall'Assistente Vocale_";
     const url = `whatsapp://send?text=${encodeURIComponent(msg)}`;
     window.open(url, '_self');
     appendOutput(`💬 Apertura WhatsApp: "${msg}"`);
