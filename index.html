@@ -321,7 +321,7 @@ function handleSpeechInput(text) {
 
     // 2. Comandi Diretti
     
-    // --- WHATSAPP ---
+    // --- WHATSAPP con testo creato al momento ---
     if (text.startsWith("invia whatsapp") || text.startsWith("whatsapp")) {
         const content = text.replace(/^(invia\s*)?whatsapp\s*(a\s*)?/i, "").trim();
         handleWhatsapp(content);
@@ -413,7 +413,7 @@ function handleWhatsapp(text) {
         speak("Cosa devo inviare?");
         return;
     }
-    const msg = formatText(text, true) + " // _trascritto dall'Assistente Vocale_";
+    const msg = formatText(text, true) + "\n //_trascritto dall'Assistente Vocale_";
     const url = `whatsapp://send?text=${encodeURIComponent(msg)}`;
     window.open(url, '_self');
     appendOutput(`💬 Apertura WhatsApp: "${msg}"`);
