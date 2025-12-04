@@ -4,32 +4,155 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#007bff">
-<title>Assistente Vocale Avanzato</title>
+<title>Assistente vocale di Umberto F. M. Cefalà</title>
 <style>
   html { font-size: 100%; box-sizing: border-box; }
   *, *:before, *:after { box-sizing: inherit; }
-  body { font-family: 'Segoe UI', sans-serif; text-align: center; padding: 1rem; margin: 0; background-color: #f8f9fa; color: #333; }
-  .controls-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
-  #statusIconContainer { font-size: 2rem; margin-top: 10px; min-height: 40px; }
-  #sectionsList { font-size: 0.85rem; color: #555; background: #e9ecef; padding: 8px; border-radius: 6px; margin: 10px 0; border: 1px solid #ced4da; }
-  button { outline: none; -webkit-tap-highlight-color: transparent; user-select: none; cursor: pointer; }
-  
-  #micButton { font-size: 3.5rem; width: 7rem; height: 7rem; border-radius: 50%; border: 6px solid #007bff; background: white; display: flex; align-items: center; justify-content: center; margin: 10px; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,123,255,0.3); }
-  #micButton.listening { border-color: #dc3545; background-color: #fff0f1; transform: scale(1.05); animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(220,53,69,0.4); } 70% { box-shadow: 0 0 0 15px rgba(220,53,69,0); } 100% { box-shadow: 0 0 0 0 rgba(220,53,69,0); } }
 
-  #stopButton, #muteButton { font-size: 2rem; width: 4.5rem; height: 4.5rem; border-radius: 12px; border: 3px solid; display: flex; align-items: center; justify-content: center; background: white; transition: transform 0.1s; }
-  #stopButton:active, #muteButton:active { transform: scale(0.95); }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    text-align: center;
+    padding: 1rem;
+    margin: 0;
+    background-color: #f8f9fa;
+    color: #333;
+  }
+
+  .controls-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.9375rem; /* 15px */
+    margin-bottom: 0.625rem; /* 10px */
+    flex-wrap: wrap;
+  }
+
+  #statusIconContainer {
+    font-size: 2rem;
+    margin-top: 0.625rem; /* 10px */
+    min-height: 2.5rem; /* 40px */
+  }
+
+  #sectionsList {
+    font-size: 0.85rem;
+    color: #555;
+    background: #e9ecef;
+    padding: 0.5rem; /* 8px */
+    border-radius: 0.375rem; /* 6px */
+    margin: 0.625rem 0; /* 10px */
+    border: 1px solid #ced4da;
+  }
+
+  button {
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    cursor: pointer;
+  }
+  
+  #micButton {
+    font-size: 3.5rem;
+    width: 7rem;
+    height: 7rem;
+    border-radius: 50%;
+    border: 0.375rem solid #007bff; /* 6px */
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0.625rem; /* 10px */
+    transition: all 0.2s;
+    box-shadow: 0 0.25rem 0.625rem rgba(0,123,255,0.3); /* 4px, 10px */
+  }
+
+  #micButton.listening {
+    border-color: #dc3545;
+    background-color: #fff0f1;
+    transform: scale(1.05);
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(220,53,69,0.4); }
+    70% { box-shadow: 0 0 0 0.9375rem rgba(220,53,69,0); } /* 15px */
+    100% { box-shadow: 0 0 0 0 rgba(220,53,69,0); }
+  }
+
+  #stopButton, #muteButton {
+    font-size: 2rem;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 0.75rem; /* 12px */
+    border: 0.1875rem solid; /* 3px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    transition: transform 0.1s;
+  }
+
+  #stopButton:active, #muteButton:active {
+    transform: scale(0.95);
+  }
+
   #stopButton { border-color: #dc3545; color: #dc3545; }
   #muteButton { border-color: #6c757d; color: #6c757d; }
   #muteButton.mute-on { border-color: #28a745; color: #28a745; }
 
-  #output { margin-top: 15px; white-space: pre-wrap; text-align: left; background: #fff; padding: 15px; border-radius: 8px; min-height: 150px; max-height: 60vh; overflow-y: auto; border: 1px solid #ddd; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); }
-  .hint-text { color: #666; font-size: 0.85rem; font-style: italic; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 5px; }
+  #output {
+    margin-top: 0.9375rem; /* 15px */
+    white-space: pre-wrap;
+    text-align: left;
+    background: #fff;
+    padding: 0.9375rem; /* 15px */
+    border-radius: 0.5rem; /* 8px */
+    min-height: 9.375rem; /* 150px */
+    max-height: 60vh;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    box-shadow: inset 0 0 0.3125rem rgba(0,0,0,0.05); /* 5px */
+  }
+
+  .hint-text {
+    color: #666;
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 0.625rem; /* 10px */
+    border-top: 1px dashed #ccc;
+    padding-top: 0.3125rem; /* 5px */
+  }
   
-  #toggleButtons { cursor: pointer; margin-top: 15px; padding: 10px 20px; width: 100%; max-width: 300px; border: none; background: #6c757d; color: white; border-radius: 6px; font-weight: bold; }
-  #extraButtons { display: none; border: 1px solid #ccc; border-radius: 6px; padding: 10px; margin-top: 10px; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto; background: #fff; }
-  .secondary-btn, input[type=file] { margin: 5px; padding: 8px; font-size: 0.9rem; }
+  #toggleButtons {
+    cursor: pointer;
+    margin-top: 0.9375rem; /* 15px */
+    padding: 0.625rem 1.25rem; /* 10px 20px */
+    width: 100%;
+    max-width: 18.75rem; /* 300px */
+    border: none;
+    background: #6c757d;
+    color: white;
+    border-radius: 0.375rem; /* 6px */
+    font-weight: bold;
+  }
+
+  #extraButtons {
+    display: none;
+    border: 1px solid #ccc;
+    border-radius: 0.375rem; /* 6px */
+    padding: 0.625rem; /* 10px */
+    margin-top: 0.625rem; /* 10px */
+    width: 100%;
+    max-width: 25rem; /* 400px */
+    margin-left: auto;
+    margin-right: auto;
+    background: #fff;
+  }
+
+  .secondary-btn, input[type=file] {
+    margin: 0.3125rem; /* 5px */
+    padding: 0.5rem; /* 8px */
+    font-size: 0.9rem;
+  }
 </style>
 </head>
 <body>
@@ -39,7 +162,7 @@
   <button id="stopButton" aria-label="Stop">⏹️</button>
   <button id="muteButton" aria-label="Audio">🔇</button>
 </div>  
-<p style="font-size:0.8rem; color:#777;">Assistente Personale</p>
+<p style="font-size:0.8rem; color:#777;">Assistente vocale di Umberto F. M. Cefalà</p>
 
 <div id="sectionsList">Caricamento...</div>
 <div id="statusIconContainer"></div> 
@@ -59,18 +182,26 @@ let archive = JSON.parse(localStorage.getItem('archive') || JSON.stringify(defau
 
 // Mappe
 const emojiMap = {
-    "cuore": "❤️", "sorriso": "🙂", "risata": "😂", "ok": "👌", "pollice su": "👍",
-    "bacio": "💋", "baci": "💋💋", "abbraccio": "🤗", "festa": "🎉", "torta": "🎂",
-    "stella": "⭐", "fuoco": "🔥", "musica": "🎵", "occhiolino": "😉", "triste": "😞",
-    "arrabbiato": "😡", "pensoso": "🤔", "applauso": "👏", "preghiera": "🙏", "forza": "💪",
-    "spunta": "✅", "croce": "❌", "gatto": "🐱", "cane": "🐶", "sole": "☀️", "luna": "🌙",
-    "pizza": "🍕", "birra": "🍺", "caffè": "☕", "auto": "🚗", "aereo": "✈️", "casa": "🏠",
-    "soldi": "💰", "regalo": "🎁", "fiore": "🌸", "computer": "💻", "telefono": "📱"
+    "cuore": "❤️", "sorriso": "🙂", "risata": "😂", "ok": "👌", "pollice su": "👍", "pollice giù": "👎", "fuoco": "🔥", "stella": "⭐", "sole": "☀️", "luna": "🌙",
+    "bacio": "💋", "abbraccio": "🤗", "festa": "🎉", "torta": "🎂", "regalo": "🎁", "musica": "🎵", "occhiolino": "😉", "triste": "😞", "arrabbiato": "😡", "pensoso": "🤔",
+    "applauso": "👏", "preghiera": "🙏", "forza": "💪", "bomba": "💣", "pericolo": "⚠️", "spunta": "✅", "croce": "❌", "fantasma": "👻", "robot": "🤖", "alieno": "👽",
+    "cucciolo": "🐶", "gatto": "🐱", "coniglio": "🐰", "orso": "🐻", "panda": "🐼", "elefante": "🐘", "leone": "🦁", "unicorno": "🦄", "pesce": "🐟", "delfino": "🐬",
+    "coccinella": "🐞", "ape": "🐝", "farfalla": "🦋", "ragno": "🕷️", "cavallo": "🐴", "arcobaleno": "🌈", "neve": "❄️", "pioggia": "🌧️", "fulmine": "⚡", "vento": "🌬️",
+    "albero": "🌳", "fiore": "🌸", "foglia": "🍃", "cactus": "🌵", "fungo": "🍄", "cibo": "🍔", "pizza": "🍕", "panino": "🥪", "gelato": "🍨", "cioccolato": "🍫",
+    "bevanda": "☕", "birra": "🍺", "vino": "🍷", "cocktail": "🍸", "acqua": "💧", "macchina": "🚗", "aereo": "✈️", "treno": "🚆", "barca": "⛵", "bicicletta": "🚲",
+    "autobus": "🚌", "camion": "🚚", "ambulanza": "🚑", "polizia": "👮", "dottore": "👩‍⚕️", "studente": "👨‍🎓", "ballerino": "💃", "cantante": "🎤", "fotografo": "📸", "pittore": "🎨",
+    "libro": "📖", "penna": "✏️", "matita": "🖊️", "chiave": "🔑", "lucchetto": "🔒", "carta": "📝", "orologio": "⏰", "telefono": "📱", "computer": "💻", "televisore": "📺",
+    "bandiera": "🚩", "medaglia": "🏅", "trofeo": "🏆", "pallone": "⚽", "basket": "🏀", "tennis": "🎾", "volley": "🏐", "rugby": "🏉", "skateboard": "🛹", "yoga": "🧘",
+    "cuoco": "👨‍🍳", "cameriere": "👩‍🍳", "poliziotto": "👮‍♂️", "pompieri": "👩‍🚒", "scientista": "👩‍🔬", "ingegnere": "👷‍♂️", "astronauta": "👩‍🚀", "re": "🤴", "regina": "👸",
+    "principe": "🤴", "principessa": "👸", "angelo": "👼", "diavolo": "😈", "scheletro": "💀", "cimitero": "🪦", "croce latina": "✝️", "stella david": "✡️", "yin yang": "☯️",
+    "cuore spezzato": "💔", "abbraccio stretto": "🤝", "mano alzata": "✋", "dito medio": "🖕", "occhi": "👀", "orecchio": "👂", "naso": "👃", "bocca": "👄", "lingua": "👅",
+    "scarpa": "👟", "camicia": "👕", "pantaloni": "👖", "vestito": "👗", "cappello": "🎩", "ombrello": "☂️", "zaino": "🎒", "borsa": "👜", "anello": "💍", "collana": "📿"
 };
-
 const textToNumMap = { "uno":1, "due":2, "tre":3, "quattro":4, "cinque":5, "sei":6, "sette":7, "otto":8, "nove":9, "dieci":10, "tutti": "all" };
-
+const __s = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
+  
 // Stati
+// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 const STATES = { IDLE: "IDLE", LISTENING: "LISTENING", PROCESSING: "PROCESSING", AWAITING_CHOICE: "AWAITING_CHOICE", AWAITING_CONFIRM: "AWAITING_CONFIRM" };
 let appState = STATES.IDLE;
 let tempMemory = {}; 
@@ -79,6 +210,7 @@ let audioEnabled = false;
 let synthesisQueue = [];
 
 /* ================== AUDIO & TTS ================== */
+// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 function stopAllAudio() {
     speechSynthesis.cancel();
     synthesisQueue = [];
@@ -104,6 +236,7 @@ function speak(text) {
 }
 
 /* ================== MICROFONO & CORE LOGIC ================== */
+// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 const micBtn = document.getElementById('micButton');
 
 function setState(newState) {
@@ -126,7 +259,7 @@ function startListening() {
 
     r.onstart = () => {
         setState(STATES.LISTENING);
-        appendOutput("⏳ Ascolto...", "temp-status");
+        appendOutput("⏳ Attendo istruzioni", "temp-status");
     };
 
     r.onresult = (e) => {
@@ -150,14 +283,18 @@ function startListening() {
 }
 
 micBtn.onclick = () => {
-    if (appState === STATES.LISTENING || speechSynthesis.speaking) {
+   if (appState === STATES.SPEAKING || speechSynthesis.speaking) {
         stopAllAudio();
-        if (currentRecognition) currentRecognition.abort();
-        setState(STATES.IDLE);
-    } else {
         startListening();
+        return;
     }
+   if (appState === STATES.LISTENING) {
+        if (currentRecognition) currentRecognition.stop();
+        return;
+    }
+    startListening();
 };
+ 
 
 document.getElementById('stopButton').onclick = () => {
     stopAllAudio();
@@ -165,11 +302,11 @@ document.getElementById('stopButton').onclick = () => {
     tempMemory = {};
     document.getElementById('output').innerHTML = "";
     setState(STATES.IDLE);
-    appendOutput("⏹️ Reset effettuato.");
+    appendOutput("🗑️ Elimino gli input e termino l'ascolto", "temp-status");
 };
 
 /* ================== INTELLIGENZA & COMANDI ================== */
-
+// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 function handleSpeechInput(text) {
     setState(STATES.PROCESSING);
     console.log("Input:", text, "State:", appState);
@@ -234,6 +371,7 @@ function handleSpeechInput(text) {
 
     // --- RICERCA NELL'ARCHIVIO ---
     const found = findBestMatch(text);
+    const __s = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
     
     if (found && found.score > 0.85) {
         // Match forte diretto
@@ -249,7 +387,7 @@ function handleSpeechInput(text) {
 }
 
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
-
+// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 function formatText(str, autoEmoji) {
     let s = str.trim();
 
