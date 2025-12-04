@@ -720,44 +720,47 @@ function startListening() {
  * Gestisce l'input dell'utente (testo) quando si attende la scelta da una lista di ricerca.
  * L'utente può dire un numero, 'tutti' o 'annulla'.
  */
+/**
+ * Gestisce l'input dell'utente (testo) quando si attende la scelta da una lista di ricerca.
+ * L'utente può dire un numero, 'tutti' o 'annulla'.
+ */
 function handleSearchChoice(text) {
     const results = tempMemory.searchResults;
+    const lowerText = text.toLowerCase();
 
     // 1. ANNULLA
-    if (negativeWords.some(w => text.includes(w))) {
+    if (negativeWords.some(w => lowerText.includes(w))) {
         speak("Ricerca annullata.");
         appendOutput("❌ Ricerca annullata.");
-        // Pulisci lo stato e la memoria
         tempMemory.searchResults = null;
         return setState(STATES.IDLE);
     }
     
     if (!results || results.length === 0) {
-        // Fallback: se la lista è vuota (non dovrebbe succedere se lo stato è impostato correttamente)
         speak("Nessun risultato disponibile da scegliere.");
         return setState(STATES.IDLE);
     }
 
-    // 2. LEGGI TUTTI
-    if (affirmativeWords.some(w => text.includes(w) && (text.includes("tutti") || text.includes("tutto")))) {
+    // 2. LEGGI TUTTI (DEVE AVERE LA PRIORITÀ sul numero)
+    // Controlla se l'input contiene "tutti" o "tutto", eventualmente preceduto da una parola affermativa ("sì tutti").
+    if (lowerText.includes("tutti") || lowerText.includes("tutto")) {
         // La funzione readAllResults imposterà lo stato READING_ALL e poi tornerà a IDLE
         readAllResults(results, text); 
-        tempMemory.searchResults = null; // Pulisci la memoria
+        tempMemory.searchResults = null; 
         return; // Non tornare subito a IDLE, attendi la fine della lettura
     }
 
     // 3. SCELTA NUMERICA
-    const number = parseNumber(text);
+    const number = parseNumber(text); // parseNumber gestisce già la conversione 'due' -> 2
     if (number > 0 && number <= results.length) {
-        const selectedIndex = number - 1;
-        const selectedItem = results[selectedIndex];
+        const selectedItem = results[number - 1];
         
         speak(`Hai scelto il numero ${number}.`);
-        displayEntryDetails(selectedItem); // Mostra i dettagli
-        speakEntry(selectedItem);         // Leggi il contenuto
+        displayEntryDetails(selectedItem);
+        speakEntry(selectedItem);        
         
         lastMainOutput = selectedItem.output;
-        tempMemory.searchResults = null; // Pulisci la memoria
+        tempMemory.searchResults = null;
         return setState(STATES.IDLE);
     } 
     
@@ -766,7 +769,6 @@ function handleSearchChoice(text) {
     appendOutput("❗ Scelta non valida. Riprova: un numero, 'tutti', o 'annulla'.");
     // Rimane nello stato AWAITING_SEARCH_CHOICE
 }
-
 
   /**
  * Gestisce l'input dell'utente quando si attende la conferma di salvataggio (sì/no).
