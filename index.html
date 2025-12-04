@@ -4,1805 +4,457 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#007bff">
-<title>Assistente vocale di Umberto F. M. Cefalà</title>
-<link rel="manifest" href="manifest.json"> 
+<title>Assistente Vocale Avanzato</title>
 <style>
-  /* ================= STILI (Mobile Friendly) ================= */
   html { font-size: 100%; box-sizing: border-box; }
   *, *:before, *:after { box-sizing: inherit; }
+  body { font-family: 'Segoe UI', sans-serif; text-align: center; padding: 1rem; margin: 0; background-color: #f8f9fa; color: #333; }
+  .controls-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
+  #statusIconContainer { font-size: 2rem; margin-top: 10px; min-height: 40px; }
+  #sectionsList { font-size: 0.85rem; color: #555; background: #e9ecef; padding: 8px; border-radius: 6px; margin: 10px 0; border: 1px solid #ced4da; }
+  button { outline: none; -webkit-tap-highlight-color: transparent; user-select: none; cursor: pointer; }
   
-  body { 
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-    text-align: center; 
-    padding: 1rem; 
-    margin: 0;
-    background-color: #f8f9fa;
-    color: #333;
-  }
-  
-  /* Contenitore Bottoni */
-  .controls-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 0.9375rem;
-      margin-bottom: 0.625rem;
-      flex-wrap: wrap;
-  }
+  #micButton { font-size: 3.5rem; width: 7rem; height: 7rem; border-radius: 50%; border: 6px solid #007bff; background: white; display: flex; align-items: center; justify-content: center; margin: 10px; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,123,255,0.3); }
+  #micButton.listening { border-color: #dc3545; background-color: #fff0f1; transform: scale(1.05); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(220,53,69,0.4); } 70% { box-shadow: 0 0 0 15px rgba(220,53,69,0); } 100% { box-shadow: 0 0 0 0 rgba(220,53,69,0); } }
 
-  /* Icona stato dinamica */
-  #statusIconContainer {
-      font-size: 2rem;
-      margin-top: 0.625rem;
-      min-height: 2.5rem;
-  }
-
-    #autore {
-      font-size: 0.85rem;
-      color: #555;
-  }
-  /* Elenco Sezioni */
-  #sectionsList {
-      font-size: 0.85rem;
-      color: #555;
-      background-color: #e9ecef;
-      padding: 0.5rem;
-      border-radius: 0.375rem;
-      margin-top: 0.625rem;
-      margin-bottom: 0.625rem;
-      border: 0.0625rem solid #ced4da;
-      word-wrap: break-word;
-  }
-
-  /* Bottoni Principali */
-  button {
-      outline: none;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-  }
-
-  #micButton {
-      font-size: 3.5rem;
-      width: 7rem;
-      height: 7rem;
-      border-radius: 50%;
-      border: 0.375rem solid #007bff;
-      background-color: white;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0.625rem;
-      transition: all 0.2s ease-in-out;
-      box-shadow: 0 0.25rem 0.625rem rgba(0, 123, 255, 0.3);
-  }
-  
-  /* Stati Microfono */
-  #micButton.listening { 
-      border-color: #dc3545; 
-      background-color: #fff0f1; 
-      transform: scale(1.05);
-      animation: pulse 1.5s infinite;
-  }
-  
-  @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
-      70% { box-shadow: 0 0 0 0.9375rem rgba(220, 53, 69, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-  }
-
-  #stopButton, #muteButton {
-      font-size: 2rem;
-      width: 4.5rem;
-      height: 4.5rem;
-      border-radius: 0.75rem;
-      border-width: 0.1875rem;
-      border-style: solid;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: white;
-      transition: transform 0.1s;
-  }
-  
+  #stopButton, #muteButton { font-size: 2rem; width: 4.5rem; height: 4.5rem; border-radius: 12px; border: 3px solid; display: flex; align-items: center; justify-content: center; background: white; transition: transform 0.1s; }
   #stopButton:active, #muteButton:active { transform: scale(0.95); }
   #stopButton { border-color: #dc3545; color: #dc3545; }
   #muteButton { border-color: #6c757d; color: #6c757d; }
-  
-  #muteButton.mute-off { background-color: #e2e6ea; opacity: 0.7; }
-  #muteButton.mute-on { background-color: #fff; opacity: 1; border-color: #28a745; color: #28a745; }
+  #muteButton.mute-on { border-color: #28a745; color: #28a745; }
 
-  /* Output Text Box */
-  #output { 
-    margin-top: 0.9375rem; 
-    white-space: pre-wrap; 
-    text-align: left; 
-    background: #fff; 
-    padding: 0.9375rem; 
-    border-radius: 0.5rem; 
-    min-height: 9.375rem; 
-    max-height: 60vh;
-    overflow-y: auto;
-    border: 0.0625rem solid #ddd;
-    font-size: 1rem;
-    box-shadow: inset 0 0 0.3125rem rgba(0,0,0,0.05);
-  }
+  #output { margin-top: 15px; white-space: pre-wrap; text-align: left; background: #fff; padding: 15px; border-radius: 8px; min-height: 150px; max-height: 60vh; overflow-y: auto; border: 1px solid #ddd; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); }
+  .hint-text { color: #666; font-size: 0.85rem; font-style: italic; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 5px; }
   
-  /* Menu Opzioni */
-  input, select, button.secondary-btn { 
-      margin: 0.3125rem; 
-      padding: 0.625rem; 
-      font-size: 1rem; 
-  }
-  
-  #toggleButtons {
-    cursor: pointer; 
-    margin-top: 0.9375rem; 
-    padding: 0.625rem 1.25rem; 
-    width: 100%; 
-    max-width: 18.75rem;
-    border: none; 
-    background-color: #6c757d; 
-    color: white; 
-    border-radius: 0.375rem;
-    font-weight: bold; 
-    font-size: 1rem;
-  }
-
-  #extraButtons {
-    display: none; 
-    border: 0.0625rem solid #ccc; 
-    border-radius: 0.375rem; 
-    padding: 0.625rem;
-    margin-top: 0.625rem; 
-    width: 100%; 
-    max-width: 25rem; 
-    margin-left: auto; 
-    margin-right: auto;
-    background-color: #fff;
-  }
-
-  @media (max-width: 480px) {
-      #micButton { width: 5.5rem; height: 5.5rem; font-size: 2.5rem; }
-      #stopButton, #muteButton { width: 3.8rem; height: 3.8rem; font-size: 1.5rem; }
-  }
+  #toggleButtons { cursor: pointer; margin-top: 15px; padding: 10px 20px; width: 100%; max-width: 300px; border: none; background: #6c757d; color: white; border-radius: 6px; font-weight: bold; }
+  #extraButtons { display: none; border: 1px solid #ccc; border-radius: 6px; padding: 10px; margin-top: 10px; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto; background: #fff; }
+  .secondary-btn, input[type=file] { margin: 5px; padding: 8px; font-size: 0.9rem; }
 </style>
 </head>
 <body>
 
 <div class="controls-container"> 
-<button id="micButton" aria-label="Avvia input vocale">🎙️</button>
-<button id="stopButton" aria-label="Reset totale">⏹️</button>
-<button id="muteButton" aria-label="Attiva/Disattiva audio">🔇</button>
+  <button id="micButton" aria-label="Avvia">🎙️</button>
+  <button id="stopButton" aria-label="Stop">⏹️</button>
+  <button id="muteButton" aria-label="Audio">🔇</button>
 </div>  
- <p id="autore">Assistente vocale di Umberto F. M. Cefalà</p>
+<p style="font-size:0.8rem; color:#777;">Assistente Personale</p>
 
 <div id="sectionsList">Caricamento...</div>
 <div id="statusIconContainer"></div> 
 <div id="output"></div>
 
-<button id="toggleButtons">⬇️ Opzioni e Info</button>
+<button id="toggleButtons">⬇️ Opzioni</button>
 <div id="extraButtons">
-  <button class="secondary-btn" id="infoCommands">Info Comandi</button> 
-  <button class="secondary-btn" id="infoArchive">Info Archivio</button> 
-  <button class="secondary-btn" id="exportCommands">Esporta JSON</button>
+  <button class="secondary-btn" id="exportCommands">Salva JSON</button>
   <input type="file" id="importFile" accept=".json">
-  <button class="secondary-btn" id="resetArchive" style="color:red; border-color:red;">Reset Archivio</button>
+  <button class="secondary-btn" id="resetArchive" style="color:red; border:1px solid red;">Reset Totale</button>
 </div>
 
 <script>
-/* ================== CONFIGURAZIONE & STATO ================== */
-// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
-
-const defaultArchive = { "conversazione": [], "whatsapp": [] }; 
+/* ================== CONFIGURAZIONE ================== */
+const defaultArchive = { "conversazione": [], "whatsapp": [] };
 let archive = JSON.parse(localStorage.getItem('archive') || JSON.stringify(defaultArchive));
 
-// Stati applicazione
-
-let tempMemory = {}; 
-let lastMainOutput = ""; 
-let currentRecognition = null; 
-let audioEnabled = false; 
-let isSpeaking = false;
-let synthesisQueue = []; // Coda per i chunk di testo (Android fix)
-
-const SIGNATURE_TEXT = " // _trascritto dall'assistente vocale_";
-
-// Vocabolario
-const copyWords = ["copia", "salva", "trascrivi", "conserva", "memorizza"];
-const affirmativeWords = ["sì", "va bene", "ok", "conferma", "esatto", "tutti", "tutto"];
-const negativeWords = ["cancella", "annulla", "ferma", "basta"];
-const searchVerbs = ["cerca", "trova", "dimmi", "scegli"];
-const searchPreps = ["in", "su", "nel", "nella", "nelle", "nei"];
-const whatsappWords = ["invia", "manda", "spedisci", "scrivi"]; 
-
-
-const NOMI_ITALIANI = new Set([
-  "alessandro","andrea","antonio","angelo","aurelio","alberto","aldo","alfredo",
-  "bruno","bartolomeo","bernardo","biagio",
-  "carlo","corrado","claudio","cesare","cristiano","cristian","carmine","costantino",
-  "daniele","dario","davide","diego","domenico","donato",
-  "enrico","emilio","emanuele","erik","ettore","edoardo","elia","elio",
-  "federico","fabio","francesco","filippo","flavio","fabrizio","fausto",
-  "gabriele","giuseppe","giovanni","giacomo","giorgio","gianluca","giulio","giuliano","gianni","graziano",
-  "luca","luigi","lorenzo","leonardo","livio","ludovico",
-  "marco","mario","matteo","mattia","massimo","maurizio","michele","mirko","marcello","manuele",
-  "nicola","niccolo","nicolò","nino",
-  "paolo","pietro","pasquale","piero","pablo",
-  "riccardo","roberto","renato","raffaele","raffaello","rino","romano",
-  "salvatore","simone","stefano","samuele","sandro","silvano","silvio","saverio",
-  "tommaso","tiziano","teo","tino",
-  "ugo","umberto",
-  "valerio","vittorio","vito","vincenzo","virgilio",
-  "walter","william",
-  "zaccaria",
-
-  // femminili
-  "anna","alessandra","adriana","amalia","ambra","anita","angela","antonella",
-  "beatrice","bianca","bruna","barbara",
-  "chiara","camilla","carla","caterina","cristina","cinzia","clelia",
-  "daniela","debora","denise","diana",
-  "elena","eleonora","erika","eva","emanuela",
-  "francesca","filomena","flora",
-  "giulia","giorgia","gabriella","giovanna","greta",
-  "ilaria","irene","isabella",
-  "jessica",
-  "laura","luisa","lucia","lia","linda","lorena",
-  "marta","marina","maria","martina","margherita","monica","miriana","michela",
-  "nadia","nika","nicoletta","noemi",
-  "ornella",
-  "paola","patrizia","pamela","patricia",
-  "roberta","romina","rosa","rosanna","rosaria","rossella","raffaella",
-  "sara","simona","silvia","serena","sabrina",
-  "tiziana","teresa",
-  "valentina","valeria","vanessa","vera","veronica","vittoria","virginia",
-  "ylenia",
-  "zara"
-]);
-
-const CITTA_ITALIANE = new Set([
-  "roma","milano","napoli","torino","palermo","genova","bologna","firenze","bari","catania",
-  "venezia","verona","messina","padova","trieste","brescia","parma","taranto","prato",
-  "modena","reggio emilia","perugia","livorno","ravenna","cagliari","foggia","rimini",
-  "salerno","sassari","pescara","novara","piacenza","ancona","andria","udine","terni",
-  "bolzano","la spezia","como","arezzo","lecce","trento","udine","cesena","pesaro",
-  "lucca","treviso","pisa","viterbo","ragusa","siracusa","potenza","campobasso","aosta",
-  "matera","siena","crotone","lamezia terme","asti","alessandria","cuneo","lodi",
-  "mantova","giugliano","marano","torre del greco","avellino"
-]);
-  
+// Mappe
 const emojiMap = {
     "cuore": "❤️", "sorriso": "🙂", "risata": "😂", "ok": "👌", "pollice su": "👍",
-    "pollice giù": "👎", "fuoco": "🔥", "stella": "⭐", "sole": "☀️", "luna": "🌙",
-    "kiss": "💋", "baci": "💋💋💋", "abbraccio": "🤗", "festa": "🎉", "torta": "🎂", "regalo": "🎁",
-    "musica": "🎵", "occhiolino": "😉", "triste": "😞", "arrabbiato": "😡", "pensoso": "🤔",
-    "applauso": "👏", "preghiera": "🙏", "forza": "💪", "bomba": "💣", "pericolo": "⚠️",
-    "spunta": "✅", "croce": "❌", "fantasma": "👻", "robot": "🤖", "alieno": "👽",
-    "cucciolo": "🐶", "gatto": "🐱", "coniglio": "🐰", "orso": "🐻", "panda": "🐼",
-    "elefante": "🐘", "leone": "🦁", "unicorno": "🦄", "pesce": "🐟", "delfino": "🐬",
-    "coccinella": "🐞", "ape": "🐝", "farfalla": "🦋", "ragno": "🕷️", "cavallo": "🐴",
-    "arcobaleno": "🌈", "neve": "❄️", "pioggia": "🌧️", "fulmine": "⚡", "vento": "🌬️",
-    "albero": "🌳", "fiore": "🌸", "foglia": "🍃", "cactus": "🌵", "fungo": "🍄",
-    "cibo": "🍔", "pizza": "🍕", "panino": "🥪", "gelato": "🍨", "cioccolato": "🍫",
-    "bevanda": "☕", "birra": "🍺", "vino": "🍷", "cocktail": "🍸", "acqua": "💧",
-    "macchina": "🚗", "aereo": "✈️", "treno": "🚆", "barca": "⛵", "bicicletta": "🚲",
-    "autobus": "🚌", "camion": "🚚", "ambulanza": "🚑", "polizia": "👮", "dottore": "👩‍⚕️",
-    "studente": "👨‍🎓", "ballerino": "💃", "cantante": "🎤", "fotografo": "📸", "pittore": "🎨",
-    "libro": "📖", "penna": "✏️", "matita": "🖊️", "chiave": "🔑", "lucchetto": "🔒",
-    "carta": "📝", "orologio": "⏰", "telefono": "📱", "computer": "💻", "televisore": "📺",
-    "bandiera": "🚩", "medaglia": "🏅", "trofeo": "🏆", "pallone": "⚽", "basket": "🏀",
-    "tennis": "🎾", "volley": "🏐", "rugby": "🏉", "skateboard": "🛹", "yoga": "🧘",
-    "cuoco": "👨‍🍳", "cameriere": "👩‍🍳", "poliziotto": "👮‍♂️", "pompieri": "👩‍🚒",
-    "scientista": "👩‍🔬", "ingegnere": "👷‍♂️", "astronauta": "👩‍🚀", "regina": "👸",
-    "principe": "🤴", "principessa": "👸", "angelo": "👼", "diavolo": "😈", "scheletro": "💀",
-    "cimitero": "🪦", "croce latina": "✝️", "stella david": "✡️", "yin yang": "☯️",
-    "cuore spezzato": "💔", "abbraccio stretto": "🤝", "mano alzata": "✋", "dito medio": "🖕",
-    "occhi": "👀", "orecchio": "👂", "naso": "👃", "bocca": "👄", "lingua": "👅",
-    "scarpa": "👟", "camicia": "👕", "pantaloni": "👖", "vestito": "👗", "cappello": "🎩",
-    "ombrello": "☂️", "zaino": "🎒", "borsa": "👜", "anello": "💍", "collana": "📿"
+    "bacio": "💋", "baci": "💋💋", "abbraccio": "🤗", "festa": "🎉", "torta": "🎂",
+    "stella": "⭐", "fuoco": "🔥", "musica": "🎵", "occhiolino": "😉", "triste": "😞",
+    "arrabbiato": "😡", "pensoso": "🤔", "applauso": "👏", "preghiera": "🙏", "forza": "💪",
+    "spunta": "✅", "croce": "❌", "gatto": "🐱", "cane": "🐶", "sole": "☀️", "luna": "🌙",
+    "pizza": "🍕", "birra": "🍺", "caffè": "☕", "auto": "🚗", "aereo": "✈️", "casa": "🏠",
+    "soldi": "💰", "regalo": "🎁", "fiore": "🌸", "computer": "💻", "telefono": "📱"
 };
 
-let textToNumMap = {
-    // 1–9 + ordinali
-    "un": 1, "uno": 1, "primo": 1,
-    "due": 2, "secondo": 2,
-    "tre": 3, "tré": 3, "terzo": 3,
-    "quattro": 4, "quarto": 4,
-    "cinque": 5, "quinto": 5,
-    "sei": 6, "sesto": 6,
-    "sette": 7, "settimo": 7,
-    "otto": 8, "ottavo": 8,
-    "nove": 9, "nono": 9,
+const textToNumMap = { "uno":1, "due":2, "tre":3, "quattro":4, "cinque":5, "sei":6, "sette":7, "otto":8, "nove":9, "dieci":10, "tutti": "all" };
 
-    // 10–19
-    "dieci": 10, "decimo": 10,
-    "undici": 11,
-    "dodici": 12,
-    "tredici": 13,
-    "quattordici": 14,
-    "quindici": 15,
-    "sedici": 16,
-    "diciassette": 17,
-    "diciotto": 18,
-    "diciannove": 19,
-
-    // Decine tonde
-    "venti": 20,
-    "trenta": 30,
-    "quaranta": 40,
-    "cinquanta": 50,
-    "sessanta": 60,
-    "settanta": 70,
-    "ottanta": 80,
-    "novanta": 90,
-
-    // 21–99
-    "ventuno": 21,
-    "ventidue": 22,
-    "ventitre": 23, "ventitré": 23,
-    "ventiquattro": 24,
-    "venticinque": 25,
-    "ventisei": 26,
-    "ventisette": 27,
-    "ventotto": 28,
-    "ventinove": 29,
-
-    "trentuno": 31,
-    "trentadue": 32,
-    "trentatre": 33, "trentatré": 33,
-    "trentaquattro": 34,
-    "trentacinque": 35,
-    "trentasei": 36,
-    "trentasette": 37,
-    "trentotto": 38,
-    "trentanove": 39,
-
-    "quarantuno": 41,
-    "quarantadue": 42,
-    "quarantatre": 43, "quarantatré": 43,
-    "quarantaquattro": 44,
-    "quarantacinque": 45,
-    "quarantasei": 46,
-    "quarantasette": 47,
-    "quarantotto": 48,
-    "quarantanove": 49,
-
-    "cinquantuno": 51,
-    "cinquantadue": 52,
-    "cinquantatre": 53, "cinquantatré": 53,
-    "cinquantaquattro": 54,
-    "cinquantacinque": 55,
-    "cinquantasei": 56,
-    "cinquantasette": 57,
-    "cinquantotto": 58,
-    "cinquantanove": 59,
-
-    "sessantuno": 61,
-    "sessantadue": 62,
-    "sessantatre": 63, "sessantatré": 63,
-    "sessantaquattro": 64,
-    "sessantacinque": 65,
-    "sessantasei": 66,
-    "sessantasette": 67,
-    "sessantotto": 68,
-    "sessantanove": 69,
-
-    "settantuno": 71,
-    "settantadue": 72,
-    "settantatre": 73, "settantatré": 73,
-    "settantaquattro": 74,
-    "settantacinque": 75,
-    "settantasei": 76,
-    "settantasette": 77,
-    "settantotto": 78,
-    "settantanove": 79,
-
-    "ottantuno": 81,
-    "ottantadue": 82,
-    "ottantatre": 83, "ottantatré": 83,
-    "ottantaquattro": 84,
-    "ottantacinque": 85,
-    "ottantasei": 86,
-    "ottantasette": 87,
-    "ottantotto": 88,
-    "ottantanove": 89,
-
-    "novantuno": 91,
-    "novantadue": 92,
-    "novantatre": 93, "novantatré": 93,
-    "novantaquattro": 94,
-    "novantacinque": 95,
-    "novantasei": 96,
-    "novantasette": 97,
-    "novantotto": 98,
-    "novantanove": 99,
-
-    // 100
-    "cento": 100
-};
-
-  const STATES = {
-    IDLE: "IDLE",
-    LISTENING: "LISTENING",
-    PROCESSING: "PROCESSING",
-    AWAITING_SEARCH_CHOICE: "AWAITING_SEARCH_CHOICE",
-    AWAITING_SAVE_CONFIRMATION: "AWAITING_SAVE_CONFIRMATION",
-    READING_ALL: "READING_ALL"
-};
-
+// Stati
+const STATES = { IDLE: "IDLE", LISTENING: "LISTENING", PROCESSING: "PROCESSING", AWAITING_CHOICE: "AWAITING_CHOICE", AWAITING_CONFIRM: "AWAITING_CONFIRM" };
 let appState = STATES.IDLE;
+let tempMemory = {}; 
+let currentRecognition = null;
+let audioEnabled = false; 
+let synthesisQueue = [];
+
+/* ================== AUDIO & TTS ================== */
+function stopAllAudio() {
+    speechSynthesis.cancel();
+    synthesisQueue = [];
+}
+
+function speak(text) {
+    stopAllAudio();
+    if (!audioEnabled || !text) return;
+    
+    // Divide testo lungo per evitare blocchi su Android
+    const chunks = text.match(/.{1,160}(\s|$)/g) || [text];
+    
+    let i = 0;
+    function playNext() {
+        if (i >= chunks.length) return;
+        const u = new SpeechSynthesisUtterance(chunks[i]);
+        u.lang = 'it-IT';
+        u.onend = () => { i++; playNext(); };
+        u.onerror = () => { i++; playNext(); };
+        speechSynthesis.speak(u);
+    }
+    playNext();
+}
+
+/* ================== MICROFONO & CORE LOGIC ================== */
+const micBtn = document.getElementById('micButton');
 
 function setState(newState) {
     appState = newState;
-
-    const micBtn = document.getElementById('micButton');
-    const statusDiv = document.getElementById('statusIconContainer');
-    const outputDiv = document.getElementById('output');
-
-    // Reset visivo standard
     micBtn.classList.remove('listening');
-    statusDiv.innerHTML = ""; 
-
-    switch (newState) {
-        case STATES.IDLE:
-            break; 
-        
-        case STATES.LISTENING:
-            micBtn.classList.add('listening');
-            break;
-            
-        case STATES.PROCESSING:
-            // Svuota i suggerimenti visivi prima di un nuovo processing
-            outputDiv.querySelectorAll('.hint-text').forEach(el => el.remove());
-            break;
-
-        case STATES.AWAITING_SEARCH_CHOICE:
-            setStatusIcon('search'); // Imposta icona ricerca
-            appendHints("Suggerimento: Pronuncia un numero (es. 'due') o 'tutti' per leggere tutto. Oppure 'annulla'.");
-            break;
-
-        case STATES.AWAITING_SAVE_CONFIRMATION:
-            setStatusIcon('transcription'); // Imposta icona salvataggio
-            appendHints("Suggerimento: Pronuncia 'sì' per salvare l'ultima frase non capita, oppure 'annulla'.");
-            break;
-            
-        case STATES.READING_ALL:
-            // Gestito all'interno della funzione readAllResults
-            break;
-    }
-}
-  
-function populateNumberMap() {
-    const units = ["", "uno", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove"];
-    const tens = ["", "dieci", "venti", "trenta", "quaranta", "cinquanta", "sessanta", "settanta", "ottanta", "novanta"];
-    const specials = ["dieci", "undici", "dodici", "tredici", "quattordici", "quindici", "sedici", "diciassette", "diciotto", "diciannove"];
-
-    for (let i = 1; i < 100; i++) {
-        let word = "";
-        if (i < 10) word = units[i]; 
-        else if (i < 20) word = specials[i - 10];
-        else {
-            let t = Math.floor(i / 10);
-            let u = i % 10;
-            let tenWord = tens[t];
-            let unitWord = units[u];
-
-            if ((u === 1 || u === 8) && tenWord.length > 0) tenWord = tenWord.slice(0, -1);
-
-            word = tenWord + unitWord;
-        }
-
-        textToNumMap[word] = i;
-
-        // Corretto: sostituisci solo "tre" finale
-        if (word.endsWith("tre")) {
-            textToNumMap[word.replace(/tre$/, "tré")] = i;
-        }
-    }
-
-    textToNumMap["un"] = 1;
-    textToNumMap["primo"] = 1;
-    textToNumMap["cento"] = 100;
-}
-
-populateNumberMap();
-  
-
-/* ================== GESTIONE AUDIO (TTS OTTIMIZZATO) ================== */
-// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
-
-// Stop brutale di tutto l'audio
-function stopAllAudio() {
-    if (speechSynthesis.speaking || speechSynthesis.pending) {
-        speechSynthesis.cancel();
-    }
-    synthesisQueue = [];
-    isSpeaking = false;
-}
-
-// Funzione per dividere testo lungo in frasi (Fix Android 15s bug)
-function splitTextIntoChunks(text) {
-    // Divide per punteggiatura mantenendo i separatori, o max caratteri
-    const regex = /[^.!?\n]+[.!?\n]+/g;
-    let chunks = text.match(regex);
-    if (!chunks || chunks.length === 0) chunks = [text];
+    if (newState === STATES.LISTENING) micBtn.classList.add('listening');
     
-    // Ulteriore controllo lunghezza (max 180 chars per sicurezza)
-    let finalChunks = [];
-    chunks.forEach(c => {
-        if (c.length > 180) {
-            let parts = c.match(/.{1,180}(\s|$)/g) || [c];
-            finalChunks.push(...parts);
-        } else {
-            finalChunks.push(c);
-        }
-    });
-    return finalChunks;
-}
-
-function speak(text, onEndCallback = null, isEntry = false) {
-    stopAllAudio(); // Interrompe eventuale parlato precedente
-  
-    if (!audioEnabled) {
-        if (!isEntry) appendOutput("🔇 Assistente impostato su muto 🔇", "hint-text");
-        if (onEndCallback) onEndCallback();
-        return;
-    }
-
-    // Preparazione coda di lettura
-    synthesisQueue = splitTextIntoChunks(text);
-    isSpeaking = true;
-
-    let chunkIndex = 0;
-
-    function playNextChunk() {
-        if (chunkIndex >= synthesisQueue.length || !isSpeaking) {
-            isSpeaking = false;
-            if (onEndCallback) onEndCallback();
-            return;
-        }
-
-        const utter = new SpeechSynthesisUtterance(synthesisQueue[chunkIndex]);
-        utter.lang = 'it-IT';
-        utter.rate = 1.0; 
-
-        utter.onend = () => {
-            chunkIndex++;
-            playNextChunk();
-        };
-
-        utter.onerror = (e) => {
-            console.error("TTS Error", e);
-            chunkIndex++;
-            playNextChunk();
-        };
-
-        speechSynthesis.speak(utter);
-    }
-
-    playNextChunk();
-}
-
-function speakEntry(item) { speak(item.output, null, true); }
-
-function showAvailableCommands() {
-    appendHints(
-        "💡 Prova a dire: " +
-        "• Ripeti  • Salva • Invia whatsapp a [nome]"
-    );
-}
-
-/* ================== GESTIONE MICROFONO E LOGICA PULSANTI ================== */
-// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
-
-const micBtn = document.getElementById('micButton');
-const stopBtn = document.getElementById('stopButton');
-const __s = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
-
-// LOGICA CENTRALE DEL TASTO MICROFONO
-micBtn.onclick = () => {
-    // 1. BARGE-IN: Se sta parlando, zittisci e ascolta subito
-    if (isSpeaking || speechSynthesis.speaking) {
-        stopAllAudio();
-        startListening(); 
-        return;
-    }
-
-    // 2. INVIO RAPIDO: Se sta già ascoltando, ferma e processa
-    if (appState === "LISTENING") {
-        if (currentRecognition) currentRecognition.stop(); // Questo triggera onend -> processa
-        return;
-    }
-
-    // 3. AVVIO STANDARD
-    startListening();
-};
-
-stopBtn.onclick = () => {
-    stopAndResetApp();
-};
-
-function stopAndResetApp() {
-   // 1. Ferma audio e sintesi vocale
-    stopAllAudio();
-
-    // 2. Ferma il riconoscimento vocale se attivo
-    if (currentRecognition) {
-        currentRecognition.onend = null; // Evita che onend riparta o dia errori
-        currentRecognition.stop();
-        currentRecognition = null;
-    }
-
-    // 3. Reset delle variabili di stato
-    appState = "IDLE";
-    tempMemory = {}; // Dimentica ricerche o liste precedenti
-    lastMainOutput = ""; // blocca comando "Ripeti"
-
-    // 4. Reset Interfaccia Visiva
-    micBtn.classList.remove('listening'); // Toglie l'animazione rossa
-    setStatusIcon(""); // Rimuove icone di stato (es. WhatsApp, Ricerca)
-
-    // 5. PULIZIA TOTALE DELLO SCHERMO
-    const out = document.getElementById('output');
-    out.innerHTML = ""; // Cancella tutto il testo precedente
- 
-    appendOutput("🗑️ Elimino gli input e termino l'ascolto", "listening-status");
-  
+    // Reset icona se torniamo in IDLE
+    if (newState === STATES.IDLE) document.getElementById('statusIconContainer').textContent = "";
 }
 
 function startListening() {
-    // Se c'è un riconoscimento attivo, chiudilo pulito prima di riaprire
-    if (currentRecognition) {
-        try { currentRecognition.abort(); } catch(e){}
-    }
-
-    if (!('webkitSpeechRecognition' in window)) {
-        appendOutput("⚠️ Browser non supportato. Utilizza Android con il browser Chrome.");
-        return;
-    }
+    if (currentRecognition) currentRecognition.abort();
+    if (!('webkitSpeechRecognition' in window)) return alert("Usa Chrome.");
 
     const r = new webkitSpeechRecognition();
     r.lang = "it-IT";
-    r.interimResults = false; // Ottimizzazione CPU: elabora solo finale
+    r.interimResults = false;
     r.maxAlternatives = 1;
-    r.continuous = false; //blocca riconoscimento continuo per ridurre cpu
-  
-  r.onstart = () => {
+
+    r.onstart = () => {
         setState(STATES.LISTENING);
-          micBtn.classList.add('listening');
-    
-            // Rimuove la scritta "Attendo istruzioni"
-        const tempStatus = document.getElementById('tempListeningStatus');
-        if (tempStatus) tempStatus.remove();
-
-        // Usa la classe speciale per poterlo rimuovere dopo
-        appendOutput("⏳ Attendo istruzioni...", "listening-status");
+        appendOutput("⏳ Ascolto...", "temp-status");
     };
 
-   r.onresult = (event) => {
-        // Rimuove la scritta "Attendo istruzioni"
-        const tempStatus = document.getElementById('tempListeningStatus');
-        if (tempStatus) tempStatus.remove();
-
-       const text = event.results[0][0].transcript.toLowerCase().trim();
-
-    r.stop();     
-    setState(STATES.PROCESSING);
-
-    handleSpeechInput(text);
-    showAvailableCommands();
- 
+    r.onresult = (e) => {
+        const text = e.results[0][0].transcript.toLowerCase().trim();
+        document.querySelectorAll('.temp-status').forEach(el => el.remove());
+        handleSpeechInput(text);
     };
 
-    r.onerror = (event) => {
-        if (event.error !== 'no-speech') appendOutput("⚠️ Microfono " + event.error);
+    r.onerror = (e) => {
+        if (e.error !== 'no-speech') appendOutput("⚠️ Errore Mic: " + e.error);
+        setState(STATES.IDLE);
     };
 
     r.onend = () => {
-        micBtn.classList.remove('listening');
-    if (appState === STATES.LISTENING) {
-        setState(STATES.IDLE);
-    }
-    currentRecognition = null;
+        // Se non stiamo processando, torna in IDLE
+        if (appState === STATES.LISTENING) setState(STATES.IDLE);
     };
 
-   if (currentRecognition) return; //protezione se già attivo 
     currentRecognition = r;
     r.start();
 }
 
-/* ================== INTELLIGENZA E COMANDI ================== */
-// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
-
-/**
- * Gestisce l'input dell'utente (testo) quando si attende la scelta da una lista di ricerca.
- * L'utente può dire un numero, 'tutti' o 'annulla'.
- */
-/**
- * Gestisce l'input dell'utente (testo) quando si attende la scelta da una lista di ricerca.
- * L'utente può dire un numero, 'tutti' o 'annulla'.
- */
-function handleSearchChoice(text) {
-    const results = tempMemory.searchResults;
-    const lowerText = text.toLowerCase();
-
-    // 1. ANNULLA
-    if (negativeWords.some(w => lowerText.includes(w))) {
-        speak("Ricerca annullata.");
-        appendOutput("❌ Ricerca annullata.");
-        tempMemory.searchResults = null;
-        return setState(STATES.IDLE);
+micBtn.onclick = () => {
+    if (appState === STATES.LISTENING || speechSynthesis.speaking) {
+        stopAllAudio();
+        if (currentRecognition) currentRecognition.abort();
+        setState(STATES.IDLE);
+    } else {
+        startListening();
     }
-    
-    if (!results || results.length === 0) {
-        speak("Nessun risultato disponibile da scegliere.");
-        return setState(STATES.IDLE);
-    }
+};
 
-    // 2. LEGGI TUTTI (DEVE AVERE LA PRIORITÀ sul numero)
-    // Controlla se l'input contiene "tutti" o "tutto", eventualmente preceduto da una parola affermativa ("sì tutti").
-    if (lowerText.includes("tutti") || lowerText.includes("tutto")) {
-        // La funzione readAllResults imposterà lo stato READING_ALL e poi tornerà a IDLE
-        readAllResults(results, text); 
-        tempMemory.searchResults = null; 
-        return; // Non tornare subito a IDLE, attendi la fine della lettura
-    }
+document.getElementById('stopButton').onclick = () => {
+    stopAllAudio();
+    if (currentRecognition) currentRecognition.abort();
+    tempMemory = {};
+    document.getElementById('output').innerHTML = "";
+    setState(STATES.IDLE);
+    appendOutput("⏹️ Reset effettuato.");
+};
 
-    // 3. SCELTA NUMERICA
-    const number = parseNumber(text); // parseNumber gestisce già la conversione 'due' -> 2
-    if (number > 0 && number <= results.length) {
-        const selectedItem = results[number - 1];
-        
-        speak(`Hai scelto il numero ${number}.`);
-        displayEntryDetails(selectedItem);
-        speakEntry(selectedItem);        
-        
-        lastMainOutput = selectedItem.output;
-        tempMemory.searchResults = null;
-        return setState(STATES.IDLE);
-    } 
-    
-    // 4. RICHIESTA NON RICONOSCIUTA
-    speak("Per favore, scegli un numero valido o dì 'tutti' oppure 'annulla'.");
-    appendOutput("❗ Scelta non valida. Riprova: un numero, 'tutti', o 'annulla'.");
-    // Rimane nello stato AWAITING_SEARCH_CHOICE
-}
+/* ================== INTELLIGENZA & COMANDI ================== */
 
-  /**
- * Gestisce l'input dell'utente quando si attende la conferma di salvataggio (sì/no).
- */
-function handleSaveConfirmation(text) {
-    const pendingText = tempMemory.pendingSaveText;
-
-    if (!pendingText) {
-        speak("Non c'è nulla in attesa di salvataggio.");
-        return setState(STATES.IDLE);
-    }
-    
-    // 1. CONFERMA (Salva)
-    if (affirmativeWords.some(w => text.includes(w))) {
-        // Riutilizza la logica di handleSaveCommand, ma senza il comando 'salva'
-        const contentToSave = formatText(pendingText);
-
-        // Aggiungi alla sezione 'conversazione'
-        archive.conversazione.push({
-            trigger: contentToSave,
-            output: "Trascritta da input non capito.",
-            meta_title: "Non Riconosciuto",
-            meta_author: "Sistema",
-            tag: "salvato"
-        });
-        localStorage.setItem('archive', JSON.stringify(archive));
-        updateSectionList();
-        
-        speak("Ho salvato la frase nell'archivio conversazione.");
-        appendOutput(`✅ Salvato il testo non riconosciuto: "${pendingText}"`);
-        
-        tempMemory.pendingSaveText = null;
-        return setState(STATES.IDLE);
-    }
-    
-    // 2. ANNULLA
-    if (negativeWords.some(w => text.includes(w))) {
-        speak("Salvataggio annullato.");
-        appendOutput("❌ Salvataggio annullato.");
-        tempMemory.pendingSaveText = null;
-        return setState(STATES.IDLE);
-    }
-    
-    // 3. RICHIESTA NON RICONOSCIUTA
-    speak("Per favore, dì 'sì' per salvare o 'annulla'.");
-    appendOutput("❗ Risposta non chiara. Dì 'sì' o 'annulla'.");
-    // Rimane nello stato AWAITING_SAVE_CONFIRMATION
-}
-  
 function handleSpeechInput(text) {
-
-    console.log("INPUT:", text, " | STATE:", appState);
-
-    // Normalizzazione
-    if (!text || typeof text !== "string") {
-        speak("Non ho sentito nulla");
-        appendOutput("Non ho sentito nulla");
-        return;
-    }
-
-    text = text.toLowerCase().trim();
-
-    /* ========================
-       1. GESTIONE STATI SPECIALI
-    ========================= */
-
-    // --- SCEGLI UN RISULTATO (liste di ricerca) ---
-    if (appState === STATES.AWAITING_SEARCH_CHOICE) {
-        return handleSearchChoice(text);
-    }
-
-    // --- CONFERMA SALVATAGGIO FALLBACK ---
-    if (appState === STATES.AWAITING_SAVE_CONFIRMATION) {
-        return handleSaveConfirmation(text);
-    }
-
-
-    /* ========================
-       2. STATO GENERALE (IDLE o PROCESSING)
-    ========================= */
-
-    // Da qui in poi gestiamo i comandi normali
-    // e ogni comando, se valido, termina in IDLE
     setState(STATES.PROCESSING);
+    console.log("Input:", text, "State:", appState);
 
-    /* ========== PRIORITÀ 1: WHATSAPP ========== */
-    if (whatsappWords.some(w => text.startsWith(w))) {
-        setStatusIcon('whatsapp');
-        handleWhatsapp(text);
-        return setState(STATES.IDLE);
+    // 1. Gestione Stati Speciali (Attesa Risposta)
+    if (appState === STATES.AWAITING_CHOICE) {
+        return handleChoiceInput(text);
+    }
+    if (appState === STATES.AWAITING_CONFIRM) {
+        return handleConfirmInput(text);
     }
 
-    /* ========== PRIORITÀ 2: SALVA / COPIA ========== */
-    const saveCmd = copyWords.find(w => text.startsWith(w));
-    if (saveCmd) {
-        setStatusIcon('transcription');
-        handleSaveCommand(text, saveCmd);
-        return setState(STATES.IDLE);
-    }
-
-    /* ========== PRIORITÀ 3: RIPETI ========== */
-    if (text === "ripeti") {
-        if (lastMainOutput) {
-            speak("Ripeto: " + lastMainOutput);
-            appendOutput("Ripeto...");
-        } else {
-            speak("Nulla da ripetere");
-            appendOutput("Nulla da ripetere");
-        }
-        return setState(STATES.IDLE);
-    }
-
+    // 2. Comandi Diretti
     
-    /* ========== PRIORITÀ 5: METADATI (AUTORE/TITOLO) ========== */
-    if (text.includes("autore") || text.includes("titolo")) {
-        setStatusIcon('search');
+    // --- WHATSAPP ---
+    if (text.startsWith("invia whatsapp") || text.startsWith("whatsapp")) {
+        const content = text.replace(/^(invia\s*)?whatsapp\s*(a\s*)?/i, "").trim();
+        handleWhatsapp(content);
+        return setState(STATES.IDLE);
+    }
 
-        let type = text.includes("autore") ? "meta_author" : "meta_title";
-        let query = text.replace(/.*(autore|titolo)\s+/i, "").trim();
-
-        if (query) {
-            handleMetadataSearch(type, query);
-            // handleMetadataSearch passa automaticamente in AWAITING_SEARCH_CHOICE
-            return;
+    // --- NUOVO: MESSAGGIO (Con Emoji Automatiche) ---
+    if (text.startsWith("messaggio")) {
+        let content = text.replace(/^messaggio\s*/i, "").trim();
+        if (!content) {
+            speak("Messaggio vuoto.");
+            return setState(STATES.IDLE);
         }
+        // Qui attiviamo le emoji automatiche (true)
+        const formatted = formatText(content, true);
+        
+        // Salviamo in conversazione
+        saveToArchive(formatted, "Messaggio Emoji");
+        speak("Messaggio creato: " + formatted);
+        appendOutput(`💌 <b>Messaggio:</b> ${formatted}`);
         return setState(STATES.IDLE);
     }
 
-    /* ========== PRIORITÀ 6: RICERCA AVANZATA (cerca in X ...) ========== */
-    const searchPattern = new RegExp(
-        `(${searchVerbs.join('|')})\\s+(${searchPreps.join('|')})\\s+([a-zA-Z0-9_]+)\\s+(.*)`,
-        'i'
-    );
-
-    const match = text.match(searchPattern);
-    if (match) {
-        setStatusIcon('search');
-        const section = match[3].toLowerCase();
-        const query = match[4].trim();
-
-        if (archive[section]) {
-            handleAdvancedSearch(section, query);
-            // handleAdvancedSearch imposta AWAITING_SEARCH_CHOICE se serve
-            return;
-        }
-    }
-
-    /* ========== PRIORITÀ 7: TRIGGER DIRETTO ========== */
-    let found = findEntryByTrigger(text);
-    if (found) {
-        setStatusIcon('conversation');
-        displayEntryDetails(found);
-        speakEntry(found);
-        lastMainOutput = found.output;
-
-        tempMemory.searchResults = null; // pulizia
-        return setState(STATES.IDLE);
-    }
-
-    /* ========== PRIORITÀ 8: RICERCA GLOBALE FALLBACK ========== */
-    handleGlobalSearchFallback(text);
-    // fallback può entrare in AWAITING_SEARCH_CHOICE o AWAITING_SAVE_CONFIRMATION
-}
-
-function handleNormalCommand(text) {
-
-    // Normalizzazione
-    if (!text || typeof text !== "string") return setState(STATES.IDLE);
-    text = text.toLowerCase().trim();
-
-    console.log("NormalCommand:", text);
-
-    /* ===========================================
-       1. PRIORITÀ MASSIMA: WHATSAPP
-       =========================================== */
-    if (whatsappWords.some(w => text.startsWith(w))) {
-        setStatusIcon('whatsapp');
-        handleWhatsapp(text);
-        return setState(STATES.IDLE);
-    }
-
-
-    /* ===========================================
-       2. SALVA / COPIA
-       =========================================== */
-    const saveCmd = copyWords.find(w => text.startsWith(w));
+    // --- SALVA / TRASCRIVI (Standard, NO Emoji) ---
+    const saveWords = ["salva", "trascrivi", "scrivi", "copia", "memorizza"];
+    const saveCmd = saveWords.find(w => text.startsWith(w));
     if (saveCmd) {
-        setStatusIcon('transcription');
-        handleSaveCommand(text, saveCmd);
+        let content = text.replace(new RegExp(`^${saveCmd}\\s*`, "i"), "").trim();
+        if (!content) {
+            speak("Cosa devo scrivere?");
+            return setState(STATES.IDLE);
+        }
+        // Qui DISATTIVIAMO le emoji automatiche (false)
+        const formatted = formatText(content, false);
+        
+        saveToArchive(formatted, "Nota Rapida");
+        speak("Ho salvato la nota.");
+        appendOutput(`💾 <b>Salvato:</b> ${formatted}`);
         return setState(STATES.IDLE);
     }
 
-
-    /* ===========================================
-       3. RIPETI
-       =========================================== */
+    // --- RIPETI ---
     if (text === "ripeti") {
-        if (lastMainOutput) {
-            speak("Ripeto: " + lastMainOutput);
-            appendOutput("Ripeto...");
-        } else {
-            speak("Nulla da ripetere");
-            appendOutput("Nulla da ripetere");
-        }
+        speak("Non ho nulla da ripetere al momento."); // Semplificato
         return setState(STATES.IDLE);
     }
 
-
-  
-    /* ===========================================
-       5. METADATI (autore / titolo)
-       =========================================== */
-    if (text.includes("autore") || text.includes("titolo")) {
-
-        setStatusIcon('search');
-
-        let type = text.includes("autore") ? "meta_author" : "meta_title";
-        let query = text.replace(/.*(autore|titolo)\s+/i, "").trim();
-
-        if (query) {
-            handleMetadataSearch(type, query);
-            // Questa funzione imposta AWAITING_SEARCH_CHOICE da sola
-            return;
-        }
-
-        return setState(STATES.IDLE);
-    }
-
-
-    /* ===========================================
-       6. RICERCA AVANZATA (cerca in X [query])
-       =========================================== */
-    const searchPattern = new RegExp(
-        `(${searchVerbs.join('|')})\\s+(${searchPreps.join('|')})\\s+([a-zA-Z0-9_]+)\\s+(.*)`,
-        'i'
-    );
-
-    const match = text.match(searchPattern);
-
-    if (match) {
-        setStatusIcon('search');
-
-        const section = match[3].toLowerCase();
-        const query = match[4].trim();
-
-        if (archive[section]) {
-            handleAdvancedSearch(section, query);
-            // può impostare AWAITING_SEARCH_CHOICE
-            return;
-        }
-    }
-
-
-    /* ===========================================
-       7. TRIGGER DIRETTO
-       =========================================== */
-    let found = findEntryByTrigger(text);
-
-    if (found) {
-        setStatusIcon('conversation');
-
-        displayEntryDetails(found);
-        speakEntry(found);
-
-        lastMainOutput = found.output;
-        tempMemory.searchResults = null;
-
-        return setState(STATES.IDLE);
-    }
-
-
-  /* =========================================== 8. CATCH-ALL / RICERCA GLOBALE =========================================== */
-    // Se non è un comando noto, un trigger, o una frase troppo corta, prova una ricerca globale
-    if (text.length > 2) {
-        handleGlobalSearchFallback(text);
-        // La funzione handleGlobalSearchFallback imposta il nuovo stato (AWAITING_SEARCH_CHOICE o AWAITING_SAVE_CONFIRMATION) 
-        // e restituisce il controllo, quindi non dobbiamo chiamare setState(STATES.IDLE) qui.
-        return; 
-    }
+    // --- RICERCA NELL'ARCHIVIO ---
+    const found = findBestMatch(text);
     
-    // Ultimo Fallback: frase troppo corta o completamente incomprensibile
-    speak("Scusa, non ho capito cosa intendevi.");
-    appendOutput("❓ Comando non riconosciuto.");
-    return setState(STATES.IDLE);
-} // Fine handleSpeechInput
+    if (found && found.score > 0.85) {
+        // Match forte diretto
+        displayEntry(found.item);
+        speak(found.item.output);
+        return setState(STATES.IDLE);
+    } else {
+        // Ricerca fuzzy o Fallback
+        const results = searchArchive(text);
+        handleSearchResults(results, text);
+        // handleSearchResults imposta lo stato corretto
+    }
 }
 
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
-// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 
-function findEntryByTrigger(text) {
+function formatText(str, autoEmoji) {
+    let s = str.trim();
 
-    if (!text || typeof text !== "string") return null;
-    text = text.toLowerCase();
-
-    let bestMatch = null;
-    let highestScore = 0;
-
-    /* =======================================================
-       1) PRIORITÀ ASSOLUTA: SEZIONE "conversazione"
-       -------------------------------------------------------
-       - prima si cerca in conversazione
-       - ogni match della sezione conversazione vince su tutto
-    ======================================================== */
-    if (archive.conversazione && Array.isArray(archive.conversazione)) {
-        for (const item of archive.conversazione) {
-            if (!item.trigger) continue;
-
-            const trg = item.trigger.toLowerCase();
-            const score = scoreTriggerMatch(text, trg);
-
-            if (score > highestScore) {
-                highestScore = score;
-                bestMatch = item;
-            }
-        }
-
-        if (bestMatch) return bestMatch; // match trovato in conversazione
+    // 1. Emoji Automatiche (Solo se richiesto)
+    if (autoEmoji) {
+        // Sostituisce le parole intere presenti nella mappa
+        const regex = new RegExp(`\\b(${Object.keys(emojiMap).join("|")})\\b`, "gi");
+        s = s.replace(regex, (match) => emojiMap[match.toLowerCase()] || match);
     }
 
+    // 2. Punteggiatura base
+    s = s.replace(/\bpunto\b/gi, ".").replace(/\bvirgola\b/gi, ",").replace(/\bpunto interrogativo\b/gi, "?").replace(/\bpunto esclamativo\b/gi, "!");
+    
+    // 3. Capitalizzazione
+    s = s.charAt(0).toUpperCase() + s.slice(1);
+    s = s.replace(/([.!?]\s*)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
 
-    /* =======================================================
-       2) SEZIONI NORMALI (tutte le altre)
-    ======================================================== */
-    for (let sec in archive) {
-        if (sec === "conversazione") continue;
-
-        for (const item of archive[sec]) {
-            if (!item.trigger) continue;
-
-            const trg = item.trigger.toLowerCase();
-            const score = scoreTriggerMatch(text, trg);
-
-            if (score > highestScore) {
-                highestScore = score;
-                bestMatch = item;
-            }
-        }
-    }
-
-    // ritorna il miglior candidato oppure null
-    return bestMatch;
+    return s;
 }
 
-/* ============================================================
-    FUNZIONE: WHATSAPP (Apertura URL precompilato)
-   ============================================================ */
 function handleWhatsapp(text) {
-    // 1) Rimuovo il prefisso (es. "invia whatsapp")
-    const prefixes = [ 
-        "whatsapp", "invia whatsapp", "manda whatsapp", "invia un whatsapp", 
-        "manda un whatsapp", "scrivi un whatsapp", "scrivi whatsapp" 
-    ];
-    let messageContent = text;
-    for (const p of prefixes) {
-        if (messageContent.startsWith(p)) {
-            // Rimuove il prefisso e lo spazio dopo (es: "invia whatsapp ciao" -> "ciao")
-            messageContent = messageContent.replace(p, "").trim(); 
-            break;
-        }
-    }
-
-    if (!messageContent || messageContent.length < 2) {
-        speak("Cosa vuoi inviare?");
-        appendOutput("❓ Nessun contenuto da inviare.");
-        return setState(STATES.IDLE); // Torna subito a IDLE
-    }
-
-    // 2) Formattazione e Pre-compilazione
-    const finalMessage = formatText(messageContent) + SIGNATURE_TEXT;
-    
-    // Crea l'URL che aprirà l'app di WhatsApp (o il web) con il messaggio precompilato.
-    const waUrl = `whatsapp://send?text=${encodeURIComponent(finalMessage)}`;
-
-    speak("Sto aprendo WhatsApp. Seleziona il destinatario e tocca Invia per confermare.");
-    appendOutput(`📨 Messaggio precompilato (apertura automatica):\n"${finalMessage}"`);
-
-    // Apre il link (nota: l'apertura tramite URL non garantisce il successo su tutti i sistemi)
-    window.open(waUrl, '_self'); 
-    
-    // Non salviamo nulla nell'archivio.
-    return setState(STATES.IDLE);
-}
-
-function handleSaveCommand(text, commandWord) {
-    console.log("SAVE INPUT:", text, "| CMD:", commandWord);
-
-    // 1) Rimuovo il comando iniziale (salva, memorizza, registra, ecc.)
-    let content = text.replace(new RegExp("^" + commandWord + "\\s*", "i"), "").trim();
-
-    /* ============================================================
-       2) CASO: nessun contenuto dopo il comando
-       ============================================================ */
-    if (!content || content.length < 2) {
-        speak("Cosa vuoi salvare?");
-        appendOutput("❓ Nessun contenuto da salvare.");
+    if (text.length < 2) {
+        speak("Cosa devo inviare?");
         return;
     }
+    const msg = formatText(text, true) + " [Assistente Vocale]";
+    const url = `whatsapp://send?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_self');
+    appendOutput(`💬 Apertura WhatsApp: "${msg}"`);
+}
 
-    /* ============================================================
-       3) Normalizzo la stringa
-       ============================================================ */
-    content = content.trim();
+function saveToArchive(text, type) {
+    archive.conversazione.push({
+        trigger: text.toLowerCase().substring(0, 20),
+        output: text,
+        meta_title: type,
+        date: new Date().toLocaleTimeString()
+    });
+    localStorage.setItem('archive', JSON.stringify(archive));
+    updateSectionList();
+}
 
-    /* ============================================================
-       4) Salvataggio effettivo
-       ============================================================ */
-    speak("Ho salvato la frase.");
-    appendOutput("💾 Salvato:", content);
+// Logica di Ricerca
+function findBestMatch(text) {
+    let best = null;
+    let maxScore = 0;
+    
+    // Cerca in tutte le sezioni
+    Object.keys(archive).forEach(sec => {
+        archive[sec].forEach(item => {
+            if (!item.trigger) return;
+            // Punteggio semplice: inclusione
+            let score = 0;
+            const t = item.trigger.toLowerCase();
+            if (text === t) score = 1.0;
+            else if (text.includes(t)) score = 0.9;
+            else if (t.includes(text) && text.length > 3) score = 0.7;
+            
+            if (score > maxScore) { maxScore = score; best = item; }
+        });
+    });
+    return { item: best, score: maxScore };
+}
 
-    // Salva in memoria temporanea (il tuo codice già lo usa)
-    tempMemory.lastSaved = content;
+function searchArchive(query) {
+    let results = [];
+    Object.keys(archive).forEach(sec => {
+        archive[sec].forEach(item => {
+            if ((item.trigger && item.trigger.includes(query)) || (item.output && item.output.includes(query))) {
+                results.push(item);
+            }
+        });
+    });
+    return results;
+}
 
-    // Eventuale feedback visivo
-    appendTrigger("save");
+function handleSearchResults(results, query) {
+    if (results.length === 0) {
+        speak("Nessun risultato. Vuoi salvare questo testo?");
+        appendOutput(`❓ Nessun risultato per "${query}". Salvare? (Dì 'sì' o 'annulla')`);
+        tempMemory.pendingText = query;
+        setState(STATES.AWAITING_CONFIRM);
+    } else if (results.length === 1) {
+        displayEntry(results[0]);
+        speak(results[0].output);
+        setState(STATES.IDLE);
+    } else {
+        tempMemory.results = results;
+        let list = results.map((r, i) => `${i+1}. ${r.meta_title || r.trigger}`).join("\n");
+        appendOutput(`📋 Trovati ${results.length} risultati:\n${list}\n\n👉 Scegli un numero o dì 'Tutti'.`);
+        speak(`Ho trovato ${results.length} risultati. Scegli un numero o dì tutti.`);
+        setState(STATES.AWAITING_CHOICE);
+    }
+}
 
-    // Rimaniamo in IDLE
+// Gestione Scelte Successive
+function handleChoiceInput(text) {
+    if (text.includes("annulla")) {
+        speak("Annullato.");
+        appendOutput("❌ Annullato.");
+        return setState(STATES.IDLE);
+    }
+
+    if (text.includes("tutti")) {
+        const fullText = tempMemory.results.map(r => r.output).join(". ");
+        speak("Leggo tutto: " + fullText);
+        appendOutput("📖 Lettura completa...");
+        return setState(STATES.IDLE);
+    }
+
+    // Parsing numero (parola o cifra)
+    let num = parseInt(text.replace(/\D/g, ''));
+    if (isNaN(num)) {
+        for (let w in textToNumMap) if (text.includes(w)) num = textToNumMap[w];
+    }
+
+    if (num > 0 && num <= tempMemory.results.length) {
+        const item = tempMemory.results[num - 1];
+        displayEntry(item);
+        speak(item.output);
+        setState(STATES.IDLE);
+    } else {
+        speak("Numero non valido. Riprova.");
+    }
+}
+
+function handleConfirmInput(text) {
+    if (text.includes("sì") || text.includes("conferma") || text.includes("ok")) {
+        const formatted = formatText(tempMemory.pendingText, false);
+        saveToArchive(formatted, "Da Ricerca Fallita");
+        speak("Salvato.");
+        appendOutput("✅ Salvato in conversazione.");
+    } else {
+        speak("Non salvato.");
+        appendOutput("❌ Operazione annullata.");
+    }
+    tempMemory = {};
     setState(STATES.IDLE);
 }
 
-
-  /* ============================================================
-    FUNZIONE: GESTIONE UNIFICATA DEI RISULTATI DI RICERCA
-   ============================================================ */
-/**
- * Gestisce l'output della ricerca: 
- * 1. Se 1 risultato: lo legge immediatamente.
- * 2. Se >1 risultato: mostra la lista e chiede una scelta (setta AWAITING_SEARCH_CHOICE).
- * 3. Se 0 risultati: chiede se salvare la query (setta AWAITING_SAVE_CONFIRMATION).
- * @param {Array<Object>} results - I risultati trovati.
- * @param {string} query - La query di ricerca originale.
- * @param {string} [section=''] - La sezione cercata (opzionale).
- */
-function handleSearchResults(results, query, section = '') {
-    // --- 0 RISULTATI: Chiedi se salvare la query (Fallback) ---
-    if (results.length === 0) {
-        speak(`Non ho trovato nulla per la ricerca: ${query}. Vuoi che lo salvi?`);
-        appendOutput(`⚠️ Nessun risultato trovato per "${query.toUpperCase()}".`);
-        tempMemory.pendingSaveText = query;
-        return setState(STATES.AWAITING_SAVE_CONFIRMATION);
-    }
-
-    // --- 1 RISULTATO: Lettura immediata ---
-    if (results.length === 1) {
-        const item = results[0];
-        const source = section ? `in ${section}` : 'nell\'archivio';
-        speak(`Trovato un unico risultato ${source}. Titolo: ${item.meta_title || item.trigger}`);
-        displayEntryDetails(item); // Mostra i dettagli a schermo
-        speakEntry(item); // Leggi il contenuto
-        lastMainOutput = item.output;
-        return setState(STATES.IDLE);
-    }
-
-    // --- >1 RISULTATO: Chiedi la scelta (Multi-Turn) ---
-    // Popola la memoria e lo stato per l'attesa
-    tempMemory.searchResults = results;
-    setState(STATES.AWAITING_SEARCH_CHOICE);
-    
-    const sectionName = section ? `in ${section}` : 'nell\'archivio completo';
-    
-    // Aggiorna l'output con la lista numerata visiva
-    let visualList = `📋 Trovati ${results.length} risultati ${sectionName.toUpperCase()}:\n\n` + results
-        .map((r, i) => `${i + 1}. ${r.meta_title || r.trigger || r.output.substring(0, 30) + '...'}` )
-        .join("\n");
-        
-    appendOutput(visualList);
-    lastMainOutput = visualList;
-
-    // Costruzione parlato (dice solo i primi 5 titoli per non essere troppo lungo)
-    let verbal = `Ho trovato ${results.length} risultati ${sectionName}. `;
-    results.slice(0, 5).forEach((r, i) => { 
-        verbal += `Numero ${i + 1}: ${r.meta_title || r.trigger || "voce"}. `;
-    });
-    
-    speak(verbal + "Quale numero vuoi leggere?");
-    appendOutput("👉 Dimmi un numero (es. 'due') o 'tutti'");
+/* ================== UTILITIES UI ================== */
+function displayEntry(item) {
+    appendOutput(`📌 <b>${item.meta_title || item.trigger}</b>\n${item.output}`);
 }
 
-function handleAdvancedSearch(section, query) {
-    // 1. Validazione sezione
-    if (!archive[section]) {
-        speak(`Non esiste una sezione chiamata ${section}. Le sezioni disponibili sono: ${Object.keys(archive).join(", ")}.`);
-        appendOutput(`❌ Sezione "${section.toUpperCase()}" non trovata.`);
-        return setState(STATES.IDLE);
-    }
-
-    // 2. Esecuzione ricerca
-    const results = getSectionSearchResults(section, query); 
-
-    // CHIAMATA UNIFICATA
-    handleSearchResults(results, query, section);
-}
-
-// =====================
-// Funzione TTS asincrona
-// =====================
-function speakAsync(text) {
-    return new Promise(resolve => {
-        if (!text || !text.trim()) {
-            resolve();
-            return;
-        }
-
-        // Interrompe eventuale parlato in corso
-        if (speechSynthesis.speaking || speechSynthesis.pending) {
-            speechSynthesis.cancel();
-        }
-
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = "it-IT";
-        utter.rate = 1.0;
-
-        utter.onend = () => resolve();
-        utter.onerror = () => {
-            console.error("TTS error in speakAsync()");
-            resolve();
-        };
-
-        speechSynthesis.speak(utter);
-    });
-}
-
-// =====================
-// Legge tutti i risultati
-// =====================
-async function readAllResults(results, userText) {
-    if (!results || results.length === 0) {
-        speak("Nessun risultato da leggere.");
-        appendOutput("⚠️ Nessun risultato disponibile.");
-        return;
-    }
-
-    // Avviso iniziale
-    speak("Leggo tutti i risultati.");
-    appendOutput("📖 Leggo tutti i risultati...");
-    setState(STATES.READING_ALL);
-
-    let combinedOutput = "";
-    let counter = 1;
-
-    for (const item of results) {
-        // Output visivo
-        const visualOut = `----------------
-Numero: ${counter}
-Titolo: ${item.meta_title || "-"}
-Autore: ${item.meta_author || "-"}
-Contenuto: ${item.output || "N/A"}
-Ricerca: ${item.trigger || "N/A"}
-Tag: ${item.tag || "-"}
-----------------`;
-
-        appendOutput(visualOut);
-        combinedOutput += visualOut + "\n";
-
-        // Output vocale
-        const verbalText = `Numero ${counter}. ` +
-            `${item.meta_title ? item.meta_title + ". " : ""}` +
-            `${item.output || ""}`;
-
-        await speakAsync(verbalText);
-        await new Promise(r => setTimeout(r, 300)); // breve pausa
-        counter++;
-    }
-
-    // Salvataggio output principale
-    lastMainOutput = combinedOutput;
-
-    // Pulizia risultati temporanei
-    tempMemory.searchResults = null;
-
-    // Feedback fine lettura
-    speak("Ho finito di leggere tutti i risultati.");
-    appendOutput("✅ Fine lettura di tutti i risultati.");
-
-    // =====================
-    // Gestione scelta numerica
-    // =====================
-    const choiceNum = parseNumber(userText);
-    if (choiceNum !== null && choiceNum > 0 && choiceNum <= results.length) {
-        const item = results[choiceNum - 1];
-
-        displayEntryDetails(item);
-        speakEntry(item);
-        appendOutput(`Numero selezionato: ${choiceNum}`);
-        lastMainOutput = item.output;
-
-        // Non cancelliamo tempMemory subito se l'utente volesse altri comandi
-        setState(STATES.IDLE);
-    } else if (userText.match(/\d+/)) {
-        // L'utente ha detto un numero fuori range
-        speak("Numero non valido. Riprova");
-        appendOutput("⚠️ Numero non valido. Riprova");
-        setState(STATES.IDLE);
-    } else {
-        // Nessuna scelta numerica specifica: ritorna a IDLE
-        setState(STATES.IDLE);
-    }
-}
-
-// =====================
-// Esempio utilizzo
-// =====================
-if (userText.includes("tutti") || userText.includes("tutto")) {
-    readAllResults(results, userText);
-}
-
-
-function handleMetadataSearch(type, query) {
-    const all = [].concat(...Object.values(archive));
-    // Filtra elementi che hanno il campo 'type' (es. meta_author) e includono la 'query'
-    const results = all.filter(c => c[type] && c[type].toLowerCase().includes(query.toLowerCase())); 
-
-    // CHIAMATA UNIFICATA
-    if (!query) {
-        speak("Specifica cosa cercare per autore o titolo.");
-        appendOutput("❓ Specifica una query dopo 'autore' o 'titolo'.");
-        return setState(STATES.IDLE);
-    }
-    
-    handleSearchResults(results, query, 'Metadata');
-    // handleSearchResults si occupa di settare lo stato e la memoria, quindi possiamo solo ritornare.
-}
-
-  
-/* ============================================================
-    FUNZIONE: FALLBACK (Ricerca globale e gestione stati multi-turno)
-   ============================================================ */
-/**
- * Gestisce l'input dell'utente quando non è stato riconosciuto come un comando specifico.
- * 1. Cerca un match diretto (trigger).
- * 2. Se non c'è match diretto, esegue una ricerca fuzzy e passa i risultati a handleSearchResults.
- * @param {string} text - L'input vocale non processato.
- */
-function handleGlobalSearchFallback(text) {
-    // 1. Cerca un match diretto e preciso (Trigger)
-    const bestMatch = findBestMatch(text); 
-    // Usiamo una soglia alta (es. 0.9) per distinguere un trigger diretto da una semplice ricerca
-    const isKeywordSearch = bestMatch && bestMatch.score > 0.9;
-    
-    if (isKeywordSearch) {
-        // Trovato match diretto: lo legge e torna subito a IDLE
-        speakEntry(bestMatch);
-        appendOutput(`✔️ Trigger Riconosciuto: ${bestMatch.trigger.toUpperCase()}`);
-        lastMainOutput = bestMatch.output;
-        return setState(STATES.IDLE);
-    }
-
-    // 2. Nessun match diretto (Fallback)
-    // Esegui una ricerca "fuzzy" (similitudine) su tutto l'archivio per trovare contenuti pertinenti
-    const fuzzyResults = getFuzzySearchResults(text); 
-
-    // Passa la gestione dei risultati trovati alla funzione unificata:
-    // Questa funzione si occuperà di:
-    // - Se 1 risultato: leggerlo.
-    // - Se >1 risultato: impostare STATES.AWAITING_SEARCH_CHOICE.
-    // - Se 0 risultati: impostare STATES.AWAITING_SAVE_CONFIRMATION.
-    handleSearchResults(fuzzyResults, text, 'Archivio Completo');
-    
-    // Non dobbiamo chiamare setState(STATES.IDLE) qui, 
-    // perché è handleSearchResults a gestire il cambio di stato a IDLE o AWAITING_...
-}
-
-// Funzione per mostrare suggerimenti 
-function appendHints(text) {
-    
+function appendOutput(html, className) {
+    const d = document.createElement('div');
+    d.innerHTML = html;
+    if (className) d.className = className;
+    d.style.marginBottom = "10px";
     const out = document.getElementById('output');
-    
-    // Crea il div dei suggerimenti
-    const div = document.createElement('div');
-    div.innerHTML = text; // Usa innerHTML per formattazione leggera se serve
-    div.className = 'hint-text'; // Classe fondamentale per la rimozione
-    
-// Stile inline per distinguerlo
-div.style.color = "#666";
-div.style.fontSize = "0.85rem";
-div.style.fontStyle = "italic";
-div.style.marginTop = "0.625rem";
-div.style.borderTop = "0.0625rem dashed #ccc"; 
-div.style.paddingTop = "0.3125rem";
-
-    out.appendChild(div);
+    out.appendChild(d);
     out.scrollTop = out.scrollHeight;
-}
-  
-/* ================== UTILITIES ================== */
-// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
-
-function formatText(str) {
-    let s = str.trim();
-
-    // 1. EMOJI vocali
-    s = s.replace(/\bemoji\s+([\w\s]+)\b/gi, (match, key) => {
-        key = key.toLowerCase().trim();
-        return emojiMap[key] || match;
-    });
-
-    // 2. Punteggiatura vocale → simboli
-    const punctuationMap = [
-        { regex: /\bpunto interrogativo\b/gi, char: "?" },
-        { regex: /\bpunto esclamativo\b/gi, char: "!" },
-        { regex: /\bdue punti\b/gi, char: ":" },
-        { regex: /\bvirgola\b/gi, char: "," },
-        { regex: /\bpunto\b/gi, char: "." },
-        { regex: /\ba capo\b/gi, char: "\n" }
-    ];
-
-    for (const p of punctuationMap) {
-        s = s.replace(p.regex, p.char);
-    }
-
-    // 3. Normalizzazione spazi e punteggiatura
-    s = s.replace(/\s+([,.!?])/g, "$1");  // niente spazio prima della punteggiatura
-    s = s.replace(/([,.!?])(?=\S)/g, "$1 "); // assicura spazio dopo punteggiatura (tranne prima di newline)
-    s = s.replace(/([,.!?])\s+\n/g, "$1\n"); // niente spazio prima delle newline
-    s = s.replace(/\s*\n\s*/g, "\n");
-
-    // 4. Capitalizzazione frasi
-    s = s.replace(/(^|[.!?]\s+)([a-z])/g, (m, before, char) => before + char.toUpperCase());
-
-    // 5. Capitalizzazione NOMI ITALIANI
-    const nomiRegex = new RegExp(`\\b(${[...NOMI_ITALIANI].join("|")})\\b`, "gi");
-    s = s.replace(nomiRegex, m => m.charAt(0).toUpperCase() + m.slice(1));
-
-    // 6. Capitalizzazione CITTA ITALIANE
-    const cittaRegex = new RegExp(`\\b(${[...CITTA_ITALIANE]
-        .sort((a,b)=>b.length-a.length) // evita match parziali (es: "terme" in "Lamezia Terme")
-        .join("|")
-        .replace(/\s+/g, "\\s+")})\\b`, "gi");
-
-    s = s.replace(cittaRegex, m =>
-        m.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
-    );
-
-    return s.trim();
-}
-
-
-function parseNumber(text) {
-    if (!text) return null;
-    let t = text.toLowerCase().replace(/[^\w ]/g, "");
-    
-    // Cerca cifre dirette
-    const digitMatch = t.match(/\d+/);
-    if (digitMatch) return parseInt(digitMatch[0]);
-
-    // Cerca parole
-    for (const [word, value] of Object.entries(textToNumMap)) {
-        const regex = new RegExp(`\\b${word}\\b`, 'i');
-        if (regex.test(t)) return value;
-    }
-    return null;
-}
-
-function displayEntryDetails(item) {
-    const out = `----------------
-Titolo: ${item.meta_title || "-"}
-Autore: ${item.meta_author || "-"}
-Contenuto: ${item.output || "N/A"}
-Ricerca: ${item.trigger || "N/A"}
-Tag: ${item.tag || "-"}
-----------------`;
-    appendOutput(out);
 }
 
 function updateSectionList() {
-    const listDiv = document.getElementById('sectionsList');
-    const sections = Object.keys(archive);
-    const labels = sections.map(sec => `${sec} (${archive[sec].length})`);
-    listDiv.textContent = "Sezioni: " + labels.join(" | ");
+    const counts = Object.keys(archive).map(k => `${k} (${archive[k].length})`).join(" | ");
+    document.getElementById('sectionsList').textContent = "Archivio: " + counts;
 }
 updateSectionList();
 
-function appendOutput(text, className = "") {
-    const out = document.getElementById('output');
-
-    // 1. Rimuovi eventuali "suggerimenti" vecchi (quelli con classe 'hint-text')
-    const oldHints = out.querySelectorAll('.hint-text');
-    oldHints.forEach(el => el.remove());
-
-    // 2. Crea il nuovo elemento
-    const div = document.createElement('div');
-    div.textContent = text;
-    // Mantiene la formattazione a capo
-    div.style.whiteSpace = "pre-wrap"; 
-    div.style.marginBottom = "1rem"; // Un po' di spazio tra i messaggi
-    
-    if (className) {
-        div.className = className;
-        // Se è un messaggio di stato temporaneo (es. Attendo istruzioni), diamogli un ID specifico
-        if (className === 'listening-status') div.id = 'tempListeningStatus';
-    }
-
-    out.appendChild(div);
-    out.scrollTop = out.scrollHeight;
-}
-
-  // Inserisci questo blocco dove vuoi, ad esempio nella sezione delle UTILITIES
-function setStatusIcon(iconName) {
-    const iconContainer = document.getElementById('statusIconContainer');
-    iconContainer.textContent = ''; // Pulisce l'icona precedente
-
-    switch (iconName) {
-        case 'search':
-            iconContainer.textContent = '🔍 Ricerca';
-            break;
-        case 'whatsapp':
-            iconContainer.textContent = '💬 Chat';
-            break;
-        case 'transcription':
-            iconContainer.textContent = '🪶 Trascrizione';
-            break;
-        case 'random':
-            iconContainer.textContent = '🎲 Lettura casuale...';
-            break;
-        default:
-            iconContainer.textContent = '';
-    }
-}
-
-/* ================== UI EXTRA ================== */
-// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
-
 document.getElementById('toggleButtons').onclick = () => {
-    const ex = document.getElementById('extraButtons');
-    ex.style.display = ex.style.display === 'block' ? 'none' : 'block';
+    const el = document.getElementById('extraButtons');
+    el.style.display = el.style.display === 'block' ? 'none' : 'block';
 };
-document.getElementById('infoArchive').onclick = () => {
-    const txt = `Come creare l'Archivio (File JSON)
 
-(Per chi vuole inserire i propri dati)
-
-L'archivio è come un libro di ricette o una rubrica. Si scrive in un formato chiamato JSON, che è semplice testo ma con regole precise di punteggiatura. Puoi crearlo usando una qualsiasi app Note o Blocco Note sul cellulare o PC.
-
-1. La Struttura (Lo Scheletro)
-
-Immagina l'archivio come una scatola che contiene diverse cartelle (le sezioni). Ogni cartella contiene dei foglietti (gli elementi).
-
-La struttura base deve essere sempre questa:
-JSON
-
-{
-  "conversazione": [],
-  "whatsapp": [],
-  "poesie": [],
-  "ricette": []
-}
-
-Le parole tra virgolette a sinistra (es. poesie) sono i nomi delle sezioni. Puoi inventarne di nuove (es. lavoro, barzellette).
-
-2. Come inserire un Elemento (Il contenuto)
-
-Dentro le parentesi quadre [] di ogni sezione, devi inserire i dati tra parentesi graffe {}. Ecco gli ingredienti fondamentali per ogni elemento:
-
-trigger: È la parola chiave. Se dici questa parola, l'assistente trova questo elemento.
-
-output: È quello che l'assistente risponderà o leggerà.
-
-meta_title (Opzionale): Il titolo utile per gli elenchi.
-
-Esempio Pratico:
-
-{
-  "whatsapp": [
-    {
-      "trigger": "mamma",
-      "output": "+393331234567"
-    },
-    {
-      "trigger": "luigi",
-      "output": "+393479999999"
+document.getElementById('resetArchive').onclick = () => {
+    if(confirm("Cancello tutto?")) {
+        archive = JSON.parse(JSON.stringify(defaultArchive));
+        localStorage.setItem('archive', JSON.stringify(archive));
+        updateSectionList();
+        appendOutput("🗑️ Archivio svuotato.");
     }
-  ],
-  "poesie": [
-    {
-      "trigger": "infinito",
-      "output": "Sempre caro mi fu quest'ermo colle...",
-      "meta_title": "L'Infinito di Leopardi"
-    }
-  ],
-  "ricette": [
-    {
-      "trigger": "carbonara",
-      "output": "Per la carbonara servono uova, guanciale, pecorino e pepe.",
-      "meta_title": "Pasta alla Carbonara"
-    }
-  ]
-}
-
-3. Regole d'oro per non sbagliare
-
-Virgolette: ogni testo deve essere racchiuso tra virgolette inglesi " ". Non usare virgolette curve.
-
-Virgole: se aggiungi più elementi, metti una virgola tra una parentesi chiusa } e quella aperta { successiva. L'ultimo elemento NON deve avere la virgola finale.
-
-Numeri WhatsApp: nella sezione whatsapp, nel campo output devi mettere solo il numero di telefono con prefisso +39, senza spazi.
-
-Estensione file: quando salvi il file, assicurati che finisca con .json. Se il telefono lo salva come .txt, rinominalo.
-
-4. Come caricarlo
-
-Apri l'assistente vocale.
-Premi Opzioni e Info.
-Tocca Scegli file.
-Seleziona il file mio_archivio.json che hai creato.
-Se appare Import completato, sei pronto!
-
-Ora prova a dire: Cerca carbonara o Invia whatsapp a Mamma ciao.`
-    document.getElementById('output').textContent = txt;
 };
-  
-document.getElementById('infoCommands').onclick = () => {
-    const txt = `Guida all'uso dell'Assistente Vocale
-(Per chi usa l'applicazione)
 
-Questa applicazione è un maggiordomo virtuale che ascolta la tua voce, risponde a domande, legge testi e può inviare messaggi WhatsApp o salvare appunti. Non serve digitare nulla, basta parlare.
-
-1. Requisiti fondamentali (Cosa serve)
-
-Per far funzionare l'assistente correttamente, devi rispettare queste semplici regole:
-
-Dispositivo: Funziona meglio su smartphone Android o su PC (computer).
-
-Browser (Programma per navigare): Devi usare Google Chrome. Altri browser (come Firefox, Safari su iPhone o Samsung Internet) potrebbero non supportare il riconoscimento vocale avanzato usato qui.
-
-
-2. I Pulsanti Principali
-
-Appena apri la pagina, vedrai tre grandi pulsanti colorati. Ecco cosa fanno:
-
-🎙️ Il Microfono (Grande, al centro):
-Tocca una volta: diventa rosso e inizia ad ascoltare. Parla chiaramente.
-Tocca mentre parla: se l'assistente sta parlando e vuoi interromperlo per dire subito qualcos'altro, tocca il microfono. Lui starà zitto e ascolterà te.
-
-⏹️ Il Quadrato (Stop):
-È il tasto di emergenza o Reset. Se l'assistente si incanta, sta parlando troppo o vuoi ricominciare da zero, premi qui. Cancella tutto il testo a schermo e ferma l'audio.
-
-🔈 L'Altoparlante (Muto):
-Serve per zittire la voce dell'assistente.
-Se l'icona è 🔈 (acceso), l'assistente leggerà le risposte ad alta voce.
-Se l'icona è 🔇 (spento), l'assistente scriverà solo il testo sullo schermo senza parlare.
-
-3. Come usare i Comandi Vocali
-
-Non devi imparare codici strani, basta parlare in modo naturale. Ecco cosa puoi dire:
-
-A. Senza Archivio (Appena aperta)
-
-Anche se non hai caricato nessun dato, l'assistente sa già fare alcune cose utili:
-
-Scrivere e Salvare appunti:
-Dì qualsiasi frase (es: Ricordami di comprare il latte).
-Lui scriverà il testo.
-Dì Salva o Copia: copierà il testo negli appunti del telefono.
-
-WhatsApp (Invio diretto):
-Dì: Invia whatsapp a [Nome] [Messaggio].
-Esempio: Invia whatsapp a Mamma sto arrivando per cena.
-Nota: funziona solo se hai caricato dei contatti nella sezione WhatsApp.
-
-Ripetizione:
-Dì Ripeti: l'assistente rileggerà l'ultima frase che ha detto.
-
-B. Con Archivio Caricato (Funzioni Avanzate)
-
-Una volta caricato il file dei dati, puoi interrogare la tua memoria personale:
-
-Ricerca Libera:
-Dì una parola chiave (es: Manzoni, Ricetta pizza).
-Lui cercherà in tutto l'archivio.
-Se trova un solo risultato, te lo legge.
-Se ne trova molti, ti mostra un elenco numerato.
-
-Scegliere dall'elenco:
-Se l'assistente dice Ho trovato 3 risultati, quale leggo?, tu rispondi col numero.
-Dì Uno, Due, Il primo, Ventitre. Capisce i numeri anche pronunciati.
-Dì Tutti per leggerli tutti di fila.
-
-Lettura Casuale:
-Dì: Leggi una cosa a caso o Random. Pescherà un contenuto casuale dall'archivio.
-
-4. Il Menu Opzioni (Caricare i dati)
-
-Sotto la zona del testo c'è un pulsante grigio ⬇️ Opzioni e Info. Premilo per vedere i comandi di gestione:
-
-Scegli file (o Importa): carichi il tuo file .json. I dati vengono salvati nella memoria del telefono e restano anche se chiudi la pagina.
-
-Esporta JSON: scarica il file aggiornato.
-
-Reset Archivio: cancella tutto e riporta l'assistente allo stato iniziale.`
-    document.getElementById('output').textContent = txt;
-};
-  
 document.getElementById('exportCommands').onclick = () => {
     const a = document.createElement('a');
     a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(archive, null, 2));
-    a.download = "archivio_assistente.json"; a.click();
+    a.download = "backup_assistente.json"; a.click();
 };
+
 document.getElementById('importFile').onchange = (e) => {
     const r = new FileReader();
     r.onload = ev => {
         try {
             const j = JSON.parse(ev.target.result);
-            // Merge intelligente
-            for (let k in j) {
-                if (!archive[k]) archive[k] = [];
-                j[k].forEach(i => archive[k].push(i));
-            }
+            Object.keys(j).forEach(k => {
+                if(!archive[k]) archive[k] = [];
+                archive[k] = archive[k].concat(j[k]);
+            });
             localStorage.setItem('archive', JSON.stringify(archive));
             updateSectionList();
-            appendOutput("Import completato.");
-        } catch(e) { appendOutput("Errore file JSON."); }
+            appendOutput("📥 Dati importati.");
+        } catch(err) { alert("File non valido"); }
     };
     if (e.target.files[0]) r.readAsText(e.target.files[0]);
 };
-document.getElementById('resetArchive').onclick = () => {
-    if(confirm("Sei sicuro di voler cancellare tutto l'archivio?")) {
-        archive = JSON.parse(JSON.stringify(defaultArchive));
-        localStorage.setItem('archive', JSON.stringify(archive));
-        updateSectionList();
-        appendOutput("Archivio resettato.");
-    }
-};
 
-// Toggle Audio
-const muteBtn = document.getElementById('muteButton');
-muteBtn.onclick = () => {
+document.getElementById('muteButton').onclick = () => {
     audioEnabled = !audioEnabled;
-    muteBtn.className = audioEnabled ? "mute-on" : "mute-off";
-    muteBtn.textContent = audioEnabled ? "🔈" : "🔇";
+    const btn = document.getElementById('muteButton');
+    btn.className = audioEnabled ? "mute-on" : "";
+    btn.textContent = audioEnabled ? "🔈" : "🔇";
     if(!audioEnabled) stopAllAudio();
 };
-muteBtn.className = "mute-off"; // Init
-
 </script>
 </body>
 </html>
-
-  
