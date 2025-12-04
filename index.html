@@ -880,13 +880,7 @@ function handleSpeechInput(text) {
         return setState(STATES.IDLE);
     }
 
-    /* ========== PRIORITÀ 4: LETTURA RANDOM / LEGGI ========== */
-    if (readWords.some(w => text.startsWith(w))) {
-        setStatusIcon('random');
-        const ok = handleRead(text);
-        return setState(STATES.IDLE);
-    }
-
+    
     /* ========== PRIORITÀ 5: METADATI (AUTORE/TITOLO) ========== */
     if (text.includes("autore") || text.includes("titolo")) {
         setStatusIcon('search');
@@ -982,16 +976,7 @@ function handleNormalCommand(text) {
     }
 
 
-    /* ===========================================
-       4. LETTURA RANDOM ("leggi", "leggimi", ecc.)
-       =========================================== */
-    if (readWords.some(w => text.startsWith(w))) {
-        setStatusIcon('random');
-        const ok = handleRead(text);
-        return setState(STATES.IDLE);
-    }
-
-
+  
     /* ===========================================
        5. METADATI (autore / titolo)
        =========================================== */
@@ -1054,12 +1039,20 @@ function handleNormalCommand(text) {
     }
 
 
-    /* ===========================================
-       8. FALLBACK (RICERCA GLOBALE)
-       =========================================== */
-    handleGlobalSearchFallback(text);
-    // Può entrare in AWAITING_SEARCH_CHOICE o AWAITING_SAVE_CONFIRMATION
-
+  /* =========================================== 8. CATCH-ALL / RICERCA GLOBALE =========================================== */
+    // Se non è un comando noto, un trigger, o una frase troppo corta, prova una ricerca globale
+    if (text.length > 2) {
+        handleGlobalSearchFallback(text);
+        // La funzione handleGlobalSearchFallback imposta il nuovo stato (AWAITING_SEARCH_CHOICE o AWAITING_SAVE_CONFIRMATION) 
+        // e restituisce il controllo, quindi non dobbiamo chiamare setState(STATES.IDLE) qui.
+        return; 
+    }
+    
+    // Ultimo Fallback: frase troppo corta o completamente incomprensibile
+    speak("Scusa, non ho capito cosa intendevi.");
+    appendOutput("❓ Comando non riconosciuto.");
+    return setState(STATES.IDLE);
+} // Fine handleSpeechInput
 }
 
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
@@ -1707,17 +1700,27 @@ function appendOutput(text, className = "") {
     out.scrollTop = out.scrollHeight;
 }
 
-function setStatusIcon(type) {
-    const c = document.getElementById('statusIconContainer');
-    let icon = "";
-    switch(type) {
-        case 'search': icon = "🔍 Ricerca"; break;
-        case 'conversation': icon = "💬 Chat"; break;
-        case 'random': icon = "📖 Lettura random"; break;
-        case 'transcription': icon = "🪶 Trascrizione"; break;
-        case 'whatsapp': icon = "📱 WhatsApp"; break;
+  // Inserisci questo blocco dove vuoi, ad esempio nella sezione delle UTILITIES
+function setStatusIcon(iconName) {
+    const iconContainer = document.getElementById('statusIconContainer');
+    iconContainer.textContent = ''; // Pulisce l'icona precedente
+
+    switch (iconName) {
+        case 'search':
+            iconContainer.textContent = '🔍 Ricerca';
+            break;
+        case 'whatsapp':
+            iconContainer.textContent = '💬 Chat';
+            break;
+        case 'transcription':
+            iconContainer.textContent = '🪶 Trascrizione';
+            break;
+        case 'random':
+            iconContainer.textContent = '🎲 Lettura casuale...';
+            break;
+        default:
+            iconContainer.textContent = '';
     }
-    c.textContent = icon;
 }
 
 /* ================== UI EXTRA ================== */
