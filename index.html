@@ -179,11 +179,65 @@
 /* ================== CONFIGURAZIONE ================== */
 const defaultArchive = { "conversazione": [], "whatsapp": [] };
 let archive = JSON.parse(localStorage.getItem('archive') || JSON.stringify(defaultArchive));
+  
+const NOMI_ITALIANI = new Set([
+  "alessandro","andrea","antonio","angelo","aurelio","alberto","aldo","alfredo",
+  "bruno","bartolomeo","bernardo","biagio",
+  "carlo","corrado","claudio","cesare","cristiano","cristian","carmine","costantino",
+  "daniele","dario","davide","diego","domenico","donato",
+  "enrico","emilio","emanuele","erik","ettore","edoardo","elia","elio",
+  "federico","fabio","francesco","filippo","flavio","fabrizio","fausto",
+  "gabriele","giuseppe","giovanni","giacomo","giorgio","gianluca","giulio","giuliano","gianni","graziano",
+  "luca","luigi","lorenzo","leonardo","livio","ludovico",
+  "marco","mario","matteo","mattia","massimo","maurizio","michele","mirko","marcello","manuele",
+  "nicola","niccolo","nicolò","nino",
+  "paolo","pietro","pasquale","piero","pablo",
+  "riccardo","roberto","renato","raffaele","raffaello","rino","romano",
+  "salvatore","simone","stefano","samuele","sandro","silvano","silvio","saverio",
+  "tommaso","tiziano","teo","tino",
+  "ugo","umberto",
+  "valerio","vittorio","vito","vincenzo","virgilio",
+  "walter","william",
+  "zaccaria",
 
+  // femminili
+  "anna","alessandra","adriana","amalia","ambra","anita","angela","antonella",
+  "beatrice","bianca","bruna","barbara",
+  "chiara","camilla","carla","caterina","cristina","cinzia","clelia",
+  "daniela","debora","denise","diana",
+  "elena","eleonora","erika","eva","emanuela",
+  "francesca","filomena","flora",
+  "giulia","giorgia","gabriella","giovanna","greta",
+  "ilaria","irene","isabella",
+  "jessica",
+  "laura","luisa","lucia","lia","linda","lorena",
+  "marta","marina","maria","martina","margherita","monica","miriana","michela",
+  "nadia","nika","nicoletta","noemi",
+  "ornella",
+  "paola","patrizia","pamela","patricia",
+  "roberta","romina","rosa","rosanna","rosaria","rossella","raffaella",
+  "sara","simona","silvia","serena","sabrina",
+  "tiziana","teresa",
+  "valentina","valeria","vanessa","vera","veronica","vittoria","virginia",
+  "ylenia",
+  "zara"
+]);
+
+const CITTA_ITALIANE = new Set([
+  "roma","milano","napoli","torino","palermo","genova","bologna","firenze","bari","catania",
+  "venezia","verona","messina","padova","trieste","brescia","parma","taranto","prato",
+  "modena","reggio emilia","perugia","livorno","ravenna","cagliari","foggia","rimini",
+  "salerno","sassari","pescara","novara","piacenza","ancona","andria","udine","terni",
+  "bolzano","la spezia","como","arezzo","lecce","trento","udine","cesena","pesaro",
+  "lucca","treviso","pisa","viterbo","ragusa","siracusa","potenza","campobasso","aosta",
+  "matera","siena","crotone","lamezia terme","asti","alessandria","cuneo","lodi",
+  "mantova","giugliano","marano","torre del greco","avellino"
+]);
+  
 // Mappe
 const emojiMap = {
     "cuore": "❤️", "sorriso": "🙂", "risata": "😂", "ok": "👌", "pollice su": "👍", "pollice giù": "👎", "fuoco": "🔥", "stella": "⭐", "sole": "☀️", "luna": "🌙",
-    "bacio": "💋", "abbraccio": "🤗", "festa": "🎉", "torta": "🎂", "regalo": "🎁", "musica": "🎵", "occhiolino": "😉", "triste": "😞", "arrabbiato": "😡", "pensoso": "🤔",
+    "bacio": "💋", "baci": "💋💋💋", "abbraccio": "🤗", "festa": "🎉", "torta": "🎂", "regalo": "🎁", "musica": "🎵", "occhiolino": "😉", "triste": "😞", "arrabbiato": "😡", "pensoso": "🤔",
     "applauso": "👏", "preghiera": "🙏", "forza": "💪", "bomba": "💣", "pericolo": "⚠️", "spunta": "✅", "croce": "❌", "fantasma": "👻", "robot": "🤖", "alieno": "👽",
     "cucciolo": "🐶", "gatto": "🐱", "coniglio": "🐰", "orso": "🐻", "panda": "🐼", "elefante": "🐘", "leone": "🦁", "unicorno": "🦄", "pesce": "🐟", "delfino": "🐬",
     "coccinella": "🐞", "ape": "🐝", "farfalla": "🦋", "ragno": "🕷️", "cavallo": "🐴", "arcobaleno": "🌈", "neve": "❄️", "pioggia": "🌧️", "fulmine": "⚡", "vento": "🌬️",
