@@ -342,14 +342,37 @@ micBtn.onclick = () => {
  
 
 document.getElementById('stopButton').onclick = () => {
+
+    // 1. Ferma audio e sintesi vocale
     stopAllAudio();
-    if (currentRecognition) currentRecognition.abort();
+
+    // 2. Ferma riconoscimento vocale se attivo
+    if (currentRecognition) {
+        currentRecognition.onend = null; // evita ri-trigger
+        try {
+            currentRecognition.abort(); // più rapido e sicuro
+        } catch (e) {
+            currentRecognition.stop();
+        }
+        currentRecognition = null;
+    }
+
+    // 3. Reset variabili temporanee e di stato
     tempMemory = {};
+    lastMainOutput = "";     // Disabilita comando "Ripeti"
+    setState(STATES.IDLE);   // Nuova gestione stati
+   
+    // 4. Reset interfaccia grafica
     document.getElementById('output').innerHTML = "";
-    setState(STATES.IDLE);
+   
+    if (typeof micBtn !== "undefined") {
+        micBtn.classList.remove('listening');
+    }
+
+    // 5. Messaggio finale
     appendOutput("🗑️ Elimino gli input e termino l'ascolto", "temp-status");
 };
-
+  
 /* ================== INTELLIGENZA & COMANDI ================== */
 // \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 function handleSpeechInput(text) {
