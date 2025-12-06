@@ -244,8 +244,7 @@ const emojiMap = {
 };
 const textToNumMap = { "uno":1, "due":2, "tre":3, "quattro":4, "cinque":5, "sei":6, "sette":7, "otto":8, "nove":9, "dieci":10, "tutti": "all" };
 const __s = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
-let infotxt = "💡 <i>Prova a dire:</i> \n <i>• Scrivi ... • Messaggio ... </i> \n <i>Oppure se hai un archivio:</i> \n <i>una parola come parametro di ricerca</i>";
-appendCustomDiv(infotxt);
+let infotxt = "💡 <i>Prova a dire: • Scrivi ... • Messaggio ... </i> \n <i>Se hai un archivio puoi dire il parametro di ricerca</i>";
   
 // Stati
 // \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
@@ -375,7 +374,7 @@ document.getElementById('stopButton').onclick = () => {
     // 5. Messaggio finale
     appendOutput("🗑️ Elimino gli input e termino l'ascolto", "temp-status");
 
-let infotxt = "💡 <i>Prova a dire:</i> \n <i>• Scrivi ... • Messaggio ... </i> \n <i>Oppure se hai un archivio:</i> \n <i>una parola come parametro di ricerca</i>";
+let infotxt = "💡 <i>Prova a dire: • Scrivi ... • Messaggio ... </i>";
 appendCustomDiv(infotxt);
 
 };
@@ -683,6 +682,9 @@ function updateSectionList() {
     document.getElementById('sectionsList').textContent = "Archivio: " + counts;
 }
 updateSectionList();
+
+  //info iniziali
+  appendCustomDiv(infotxt);  
 
 document.getElementById('toggleButtons').onclick = () => {
     const el = document.getElementById('extraButtons');
