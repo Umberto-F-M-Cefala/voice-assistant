@@ -244,7 +244,7 @@ const emojiMap = {
 };
 const textToNumMap = { "uno":1, "due":2, "tre":3, "quattro":4, "cinque":5, "sei":6, "sette":7, "otto":8, "nove":9, "dieci":10, "tutti": "all" };
 const __s = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
-const infotxt = "💡 <i>Prova a dire:</i> \n <i>• Scrivi ... • Messaggio ... </i> \n <i>Oppure se hai un archivio:</i> \n <i>una parola come parametro di ricerca</i>";
+let infotxt = "💡 <i>Prova a dire:</i> \n <i>• Scrivi ... • Messaggio ... </i> \n <i>Oppure se hai un archivio:</i> \n <i>una parola come parametro di ricerca</i>";
   
 // Stati
 // \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
@@ -449,7 +449,7 @@ function handleSpeechInput(text) {
 
     // --- RICERCA NELL'ARCHIVIO ---
     const found = findBestMatch(text);
-    const __s = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
+    const __s2 = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
     
     if (found && found.score > 0.85) {
         // Match forte diretto
