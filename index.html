@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#007bff">
 <title>Assistente vocale di Umberto F. M. Cefalà</title>
+<meta name="author" content="Umberto F. M. Cefalà">
 <style>
   html { font-size: 100%; box-sizing: border-box; }
   *, *:before, *:after { box-sizing: inherit; }
@@ -113,16 +113,7 @@
     box-shadow: inset 0 0 0.3125rem rgba(0,0,0,0.05); /* 5px */
   }
 
-  .hint-text {
-    color: #666;
-    font-size: 0.85rem;
-    font-style: italic;
-    margin-top: 0.625rem; /* 10px */
-    border-top: 1px dashed #ccc;
-    padding-top: 0.3125rem; /* 5px */
-  }
-  
-  #toggleButtons {
+   #toggleButtons {
     cursor: pointer;
     margin-top: 0.9375rem; /* 15px */
     padding: 0.625rem 1.25rem; /* 10px 20px */
@@ -177,7 +168,7 @@
 
 <script>
 /* ================== CONFIGURAZIONE ================== */
-const defaultArchive = { "conversazione": [], "whatsapp": [] };
+const defaultArchive = { "conversazione": [] };
 let archive = JSON.parse(localStorage.getItem('archive') || JSON.stringify(defaultArchive));
   
 const NOMI_ITALIANI = new Set([
@@ -459,14 +450,55 @@ function formatText(str, autoEmoji) {
         s = s.replace(regex, (match) => emojiMap[match.toLowerCase()] || match);
     }
 
-    // 2. Punteggiatura base
-    s = s.replace(/\bpunto\b/gi, ".").replace(/\bvirgola\b/gi, ",").replace(/\bpunto interrogativo\b/gi, "?").replace(/\bpunto esclamativo\b/gi, "!");
-    
-    // 3. Capitalizzazione
-    s = s.charAt(0).toUpperCase() + s.slice(1);
-    s = s.replace(/([.!?]\s*)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
+  // Punteggiatura vocale → simboli
+    const punctuationMap = [
+        { regex: /\bpunto interrogativo\b/gi, char: "?" },
+        { regex: /\bpunto esclamativo\b/gi, char: "!" },
+        { regex: /\bdue punti\b/gi, char: ":" },
+        { regex: /\bvirgola\b/gi, char: "," },
+        { regex: /\bpunto\b/gi, char: "." },
+        { regex: /\ba capo\b/gi, char: "\n" }
+    ];
 
-    return s;
+    for (const p of punctuationMap) {
+        s = s.replace(p.regex, p.char);
+    }
+
+    // Normalizzazione spazi e punteggiatura
+    s = s.replace(/\s+([,.!?])/g, "$1");  // niente spazio prima della punteggiatura
+    s = s.replace(/([,.!?])(?=\S)/g, "$1 "); // assicura spazio dopo punteggiatura (tranne prima di newline)
+    s = s.replace(/([,.!?])\s+\n/g, "$1\n"); // niente spazio prima delle newline
+    s = s.replace(/\s*\n\s*/g, "\n");
+
+    // Capitalizzazione frasi
+    s = s.replace(/(^|[.!?]\s+)([a-z])/g, (m, before, char) => before + char.toUpperCase());
+
+    // Capitalizzazione NOMI ITALIANI
+    const nomiRegex = new RegExp(`\\b(${[...NOMI_ITALIANI].join("|")})\\b`, "gi");
+    s = s.replace(nomiRegex, m => m.charAt(0).toUpperCase() + m.slice(1));
+
+    // Capitalizzazione CITTA ITALIANE
+    const cittaRegex = new RegExp(`\\b(${[...CITTA_ITALIANE]
+        .sort((a,b)=>b.length-a.length) // evita match parziali (es: "terme" in "Lamezia Terme")
+        .join("|")
+        .replace(/\s+/g, "\\s+")})\\b`, "gi");
+
+    // Formattazione del saluto (Buongiorno/Ciao/Buonasera + nomi)
+    s = s.replace(
+    /\b(Buongiorno|Ciao|Buonasera)\s+((?:[A-Z][a-z]+(?:\s+)?)+)/g,
+    (m, saluto, nomi) => {
+        nomi = nomi.trim();
+        return `${saluto} ${nomi},\n`;
+    }
+   );
+
+  
+    s = s.replace(cittaRegex, m =>
+        m.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+    );
+
+ return s;
+  
 }
 
 function handleWhatsapp(text) {
@@ -598,7 +630,7 @@ function appendOutput(html, className) {
     const d = document.createElement('div');
     d.innerHTML = html;
     if (className) d.className = className;
-    d.style.marginBottom = "10px";
+    d.style.marginBottom = "0.625rem";
     const out = document.getElementById('output');
     out.appendChild(d);
     out.scrollTop = out.scrollHeight;
