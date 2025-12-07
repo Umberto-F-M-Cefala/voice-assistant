@@ -499,23 +499,36 @@ if (text.startsWith("archivia")) {
     return setState(STATES.IDLE);
 }
  // --- SALVA in appunti ---
+
 if (text === "salva" || text === "copia") {
-    if (!lastMainOutput) {
+
+    if (!lastMainOutput || typeof lastMainOutput !== "string") {
         speak("Nulla da salvare");
         appendOutput("Non c'è nulla da salvare.");
         return setState(STATES.IDLE);
     }
+
+    // Controllo compatibilità API
+    if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        speak("La funzione copia non è supportata");
+        appendOutput("❌ Clipboard API non supportata dal browser.");
+        return setState(STATES.IDLE);
+    }
+
     navigator.clipboard.writeText(lastMainOutput)
         .then(() => {
             speak("Salvato negli appunti");
             appendOutput(`💾 Copiato: "${lastMainOutput}"`);
-            return setState(STATES.IDLE);
+            setState(STATES.IDLE);
         })
-        .catch(e => {
+        .catch(err => {
+            console.error("Clipboard error:", err);
             speak("Errore nel salvataggio");
-            return setState(STATES.IDLE);
+            appendOutput("❌ Errore durante la copia negli appunti.");
+            setState(STATES.IDLE);
         });
 }
+
 
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
 // \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
