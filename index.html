@@ -421,10 +421,12 @@ function handleSpeechInput(text) {
         speak("Messaggio creato: " + formatted);
         appendOutput(`💬 <b>Messaggio:</b> ${formatted}`);
         lastMainOutput = formatted; //memoria
+        infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia [e il titolo del contenuto] </i>";
+        appendCustomDiv(infotxt);
         return setState(STATES.IDLE);
     }
 
-    // --- SALVA / TRASCRIVI (Standard, NO Emoji) ---
+    // --- SCRIVI (Standard, NO Emoji) ---
         if (text.startsWith("trascrivi") || text.startsWith("scrivi")) {
         content = text.replace(/^(trascrivi|scrivi)\s*/i, "").trim();
         if (!content) {
@@ -438,6 +440,8 @@ function handleSpeechInput(text) {
         speak("Ho salvato la nota.");
         appendOutput(`💾 <b>Salvato:</b> ${formatted}`);
         lastMainOutput = formatted; //memoria
+        infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia [e il titolo del contenuto] </i>";
+appendCustomDiv(infotxt);
         return setState(STATES.IDLE);
     }
 
@@ -472,14 +476,16 @@ function handleSpeechInput(text) {
         return setState(STATES.IDLE);
     }
  // --- ARCHIVIA ---
-    if (text === "archivia") {
+    if (text.startsWith("archivia") {
+      content = text.replace(/^archivia\s*/i, "").trim();
         if (!lastMainOutput) {
           speak("Nulla da archiviare");
-          appendOutput("Nulla da archiviare.");
+          appendOutput("Non c'è nulla da archiviare.");
             return setState(STATES.IDLE);
         }
+        saveToArchive(lastMainOutput, content);
         speak("Archiviato"); 
-        saveToArchive(lastMainOutput, "Messaggio Emoji");
+        appendOutput("Non c'è nulla da archiviare.");
         return setState(STATES.IDLE);
     }
  // --- SALVA in appunti ---
@@ -567,10 +573,9 @@ function handleWhatsapp(text) {
 
 function saveToArchive(text, type) {
     archive.conversazione.push({
-        trigger: text.toLowerCase().substring(0, 20),
+        trigger: type.toLowerCase().substring(0, 20),
         output: text,
-        meta_title: type,
-        date: new Date().toLocaleTimeString()
+        meta_title: type.toLowerCase().substring(0, 20)
     });
     localStorage.setItem('archive', JSON.stringify(archive));
     updateSectionList();
