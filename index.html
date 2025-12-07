@@ -417,11 +417,10 @@ function handleSpeechInput(text) {
         // Qui attiviamo le emoji automatiche (true)
         formatted = formatText(content, true);
         
-        // Salviamo in conversazione
         speak("Messaggio creato: " + formatted);
         appendOutput(`💬 <b>Messaggio:</b> ${formatted}`);
         lastMainOutput = formatted; //memoria
-        infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia [e il titolo del contenuto] </i>";
+        infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia ... [il titolo del contenuto] </i>";
         appendCustomDiv(infotxt);
         return setState(STATES.IDLE);
     }
@@ -438,7 +437,7 @@ function handleSpeechInput(text) {
         formatted = formatText(content, false);
         
         lastMainOutput = formatted; //memoria
-        infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia [e il titolo del contenuto] </i>";
+        infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia ... [il titolo del contenuto] </i>";
 appendCustomDiv(infotxt);
         return setState(STATES.IDLE);
     }
@@ -493,12 +492,22 @@ appendCustomDiv(infotxt);
         return setState(STATES.IDLE);
     }
  // --- SALVA in appunti ---
-    if (text === "salva" || text === "copia") {
-       speak("Non ho nulla"); 
-       appendOutput(`💾 <b>Salvato:</b> ${lastMainOutput}`);
-       return setState(STATES.IDLE);
+if (text === "salva" || text === "copia") {
+    if (!lastMainOutput) {
+        speak("Nulla da salvare");
+        appendOutput("Non c'è nulla da salvare.");
+        return setState(STATES.IDLE);
     }
-  
+    navigator.clipboard.writeText(lastMainOutput)
+        .then(() => {
+            speak("Salvato negli appunti");
+            appendOutput(`💾 Copiato: "${lastMainOutput}"`);
+            return setState(STATES.IDLE);
+        })
+        .catch(e => {
+            speak("Errore nel salvataggio");
+            return setState(STATES.IDLE);
+        });
 }
 
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
