@@ -399,9 +399,15 @@ function handleSpeechInput(text) {
     
     // --- invio diretto WHATSAPP con testo creato al momento ---
     if (text.startsWith("invia whatsapp") || text.startsWith("whatsapp")) {
-        content = text.replace(/^(invia whatsapp|whatsapp)\s*/i, "").trim();     
+        content = text.replace(/^(invia whatsapp|whatsapp)\s*/i, "").trim();    
+      if (text.length < 2) {
+        speak("Non trovo nulla da inviare");
+        appendOutput(`💬 Non trovo nulla da inviare.`);
+        return;
+      } else {
         handleWhatsapp(content);
         lastMainOutput = formatted; //memoria
+       }
         return setState(STATES.IDLE);
     }
   
@@ -597,11 +603,6 @@ function formatText(str, autoEmoji) {
 }
 
 function handleWhatsapp(text) {
-    if (text.length < 2) {
-        speak("Non trovo nulla da inviare");
-        appendOutput(`💬 Non trovo nulla da inviare.`);
-        return;
-    }
     const msg = formatText(text, true) + "\n //_trascritto dall'Assistente Vocale_";
     const url = `whatsapp://send?text=${encodeURIComponent(msg)}`;
     window.open(url, '_self');
