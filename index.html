@@ -402,13 +402,7 @@ function handleSpeechInput(text) {
         return setState(STATES.IDLE);
     }
  
-   // --- WHATSAPP invio input già registrato ---
-    if (text === "invia whatsapp" || text === "whatsapp") {
-        speak("Non ho nulla"); 
-        return setState(STATES.IDLE);
-    }
-
-  
+ 
     // --- NUOVO: MESSAGGIO (Con Emoji Automatiche) ---
     if (text.startsWith("messaggio")) {
         let content = text.replace(/^messaggio\s*/i, "").trim();
@@ -444,12 +438,6 @@ function handleSpeechInput(text) {
         return setState(STATES.IDLE);
     }
 
-    // --- RIPETI ---
-    if (text === "ripeti") {
-        speak("Non ho nulla da ripetere al momento."); // Semplificato
-        return setState(STATES.IDLE);
-    }
-
     // --- RICERCA NELL'ARCHIVIO ---
     const found = findBestMatch(text);
     const __s2 = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
@@ -465,6 +453,32 @@ function handleSpeechInput(text) {
         handleSearchResults(results, text);
         // handleSearchResults imposta lo stato corretto
     }
+
+  /* ============ comandi accessori della function handleSpeechInput(text) ============ */
+// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
+
+    // --- RIPETI ---
+    if (text === "ripeti") {
+        speak("Non ho nulla da ripetere al momento."); // Semplificato
+        return setState(STATES.IDLE);
+    }
+
+   // --- WHATSAPP invio input già registrato ---
+    if (text === "invia whatsapp" || text === "whatsapp") {
+        speak("Non ho nulla"); 
+        return setState(STATES.IDLE);
+    }
+ // --- ARCHIVIA ---
+    if (text === "archivia") {
+        speak("Non ho nulla"); 
+        return setState(STATES.IDLE);
+    }
+ // --- SALVA in appunti ---
+    if (text === "salva" || text === "copia") {
+        speak("Non ho nulla"); 
+        return setState(STATES.IDLE);
+    }
+  
 }
 
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
