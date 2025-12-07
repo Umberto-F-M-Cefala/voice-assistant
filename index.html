@@ -163,7 +163,7 @@
 <div id="extraButtons">
   <p>Caricamento archivio: </p><input type="file" id="importFile" accept=".json">
   <button class="secondary-btn" id="exportCommands">Esporta archivio</button>
-  <button class="secondary-btn" id="resetArchive" style="color:red; border:1px solid red;">Reset archivio</button>
+  <button class="secondary-btn" id="resetArchive" style="color:red; border:0.1rem solid red;">Reset archivio</button>
 </div>
 
 <script>
@@ -546,13 +546,14 @@ function formatText(str, autoEmoji) {
 
 function handleWhatsapp(text) {
     if (text.length < 2) {
-        speak("Cosa devo inviare?");
+        speak("Non trovo nulla da inviare");
+        appendOutput(`💬 Non trovo nulla da inviare.`);
         return;
     }
     const msg = formatText(text, true) + "\n //_trascritto dall'Assistente Vocale_";
     const url = `whatsapp://send?text=${encodeURIComponent(msg)}`;
     window.open(url, '_self');
-    appendOutput(`💬 Apertura WhatsApp: "${msg}"`);
+    appendOutput(`💬 Invio diretto del messaggio WhatsApp: "${msg}"`);
 }
 
 function saveToArchive(text, type) {
