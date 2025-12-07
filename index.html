@@ -468,7 +468,7 @@ function handleSpeechInput(text) {
         speak("Ripeto: " + lastMainOutput);
         appendOutput("Ripeto... ");
     } 
-        if (!lastMainOutput) {
+        if (lastMainOutput === 0) {
         speak("Nulla da ripetere");
         appendOutput("Nulla da ripetere");
     }
@@ -477,7 +477,7 @@ function handleSpeechInput(text) {
 
    // --- WHATSAPP invio input già registrato ---
     if (text === "invia whatsapp" || text === "whatsapp") {
-     if (!lastMainOutput) {
+     if (lastMainOutput === 0) {
           speak("Nulla da inviare");
           appendOutput("Non c'è nulla da inviare con Whatsapp.");
           return setState(STATES.IDLE);
@@ -488,7 +488,7 @@ function handleSpeechInput(text) {
  // --- ARCHIVIA ---
 if (text.startsWith("archivia")) {
     content = text.replace(/^archivia\s*/i, "").trim();
-    if (!lastMainOutput) {
+    if (lastMainOutput === 0) {
         speak("Nulla da archiviare");
         appendOutput("Non c'è nulla da archiviare.");
         return setState(STATES.IDLE);
@@ -502,7 +502,7 @@ if (text.startsWith("archivia")) {
 
 if (text === "salva" || text === "copia") {
 
-    if (!lastMainOutput || typeof lastMainOutput !== "string") {
+    if (lastMainOutput === 0) {
         speak("Nulla da salvare");
         appendOutput("Non c'è nulla da salvare.");
         return setState(STATES.IDLE);
