@@ -22,14 +22,14 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 0.9rem; /* 15px */
-    margin-bottom: 0.2rem; 
+    gap: 0.2rem;
+    margin-bottom: 0.3rem; 
     flex-wrap: wrap;
   }
 
   #statusIconContainer {
     font-size: 2rem;
-    margin-top: 0.2rem; 
+    margin-top: 0.3rem; 
     min-height: 2.5rem; /* 40px */
   }
 
@@ -39,7 +39,7 @@
     background: #e9ecef;
     padding: 0.5rem; /* 8px */
     border-radius: 0.3rem; /* 6px */
-    margin: 0.2rem 0; 
+    margin: 0.3rem 0; 
     border: 0.1rem solid #ced4da;
   }
 
@@ -115,7 +115,7 @@
 
    #toggleButtons {
     cursor: pointer;
-    margin-top: 0.2rem; 
+    margin-top: 0.3rem; 
     padding: 0.6rem 1rem; /* 10px 20px */
     width: 100%;
     max-width: 18rem; /* 300px */
@@ -131,7 +131,7 @@
     border: 0.1rem solid #ccc;
     border-radius: 0.3rem; /* 6px */
     padding: 0.6rem; /* 10px */
-    margin-top: 0.2rem; 
+    margin-top: 0.3rem; 
     width: 100%;
     max-width: 25rem; /* 400px */
     margin-left: auto;
@@ -140,8 +140,8 @@
   }
 
   .secondary-btn, input[type=file] {
-    margin: 0.3rem; /* 5px */
-    padding: 0.5rem; /* 8px */
+    margin: 0.1rem;
+    padding: 0.3rem; /* 8px */
     font-size: 0.9rem;
   }
 </style>
@@ -245,6 +245,7 @@ const emojiMap = {
 const textToNumMap = { "uno":1, "due":2, "tre":3, "quattro":4, "cinque":5, "sei":6, "sette":7, "otto":8, "nove":9, "dieci":10, "tutti": "all" };
 const __s = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
 let infotxt = "💡 <i>Prova a dire: • Scrivi ... • Messaggio ... </i> \n <i>Se hai un archivio puoi dire il parametro di ricerca</i>";
+let lastMainOutput = "";     // memoria es. per comando "Ripeti"
   
 // Stati
 // \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
@@ -374,7 +375,7 @@ document.getElementById('stopButton').onclick = () => {
     // 5. Messaggio finale
     appendOutput("🗑️ Elimino gli input e termino l'ascolto", "temp-status");
 
-let infotxt = "💡 <i>Prova a dire: • Scrivi ... • Messaggio ... </i>";
+infotxt = "💡 <i>Prova a dire: • Scrivi ... • Messaggio ... </i> \n <i>Se hai un archivio puoi dire il parametro di ricerca</i>";
 appendCustomDiv(infotxt);
 
 };
