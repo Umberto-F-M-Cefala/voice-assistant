@@ -245,6 +245,8 @@ const emojiMap = {
 const textToNumMap = { "uno":1, "due":2, "tre":3, "quattro":4, "cinque":5, "sei":6, "sette":7, "otto":8, "nove":9, "dieci":10, "tutti": "all" };
 const __s = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
 let infotxt = "💡 <i>Prova a dire: • Scrivi ... • Messaggio ... </i> \n <i>Se hai un archivio puoi dire il parametro di ricerca</i>";
+let content = "";
+let formatted = "";
 let lastMainOutput = "";     // memoria es. per comando "Ripeti"
   
 // Stati
@@ -398,44 +400,44 @@ function handleSpeechInput(text) {
     
     // --- WHATSAPP con testo creato al momento ---
     if (text.startsWith("invia whatsapp") || text.startsWith("whatsapp")) {
-        const content = text.replace(/^(invia\s*)?whatsapp\s*(a\s*)?/i, "").trim();
+     content = text.replace(/^(invia whatsapp|whatsapp)\s*/i, "").trim();     
         handleWhatsapp(content);
         return setState(STATES.IDLE);
     }
  
  
-    // --- NUOVO: MESSAGGIO (Con Emoji Automatiche) ---
+    // --- MESSAGGIO (Con Emoji Automatiche) ---
     if (text.startsWith("messaggio")) {
-        let content = text.replace(/^messaggio\s*/i, "").trim();
+        content = text.replace(/^messaggio\s*/i, "").trim();
         if (!content) {
             speak("Messaggio vuoto.");
             return setState(STATES.IDLE);
         }
         // Qui attiviamo le emoji automatiche (true)
-        const formatted = formatText(content, true);
+        formatted = formatText(content, true);
         
         // Salviamo in conversazione
         saveToArchive(formatted, "Messaggio Emoji");
         speak("Messaggio creato: " + formatted);
         appendOutput(`<b>Messaggio:</b> ${formatted}`);
+        lastMainOutput = formatted; //memoria
         return setState(STATES.IDLE);
     }
 
     // --- SALVA / TRASCRIVI (Standard, NO Emoji) ---
-    const saveWords = ["salva", "trascrivi", "scrivi", "copia", "memorizza"];
-    const saveCmd = saveWords.find(w => text.startsWith(w));
-    if (saveCmd) {
-        let content = text.replace(new RegExp(`^${saveCmd}\\s*`, "i"), "").trim();
+        if (text.startsWith("trascrivi") || text.startsWith("scrivi")) {
+        content = text.replace(/^(trascrivi|scrivi)\s*/i, "").trim();
         if (!content) {
             speak("Cosa devo scrivere?");
             return setState(STATES.IDLE);
         }
         // Qui DISATTIVIAMO le emoji automatiche (false)
-        const formatted = formatText(content, false);
+        formatted = formatText(content, false);
         
         saveToArchive(formatted, "Nota Rapida");
         speak("Ho salvato la nota.");
         appendOutput(`💾 <b>Salvato:</b> ${formatted}`);
+        lastMainOutput = formatted; //memoria
         return setState(STATES.IDLE);
     }
 
@@ -654,7 +656,7 @@ function handleChoiceInput(text) {
 
 function handleConfirmInput(text) {
     if (text.includes("salva")) {
-        const formatted = formatText(tempMemory.pendingText, false);
+        formatted = formatText(tempMemory.pendingText, false);
         saveToArchive(formatted, "Da Ricerca Fallita");
         speak("Salvato.");
         appendOutput("✅ Salvato in conversazione.");
