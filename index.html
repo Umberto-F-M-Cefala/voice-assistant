@@ -519,13 +519,13 @@ if (text === "salva" || text === "copia") {
         .then(() => {
             speak("Salvato negli appunti");
             appendOutput(`💾 Copiato: "${lastMainOutput}"`);
-            setState(STATES.IDLE);
+            return setState(STATES.IDLE);
         })
         .catch(err => {
             console.error("Clipboard error:", err);
             speak("Errore nel salvataggio");
             appendOutput("❌ Errore durante la copia negli appunti.");
-            setState(STATES.IDLE);
+            return setState(STATES.IDLE);
         });
 }
 
