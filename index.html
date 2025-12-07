@@ -476,7 +476,7 @@ appendCustomDiv(infotxt);
         return setState(STATES.IDLE);
     }
  // --- ARCHIVIA ---
-    if (text.startsWith("archivia") {
+    if (text.startsWith("archivia")) {
       content = text.replace(/^archivia\s*/i, "").trim();
         if (!lastMainOutput) {
           speak("Nulla da archiviare");
