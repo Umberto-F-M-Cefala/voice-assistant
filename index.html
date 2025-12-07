@@ -430,15 +430,13 @@ function handleSpeechInput(text) {
         if (text.startsWith("trascrivi") || text.startsWith("scrivi")) {
         content = text.replace(/^(trascrivi|scrivi)\s*/i, "").trim();
         if (!content) {
-            speak("Cosa devo scrivere?");
+          speak("Contenuto vuoto");
+          appendOutput(`Contenuto vuoto.`);
             return setState(STATES.IDLE);
         }
         // Qui DISATTIVIAMO le emoji automatiche (false)
         formatted = formatText(content, false);
         
-        saveToArchive(formatted, "Nota Rapida");
-        speak("Ho salvato la nota.");
-        appendOutput(`💾 <b>Salvato:</b> ${formatted}`);
         lastMainOutput = formatted; //memoria
         infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia [e il titolo del contenuto] </i>";
 appendCustomDiv(infotxt);
@@ -496,8 +494,9 @@ appendCustomDiv(infotxt);
     }
  // --- SALVA in appunti ---
     if (text === "salva" || text === "copia") {
-        speak("Non ho nulla"); 
-        return setState(STATES.IDLE);
+       speak("Non ho nulla"); 
+       appendOutput(`💾 <b>Salvato:</b> ${lastMainOutput}`);
+       return setState(STATES.IDLE);
     }
   
 }
