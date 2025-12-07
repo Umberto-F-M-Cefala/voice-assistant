@@ -481,8 +481,9 @@ function handleSpeechInput(text) {
           speak("Nulla da inviare");
           appendOutput("Non c'è nulla da inviare con Whatsapp.");
           return setState(STATES.IDLE);
-        }
+        } else {
         handleWhatsapp(lastMainOutput);
+     }
         return setState(STATES.IDLE);
     }
  // --- ARCHIVIA ---
