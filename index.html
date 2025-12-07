@@ -466,7 +466,13 @@ appendCustomDiv(infotxt);
 
     // --- RIPETI ---
     if (text === "ripeti") {
-        speak("Non ho nulla da ripetere al momento."); // Semplificato
+        if (lastMainOutput) {
+        speak("Ripeto: " + lastMainOutput);
+        appendOutput("Ripeto... ");
+    } else {
+        speak("Nulla da ripetere");
+        appendOutput("Nulla da ripetere");
+    }
         return setState(STATES.IDLE);
     }
 
