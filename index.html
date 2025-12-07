@@ -485,18 +485,18 @@ appendCustomDiv(infotxt);
         return setState(STATES.IDLE);
     }
  // --- ARCHIVIA ---
-    if (text.startsWith("archivia")) {
-      content = text.replace(/^archivia\s*/i, "").trim();
-        if (!lastMainOutput) {
-          speak("Nulla da archiviare");
-          appendOutput("Non c'è nulla da archiviare.");
-            return setState(STATES.IDLE);
-        }
-        saveToArchive(lastMainOutput, content);
-        speak("Archiviato"); 
+if (text.startsWith("archivia")) {
+    content = text.replace(/^archivia\s*/i, "").trim();
+    if (!lastMainOutput) {
+        speak("Nulla da archiviare");
         appendOutput("Non c'è nulla da archiviare.");
         return setState(STATES.IDLE);
     }
+    saveToArchive(lastMainOutput, content);
+    speak("Archiviato");
+    appendOutput("Archiviato con successo.");
+    return setState(STATES.IDLE);
+}
  // --- SALVA in appunti ---
 if (text === "salva" || text === "copia") {
     if (!lastMainOutput) {
