@@ -508,26 +508,26 @@ if (text === "salva" || text === "copia") {
         return setState(STATES.IDLE);
     }
 
-    // Controllo compatibilità API
     if (!navigator.clipboard || !navigator.clipboard.writeText) {
         speak("La funzione copia non è supportata");
         appendOutput("❌ Clipboard API non supportata dal browser.");
         return setState(STATES.IDLE);
     }
 
-    navigator.clipboard.writeText(lastMainOutput)
-        .then(() => {
+    // Funzione async inline
+    (async () => {
+        try {
+            await navigator.clipboard.writeText(lastMainOutput);
             speak("Salvato negli appunti");
             appendOutput(`💾 Copiato: "${lastMainOutput}"`);
-            return setState(STATES.IDLE);
-        })
-        .catch(err => {
+        } catch (err) {
             console.error("Clipboard error:", err);
             speak("Errore nel salvataggio");
             appendOutput("❌ Errore durante la copia negli appunti.");
-            return setState(STATES.IDLE);
-        });
-}
+        } finally {
+            setState(STATES.IDLE);
+        }
+    })();
 }
 
 /* ================== IMPLEMENTAZIONE FUNZIONI ================== */
