@@ -377,7 +377,7 @@ document.getElementById('stopButton').onclick = () => {
     appendOutput("🗑️ Elimino gli input e termino l'ascolto", "temp-status");
 
 infotxt = "💡 <i>Prova a dire: • Scrivi ... • Messaggio ... </i> \n <i>Se hai un archivio puoi dire il parametro di ricerca</i>";
-appendCustomDiv(infotxt);
+appendCustomDiv(infotxt, "info-message");
 
 };
   
@@ -420,7 +420,7 @@ function handleSpeechInput(text) {
         appendOutput(`💬 <b>Messaggio:</b> ${formatted}`);
         lastMainOutput = formatted; //memoria
         infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia ... [il titolo del contenuto] </i>";
-        appendCustomDiv(infotxt);
+        appendCustomDiv(infotxt, "info-message");
         return setState(STATES.IDLE);
     }
 
@@ -439,7 +439,7 @@ function handleSpeechInput(text) {
         appendOutput(`<b>Testo:</b> ${formatted}`);
         lastMainOutput = formatted; //memoria
         infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia ... [il titolo del contenuto] </i>";
-appendCustomDiv(infotxt);
+        appendCustomDiv(infotxt, "info-message");
         return setState(STATES.IDLE);
     }
 
@@ -747,7 +747,7 @@ function updateSectionList() {
 updateSectionList();
 
   //info iniziali
-  appendCustomDiv(infotxt);  
+  appendCustomDiv(infotxt, "info-message");  
 
 document.getElementById('toggleButtons').onclick = () => {
     const el = document.getElementById('extraButtons');
