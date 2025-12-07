@@ -22,7 +22,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 0.2rem;
+    gap: 0.6rem;
     margin-bottom: 0.3rem; 
     flex-wrap: wrap;
   }
@@ -30,7 +30,7 @@
   #statusIconContainer {
     font-size: 2rem;
     margin-top: 0.3rem; 
-    min-height: 2.5rem; /* 40px */
+    min-height: 0.5rem; 
   }
 
   #sectionsList {
@@ -398,28 +398,28 @@ function handleSpeechInput(text) {
 
     // 2. Comandi Diretti
     
-    // --- WHATSAPP con testo creato al momento ---
+    // --- invio diretto WHATSAPP con testo creato al momento ---
     if (text.startsWith("invia whatsapp") || text.startsWith("whatsapp")) {
-     content = text.replace(/^(invia whatsapp|whatsapp)\s*/i, "").trim();     
+        content = text.replace(/^(invia whatsapp|whatsapp)\s*/i, "").trim();     
         handleWhatsapp(content);
+        lastMainOutput = formatted; //memoria
         return setState(STATES.IDLE);
     }
- 
- 
+  
     // --- MESSAGGIO (Con Emoji Automatiche) ---
     if (text.startsWith("messaggio")) {
         content = text.replace(/^messaggio\s*/i, "").trim();
         if (!content) {
-            speak("Messaggio vuoto.");
+          speak("Messaggio vuoto");
+          appendOutput(`💬 Messaggio vuoto.`);
             return setState(STATES.IDLE);
         }
         // Qui attiviamo le emoji automatiche (true)
         formatted = formatText(content, true);
         
         // Salviamo in conversazione
-        saveToArchive(formatted, "Messaggio Emoji");
         speak("Messaggio creato: " + formatted);
-        appendOutput(`<b>Messaggio:</b> ${formatted}`);
+        appendOutput(`💬 <b>Messaggio:</b> ${formatted}`);
         lastMainOutput = formatted; //memoria
         return setState(STATES.IDLE);
     }
@@ -473,7 +473,13 @@ function handleSpeechInput(text) {
     }
  // --- ARCHIVIA ---
     if (text === "archivia") {
-        speak("Non ho nulla"); 
+        if (!lastMainOutput) {
+          speak("Nulla da archiviare");
+          appendOutput("Nulla da archiviare.");
+            return setState(STATES.IDLE);
+        }
+        speak("Archiviato"); 
+        saveToArchive(lastMainOutput, "Messaggio Emoji");
         return setState(STATES.IDLE);
     }
  // --- SALVA in appunti ---
