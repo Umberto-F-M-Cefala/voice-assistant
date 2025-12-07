@@ -434,7 +434,9 @@ function handleSpeechInput(text) {
         }
         // Qui DISATTIVIAMO le emoji automatiche (false)
         formatted = formatText(content, false);
-        
+
+        speak("Ho scritto: " + formatted);
+        appendOutput(`<b>Testo:</b> ${formatted}`);
         lastMainOutput = formatted; //memoria
         infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia ... [il titolo del contenuto] </i>";
 appendCustomDiv(infotxt);
@@ -474,7 +476,12 @@ appendCustomDiv(infotxt);
 
    // --- WHATSAPP invio input già registrato ---
     if (text === "invia whatsapp" || text === "whatsapp") {
-        speak("Non ho nulla"); 
+     if (!lastMainOutput) {
+          speak("Nulla da inviare");
+          appendOutput("Non c'è nulla da inviare con Whatsapp.");
+          return setState(STATES.IDLE);
+        }
+        handleWhatsapp(lastMainOutput);
         return setState(STATES.IDLE);
     }
  // --- ARCHIVIA ---
