@@ -467,7 +467,8 @@ appendCustomDiv(infotxt);
         if (lastMainOutput) {
         speak("Ripeto: " + lastMainOutput);
         appendOutput("Ripeto... ");
-    } else {
+    } 
+        if (!lastMainOutput) {
         speak("Nulla da ripetere");
         appendOutput("Nulla da ripetere");
     }
