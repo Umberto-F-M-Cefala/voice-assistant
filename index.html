@@ -413,15 +413,8 @@ function handleSpeechInput(text) {
     // 2. Comandi Diretti
     
     // --- invio diretto WHATSAPP con testo creato al momento ---
-    if (text.startsWith("invia whatsapp") || text.startsWith("whatsapp")) {
+    if (text.startsWith("invia whatsapp") || text.startsWith("whatsapp")) && text.split(" ").length > 1) {
     const content = text.replace(/^(invia whatsapp|whatsapp)\s*/i, "").trim();
-
-    if (content.length < 2) {
-        speak("Non trovo nulla da inviare");
-        appendOutput(`💬 Non trovo nulla da inviare.`);
-        return setState(STATES.IDLE);
-    }
-
     handleWhatsapp(content, true); // formattazione attiva
     lastMainOutput = formatted;    // memoria
     return setState(STATES.IDLE);
