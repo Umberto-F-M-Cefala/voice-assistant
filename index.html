@@ -858,11 +858,28 @@ function handleChoiceInput(text) {
 }
 
 function handleConfirmInput(text) {
-    if (text.includes("salva")) {
+    if (text.includes("si")) {
         formatted = formatText(tempMemory.pendingText, false);
-        saveToArchive(formatted, "Da Ricerca Fallita");
-        speak("Salvato.");
-        appendOutput("✅ Salvato in conversazione.");
+     if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        speak("La funzione copia non è supportata");
+        appendOutput("❌ Clipboard API non supportata dal browser.");
+        return setState(STATES.IDLE);
+    }
+
+    // Funzione async inline
+    (async () => {
+        try {
+            await navigator.clipboard.writeText(lastMainOutput);
+            speak("Salvato negli appunti");
+            appendOutput(`💾 Copiato: "${lastMainOutput}"`);
+        } catch (err) {
+            console.error("Clipboard error:", err);
+            speak("Errore nel salvataggio");
+            appendOutput("❌ Errore durante la copia negli appunti.");
+        } finally {
+            setState(STATES.IDLE);
+        }
+    })();
     } else {
         speak("Non salvato.");
         appendOutput("❌ Operazione annullata.");
