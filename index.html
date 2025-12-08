@@ -414,17 +414,19 @@ function handleSpeechInput(text) {
     
     // --- invio diretto WHATSAPP con testo creato al momento ---
     if (text.startsWith("invia whatsapp") || text.startsWith("whatsapp")) {
-        content = text.replace(/^(invia whatsapp|whatsapp)\s*/i, "").trim();    
-      if (text.length < 2) {
+    const content = text.replace(/^(invia whatsapp|whatsapp)\s*/i, "").trim();
+
+    if (content.length < 2) {
         speak("Non trovo nulla da inviare");
         appendOutput(`💬 Non trovo nulla da inviare.`);
-        return;
-      } else {
-        handleWhatsapp(content);
-        lastMainOutput = formatted; //memoria
-       }
         return setState(STATES.IDLE);
     }
+
+    handleWhatsapp(content, true); // formattazione attiva
+    lastMainOutput = formatted;    // memoria
+    return setState(STATES.IDLE);
+}
+
   
     // --- MESSAGGIO (Con Emoji Automatiche) ---
     if (text.startsWith("messaggio")) {
@@ -599,15 +601,16 @@ if (searchCommand) {
 
    // --- WHATSAPP invio input già registrato ---
     if (text === "invia whatsapp" || text === "whatsapp") {
-     if (lastMainOutput === 0) {
-          speak("Nulla da inviare");
-          appendOutput("Non c'è nulla da inviare con Whatsapp.");
-          return setState(STATES.IDLE);
-        } else {
-        handleWhatsapp(lastMainOutput);
-     }
+    if (!lastMainOutput) {
+        speak("Nulla da inviare");
+        appendOutput("Non c'è nulla da inviare con Whatsapp.");
         return setState(STATES.IDLE);
     }
+
+    handleWhatsapp(lastMainOutput, false); // non formattare, invia così com’è
+    return setState(STATES.IDLE);
+}
+
  // --- ARCHIVIA ---
 if (text.startsWith("archivia")) {
     content = text.replace(/^archivia\s*/i, "").trim();
@@ -725,12 +728,17 @@ function formatText(str, autoEmoji) {
   
 }
 
-function handleWhatsapp(text) {
-    const msg = formatText(text, true) + "\n //_trascritto dall'Assistente Vocale_";
+function handleWhatsapp(text, shouldFormat = true) {
+    // Usa text passato come parametro, non fa riferimento a variabili esterne
+    const msg = (shouldFormat ? formatText(text, true) : text)
+              + "\n //_trascritto dall'Assistente Vocale_";
+
     const url = `whatsapp://send?text=${encodeURIComponent(msg)}`;
     window.open(url, '_self');
+
     appendOutput(`💬 Invio diretto del messaggio WhatsApp: "${msg}"`);
 }
+
 
 function saveToArchive(text, type) {
     archive.conversazione.push({
