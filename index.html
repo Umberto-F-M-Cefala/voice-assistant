@@ -247,8 +247,6 @@ let infotxt = "💡 <i>Prova a dire: • Scrivi ... • Messaggio ... </i> \n <i
 let content = "";
 let formatted = "";
 let lastMainOutput = "";     // memoria es. per comando "Ripeti"
-let found = "";  
-let results = "";  
   
 // Stati
 // \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
@@ -452,48 +450,42 @@ function handleSpeechInput(text) {
     }
 
     // --- RICERCA NELL'ARCHIVIO ---
-  if (!text.startsWith("trascrivi") && !text.startsWith("scrivi")) {
-  if (!text.startsWith("invia whatsapp") && !text.startsWith("whatsapp")) {
-  if (!text.startsWith("messaggio")) {
-  if (text !== "ripeti") {
-  if (!text.startsWith("archivia")) {
-  if (text !== "invia whatsapp" && text !== "whatsapp") {
-  if (text !== "salva" && text !== "copia") {
+const prefissiEsclusi = ["trascrivi", "scrivi", "messaggio", "archivia", "invia whatsapp", "whatsapp"];
+const paroleEsatteEscluse = ["ripeti", "salva", "copia", "esamina", "esamina dispositivo", "invia whatsapp", "whatsapp"];
 
+const testoValido = !prefissiEsclusi.some(p => text.startsWith(p)) &&
+                     !paroleEsatteEscluse.includes(text);
 
-  
-    
+if (testoValido) {
+  const __s2 = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
+  const searchCommand = handleSearchCommand(text);
 
-    
-    found = findBestMatch(text);
-    const __s2 = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
-    
-    if (found && found.score > 0.85) {
-        // Match forte diretto
+if (searchCommand) {
+    // "cerca in SEZIONE ... per campo ... "
+    const results = searchArchive(searchCommand.query, [searchCommand.field], searchCommand.section);
+    handleSearchResults(results, searchCommand.query);
+} else {
+    // Ricerca default trigger in sezione conversazione
+    let found = findBestMatchInSection(text, defaultArchive);
+    if (found.score > 0.85) {
         displayEntry(found.item);
         speak(found.item.output);
-        return setState(STATES.IDLE);
+        setState(STATES.IDLE);
     } else {
-        // Ricerca fuzzy o Fallback
-        results = searchArchive(text);
+        // fallback globale: trigger in tutte le sezioni
+        let results = searchArchive(text, ["trigger"]);
+        if (results.length === 0) {
+            // fallback completo: tutti i campi in tutte le sezioni
+            results = searchArchive(text, ["trigger","meta_title","meta_author"]);
+        }
         handleSearchResults(results, text);
-        // handleSearchResults imposta lo stato corretto
     }
+}
 
-
-
-
-
-  }
-  }  
-  }
-  }
-  }  
-  }  
+  
   }
 
-
-  /* ============ comando per dati del dispositivo ============ */
+  /* ============ comando per append dati del dispositivo ============ */
 // \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
   
   if (text === "esamina" || text === "esamina dispositivo") {
@@ -729,36 +721,71 @@ function saveToArchive(text, type) {
 }
 
 // Logica di Ricerca
-function findBestMatch(text) {
-    let best = null;
-    let maxScore = 0;
-    
-    // Cerca in tutte le sezioni
-    Object.keys(archive).forEach(sec => {
-        archive[sec].forEach(item => {
-            if (!item.trigger) return;
-            // Punteggio semplice: inclusione
-            let score = 0;
-            const t = item.trigger.toLowerCase();
-            if (text === t) score = 1.0;
-            else if (text.includes(t)) score = 0.9;
-            else if (t.includes(text) && text.length > 3) score = 0.7;
-            
-            if (score > maxScore) { maxScore = score; best = item; }
-        });
-    });
-    return { item: best, score: maxScore };
+
+function handleSearchCommand(text) {
+    const searchRegex = /^cerca\s+(?:in\s+([a-zA-Z0-9_]+))?(?:\s+per\s+(titolo|autore))?\s*(.*)$/i;
+    const match = text.match(searchRegex);
+
+    if (!match) return null;
+
+    const section = match[1] ? match[1].toLowerCase() : null;
+    const field = match[2] ? match[2].toLowerCase() : "trigger";
+    const query = match[3].trim();
+
+    if (!query) return null;
+
+    return { section, field, query };
 }
 
-function searchArchive(query) {
-    let results = [];
-    Object.keys(archive).forEach(sec => {
-        archive[sec].forEach(item => {
-            if ((item.trigger && item.trigger.includes(query)) || (item.output && item.output.includes(query))) {
-                results.push(item);
+  
+function findBestMatchInSection(query, section) {
+    let best = null;
+    let maxScore = 0;
+    const q = query.toLowerCase().trim();
+
+    if (!archive[section]) return { item: null, score: 0 };
+
+    archive[section].forEach(item => {
+        ["trigger", "meta_title", "meta_author"].forEach(field => {
+            const value = (item[field] || "").toLowerCase();
+            const score = fuzzyScore(q, value);
+            if (score > maxScore) {
+                maxScore = score;
+                best = item;
             }
         });
     });
+
+    return { item: best, score: maxScore };
+}
+
+function fuzzyScore(query, text) {
+    query = query.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+    text = text.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+
+    if (!text) return 0;
+    if (query === text) return 1.0;
+    if (text.includes(query)) return 0.9;
+    if (query.includes(text) && text.length > 3) return 0.7;
+    return 0;
+}
+          
+function searchArchive(query, fields = ["trigger"], section = null) {
+    let results = [];
+    const q = query.toLowerCase().trim();
+    const sectionsToSearch = section ? [section] : Object.keys(archive);
+
+    sectionsToSearch.forEach(sec => {
+        archive[sec].forEach(item => {
+            for (let f of fields) {
+                if ((item[f] || "").toLowerCase().includes(q)) {
+                    results.push({ ...item, section: sec });
+                    break; // Non duplicare se più campi matchano
+                }
+            }
+        });
+    });
+
     return results;
 }
 
@@ -774,8 +801,26 @@ function handleSearchResults(results, query) {
         setState(STATES.IDLE);
     } else {
         tempMemory.results = results;
-        let list = results.map((r, i) => `${i+1}. ${r.meta_title || r.trigger}`).join("\n");
-        appendOutput(`📋 Trovati ${results.length} risultati:\n${list}\n\n👉 Scegli un numero o dì 'Tutti'.`);
+
+        // Raggruppa per sezione
+        const resultsBySection = {};
+        results.forEach(r => {
+            const sec = r.section || "Generale";
+            if (!resultsBySection[sec]) resultsBySection[sec] = [];
+            resultsBySection[sec].push(r);
+        });
+
+        let list = "";
+        let counter = 1;
+        for (let sec in resultsBySection) {
+            list += `\n--- ${sec.toUpperCase()} ---\n`;
+            resultsBySection[sec].forEach(item => {
+                list += `${counter}. ${item.meta_title || item.trigger}\n`;
+                counter++;
+            });
+        }
+
+        appendOutput(`📋 Trovati ${results.length} risultati:${list}\n\n👉 Scegli un numero o dì 'Tutti'.`);
         speak(`Ho trovato ${results.length} risultati. Scegli un numero o dì tutti.`);
         setState(STATES.AWAITING_CHOICE);
     }
