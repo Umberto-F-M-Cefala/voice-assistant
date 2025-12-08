@@ -693,7 +693,14 @@ function formatText(str, autoEmoji) {
         return `${saluto} ${nomi},\n`;
     }
    );
-
+  //Formattazione più vocativo
+   s = s.replace(
+    /\b(Buongiorno|Ciao|Buonasera)\s+(mia bella|mie belle|cara)(?:\s+([A-Z][a-z]+))?/g,
+    (m, saluto, vocativo, nome) => {
+        const full = nome ? `${vocativo} ${nome}` : vocativo;
+        return `${saluto} ${full},\n`;
+    }
+    );
   
     s = s.replace(cittaRegex, m =>
         m.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
