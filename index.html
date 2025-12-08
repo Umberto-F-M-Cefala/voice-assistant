@@ -107,7 +107,7 @@
     padding: 0.2rem;
     border-radius: 0.5rem; /* 8px */
     min-height: 9rem; /* 150px */
-    max-height: 70vh;
+    max-height: 100vh;
     overflow-y: auto;
     border: 0.1rem solid #ddd;
     box-shadow: inset 0 0 0.3125rem rgba(0,0,0,0.05); /* 5px */
@@ -247,6 +247,8 @@ let infotxt = "💡 <i>Prova a dire: • Scrivi ... • Messaggio ... </i> \n <i
 let content = "";
 let formatted = "";
 let lastMainOutput = "";     // memoria es. per comando "Ripeti"
+let found = "";  
+let results = "";  
   
 // Stati
 // \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
@@ -425,7 +427,7 @@ function handleSpeechInput(text) {
         speak("Messaggio creato: " + formatted);
         appendOutput(`💬 <b>Messaggio:</b> ${formatted}`);
         lastMainOutput = formatted; //memoria
-        infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia ... [il titolo del contenuto] </i>";
+        infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia ... [il titolo del contenuto] • Invia Whatsapp</i>";
         appendCustomDiv(infotxt, "info-message");
         return setState(STATES.IDLE);
     }
@@ -444,13 +446,26 @@ function handleSpeechInput(text) {
         speak("Ho scritto: " + formatted);
         appendOutput(`<b>Testo:</b> ${formatted}`);
         lastMainOutput = formatted; //memoria
-        infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia ... [il titolo del contenuto] </i>";
+        infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia ... [il titolo del contenuto] • Invia Whatsapp</i>";
         appendCustomDiv(infotxt, "info-message");
         return setState(STATES.IDLE);
     }
 
     // --- RICERCA NELL'ARCHIVIO ---
-    const found = findBestMatch(text);
+  if (!text.startsWith("trascrivi") && !text.startsWith("scrivi")) {
+  if (!text.startsWith("invia whatsapp") && !text.startsWith("whatsapp")) {
+  if (!text.startsWith("messaggio")) {
+  if (text !== "ripeti") {
+  if (!text.startsWith("archivia")) {
+  if (text !== "invia whatsapp" && text !== "whatsapp") {
+  if (text !== "salva" && text !== "copia") {
+
+
+  
+    
+
+    
+    found = findBestMatch(text);
     const __s2 = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
     
     if (found && found.score > 0.85) {
@@ -460,11 +475,105 @@ function handleSpeechInput(text) {
         return setState(STATES.IDLE);
     } else {
         // Ricerca fuzzy o Fallback
-        const results = searchArchive(text);
+        results = searchArchive(text);
         handleSearchResults(results, text);
         // handleSearchResults imposta lo stato corretto
     }
 
+
+
+
+
+  }
+  }  
+  }
+  }
+  }  
+  }  
+  }
+
+
+  /* ============ comando per dati del dispositivo ============ */
+// \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
+  
+  if (text === "esamina" || text === "esamina dispositivo") {
+    async function getDeviceInfo() {
+        const info = {};
+
+        // --- NAVIGATOR ---
+        info.userAgent = navigator.userAgent;
+        info.platform = navigator.platform;
+        info.language = navigator.language;
+        info.languages = navigator.languages;
+        info.vendor = navigator.vendor;
+        info.cookieEnabled = navigator.cookieEnabled;
+        info.doNotTrack = navigator.doNotTrack;
+
+        // --- SCHERMO ---
+        info.screen = {
+            width: screen.width,
+            height: screen.height,
+            availWidth: screen.availWidth,
+            availHeight: screen.availHeight,
+            pixelRatio: window.devicePixelRatio
+        };
+
+        // --- FINESTRA ---
+        info.window = {
+            innerWidth: window.innerWidth,
+            innerHeight: window.innerHeight,
+            outerWidth: window.outerWidth,
+            outerHeight: window.outerHeight
+        };
+
+        // --- HARDWARE ---
+        info.hardware = {
+            hardwareConcurrency: navigator.hardwareConcurrency,
+            deviceMemory: navigator.deviceMemory
+        };
+
+        // --- CONNESSIONE ---
+        if (navigator.connection) {
+            info.connection = {
+                type: navigator.connection.type,
+                effectiveType: navigator.connection.effectiveType,
+                downlink: navigator.connection.downlink,
+                rtt: navigator.connection.rtt,
+                saveData: navigator.connection.saveData
+            };
+        }
+
+        // --- BATTERIA ---
+        if (navigator.getBattery) {
+            try {
+                const battery = await navigator.getBattery();
+                info.battery = {
+                    level: battery.level,
+                    charging: battery.charging,
+                    chargingTime: battery.chargingTime,
+                    dischargingTime: battery.dischargingTime
+                };
+            } catch(e) {}
+        }
+
+        return info;
+    }
+
+    // --- ESECUZIONE E APPEND ---
+    getDeviceInfo().then(info => {
+        const formattedInfo = `<pre>${JSON.stringify(info, null, 2)}</pre>`;
+        speak("Ecco le informazioni del dispositivo");
+        appendOutput(`<b>Info dispositivo:</b><br>${formattedInfo}`);
+        infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia ... [il titolo del contenuto] • Invia Whatsapp</i>";
+        appendCustomDiv(infotxt, "info-message");
+        lastMainOutput = formattedInfo; // memoria
+        return setState(STATES.IDLE);
+    });
+
+    return; // termina il blocco
+}
+
+  
   /* ============ comandi accessori della function handleSpeechInput(text) ============ */
 // \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
 
