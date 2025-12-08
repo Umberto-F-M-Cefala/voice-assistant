@@ -226,21 +226,36 @@ const CITTA_ITALIANE = new Set([
   
 // Mappe
 const emojiMap = {
-    "cuore": "❤️", "sorriso": "🙂", "risata": "😂", "ok": "👌", "pollice su": "👍", "pollice giù": "👎", "fuoco": "🔥", "stella": "⭐", "sole": "☀️", "luna": "🌙",
-    "bacio": "💋", "baci": "💋💋💋", "abbraccio": "🤗", "festa": "🎉", "torta": "🎂", "regalo": "🎁", "musica": "🎵", "occhiolino": "😉", "triste": "😞", "arrabbiato": "😡", "pensoso": "🤔",
-    "applauso": "👏", "preghiera": "🙏", "forza": "💪", "bomba": "💣", "pericolo": "⚠️", "spunta": "✅", "croce": "❌", "fantasma": "👻", "robot": "🤖", "alieno": "👽",
-    "cucciolo": "🐶", "gatto": "🐱", "coniglio": "🐰", "orso": "🐻", "panda": "🐼", "elefante": "🐘", "leone": "🦁", "unicorno": "🦄", "pesce": "🐟", "delfino": "🐬",
-    "coccinella": "🐞", "ape": "🐝", "farfalla": "🦋", "ragno": "🕷️", "cavallo": "🐴", "arcobaleno": "🌈", "neve": "❄️", "pioggia": "🌧️", "fulmine": "⚡", "vento": "🌬️",
-    "albero": "🌳", "fiore": "🌸", "foglia": "🍃", "cactus": "🌵", "fungo": "🍄", "cibo": "🍔", "pizza": "🍕", "panino": "🥪", "gelato": "🍨", "cioccolato": "🍫",
-    "bevanda": "☕", "birra": "🍺", "vino": "🍷", "cocktail": "🍸", "acqua": "💧", "macchina": "🚗", "aereo": "✈️", "treno": "🚆", "barca": "⛵", "bicicletta": "🚲",
-    "autobus": "🚌", "camion": "🚚", "ambulanza": "🚑", "polizia": "👮", "dottore": "👩‍⚕️", "studente": "👨‍🎓", "ballerino": "💃", "cantante": "🎤", "fotografo": "📸", "pittore": "🎨",
-    "libro": "📖", "penna": "✏️", "matita": "🖊️", "chiave": "🔑", "lucchetto": "🔒", "carta": "📝", "orologio": "⏰", "telefono": "📱", "computer": "💻", "televisore": "📺",
-    "bandiera": "🚩", "medaglia": "🏅", "trofeo": "🏆", "pallone": "⚽", "basket": "🏀", "tennis": "🎾", "volley": "🏐", "rugby": "🏉", "skateboard": "🛹", "yoga": "🧘",
-    "cuoco": "👨‍🍳", "cameriere": "👩‍🍳", "poliziotto": "👮‍♂️", "pompieri": "👩‍🚒", "scientista": "👩‍🔬", "ingegnere": "👷‍♂️", "astronauta": "👩‍🚀", "re": "🤴", "regina": "👸",
-    "principe": "🤴", "principessa": "👸", "angelo": "👼", "diavolo": "😈", "scheletro": "💀", "cimitero": "🪦", "croce latina": "✝️", "stella david": "✡️", "yin yang": "☯️",
-    "cuore spezzato": "💔", "abbraccio stretto": "🤝", "mano alzata": "✋", "dito medio": "🖕", "occhi": "👀", "orecchio": "👂", "naso": "👃", "bocca": "👄", "lingua": "👅",
-    "scarpa": "👟", "camicia": "👕", "pantaloni": "👖", "vestito": "👗", "cappello": "🎩", "ombrello": "☂️", "zaino": "🎒", "borsa": "👜", "anello": "💍", "collana": "📿"
+"cuore":"❤️","sorriso":"🙂","risata":"😂","ok":"👌","pollice su":"👍","pollice giù":"👎","fuoco":"🔥","stella":"⭐","sole":"☀️","luna":"🌙",
+"bacio":"💋","baci":"💋💋💋","abbraccio":"🤗","festa":"🎉","torta":"🎂","regalo":"🎁","musica":"🎵","occhiolino":"😉","triste":"😞","arrabbiato":"😡","pensoso":"🤔",
+"applauso":"👏","preghiera":"🙏","forza":"💪","bomba":"💣","pericolo":"⚠️","spunta":"✅","croce":"❌","fantasma":"👻","robot":"🤖","alieno":"👽",
+"cucciolo":"🐶","gatto":"🐱","coniglio":"🐰","orso":"🐻","panda":"🐼","elefante":"🐘","leone":"🦁","unicorno":"🦄","pesce":"🐟","delfino":"🐬",
+"coccinella":"🐞","ape":"🐝","farfalla":"🦋","ragno":"🕷️","cavallo":"🐴","arcobaleno":"🌈","neve":"❄️","pioggia":"🌧️","fulmine":"⚡","vento":"🌬️",
+"albero":"🌳","fiore":"🌸","foglia":"🍃","cactus":"🌵","fungo":"🍄","cibo":"🍔","pizza":"🍕","panino":"🥪","gelato":"🍨","cioccolato":"🍫",
+"bevanda":"☕","birra":"🍺","vino":"🍷","cocktail":"🍸","acqua":"💧","macchina":"🚗","aereo":"✈️","treno":"🚆","barca":"⛵","bicicletta":"🚲",
+"autobus":"🚌","camion":"🚚","ambulanza":"🚑","polizia":"👮","dottore":"👩‍⚕️","studente":"👨‍🎓","ballerino":"💃","cantante":"🎤","fotografo":"📸","pittore":"🎨",
+"libro":"📖","penna":"✏️","matita":"🖊️","chiave":"🔑","lucchetto":"🔒","carta":"📝","orologio":"⏰","telefono":"📱","computer":"💻","televisore":"📺",
+"bandiera":"🚩","medaglia":"🏅","trofeo":"🏆","pallone":"⚽","basket":"🏀","tennis":"🎾","volley":"🏐","rugby":"🏉","skateboard":"🛹","yoga":"🧘",
+"cuoco":"👨‍🍳","cameriere":"👩‍🍳","poliziotto":"👮‍♂️","pompieri":"👩‍🚒","scientista":"👩‍🔬","ingegnere":"👷‍♂️","astronauta":"👩‍🚀","re":"🤴","regina":"👸",
+"principe":"🤴","principessa":"👸","angelo":"👼","diavolo":"😈","scheletro":"💀","cimitero":"🪦","croce latina":"✝️","stella david":"✡️","yin yang":"☯️",
+"cuore spezzato":"💔","abbraccio stretto":"🤝","mano alzata":"✋","dito medio":"🖕","occhi":"👀","orecchio":"👂","naso":"👃","bocca":"👄","lingua":"👅",
+"scarpa":"👟","camicia":"👕","pantaloni":"👖","vestito":"👗","cappello":"🎩","ombrello":"☂️","zaino":"🎒","borsa":"👜","anello":"💍","collana":"📿",
+
+"computer fisso":"🖥️","stampante":"🖨️","mouse":"🖱️","videogame":"🎮","joystick":"🕹️",
+"montagna":"⛰️","deserto":"🏜️","foresta":"🌲","mare":"🌊","isola":"🏝️",
+"razzo":"🚀","satellite":"🛰️","ufo":"🛸",
+"medico":"🧑‍⚕️","insegnante":"🧑‍🏫","pittore artista":"🧑‍🎨","cantante uomo":"👨‍🎤","cantante donna":"👩‍🎤",
+"palla da golf":"⛳","ping pong":"🏓","arti marziali":"🥋",
+"girasole":"🌻","tulipano":"🌷","pianta":"🪴",
+
+"fragola":"🍓","mela rossa":"🍎","mela verde":"🍏","banana":"🍌","arancia":"🍊","limone":"🍋","ciliegie":"🍒","uva":"🍇","ananas":"🍍","pera":"🍐","cocco":"🥥","kiwi":"🥝","melone":"🍈","anguria":"🍉",
+
+"pomodoro":"🍅","carota":"🥕","patata":"🥔","mais":"🌽","broccolo":"🥦","cetriolo":"🥒","peperone":"🫑","melanzana":"🍆","insalata":"🥬","aglio":"🧄","cipolla":"🧅",
+
+"hamburger":"🍔","hot dog":"🌭","pasta":"🍝","sushi":"🍣","ramen":"🍜","riso":"🍚","pollo":"🍗","bistecca":"🥩","tacos":"🌮","burrito":"🌯","insalata mista":"🥗","zuppa":"🥣",
+"pane":"🍞","formaggio":"🧀","uovo":"🥚","frittata":"🍳","patatine fritte":"🍟","ciambella":"🍩","croissant":"🥐","pane tostato":"🍞","ciotola di frutta":"🥣"
 };
+
 const textToNumMap = { "uno":1, "due":2, "tre":3, "quattro":4, "cinque":5, "sei":6, "sette":7, "otto":8, "nove":9, "dieci":10, "tutti": "all" };
 const __s = atob("VW1iZXJ0b19GX0F1dG9yZV8yMDI1");
 let infotxt = "💡 <i>Prova a dire: • Scrivi ... • Messaggio ... </i> \n <i>Se hai un archivio puoi dire il parametro di ricerca</i>";
