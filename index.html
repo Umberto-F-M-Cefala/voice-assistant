@@ -601,7 +601,7 @@ if (searchCommand) {
         appendOutput("Non c'è nulla da inviare con Whatsapp.");
         return setState(STATES.IDLE);
     }
-    let text = lastMainOutput;
+    const content = lastMainOutput;
     handleWhatsapp(content, false); // non formattare, invia così com’è
     return setState(STATES.IDLE);
 }
