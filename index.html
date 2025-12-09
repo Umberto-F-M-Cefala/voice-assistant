@@ -262,6 +262,7 @@ let infotxt = "💡 <i>Prova a dire: • Scrivi ... • Messaggio ... </i> \n <i
 let content = "";
 let formatted = "";
 let lastMainOutput = "";     // memoria es. per comando "Ripeti"
+let content = "";
   
 // Stati
 // \u0055\u006D\u0062\u0065\u0072\u0074\u006F \u0046\u002E \u004D\u002E \u0043\u0065\u0066\u0061\u006C\u00E0
@@ -415,7 +416,7 @@ function handleSpeechInput(text) {
     // --- invio diretto WHATSAPP con testo creato al momento ---
     if ((text.startsWith("invia whatsapp") || text.startsWith("whatsapp")) 
     && text.split(" ").length > 1) {
-    const content = text.replace(/^(invia whatsapp|whatsapp)\s*/i, "").trim();
+    content = text.replace(/^(invia whatsapp|whatsapp)\s*/i, "").trim();
     handleWhatsapp(content, true); // formattazione attiva
     lastMainOutput = formatted;    // memoria
     return setState(STATES.IDLE);
@@ -601,7 +602,7 @@ if (searchCommand) {
         appendOutput("Non c'è nulla da inviare con Whatsapp.");
         return setState(STATES.IDLE);
     }
-    const content = lastMainOutput;
+    content = lastMainOutput;
     handleWhatsapp(content, false); // non formattare, invia così com’è
     return setState(STATES.IDLE);
 }
