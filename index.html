@@ -743,16 +743,16 @@ function formatText(str, autoEmoji) {
 }
 
 function handleWhatsapp(text, shouldFormat = true) {
-    // Usa text passato come parametro, non fa riferimento a variabili esterne
-    const msg = (shouldFormat ? formatText(text, true) : text)
-              + "\n //_trascritto dall'Assistente Vocale_";
+    // Se shouldFormat è true, aggiunge la formattazione e la nota, altrimenti solo il testo
+    const msg = shouldFormat 
+        ? formatText(text, true) + "\n //_trascritto dall'Assistente Vocale_"
+        : text;
 
     const url = `whatsapp://send?text=${encodeURIComponent(msg)}`;
     window.open(url, '_self');
 
     appendOutput(`💬 Invio diretto del messaggio WhatsApp: "${msg}"`);
 }
-
 
 function saveToArchive(text, type) {
     archive.conversazione.push({
