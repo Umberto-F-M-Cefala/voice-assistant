@@ -412,15 +412,45 @@ function handleSpeechInput(text) {
 
     // 2. Comandi Diretti
     
-    // --- invio diretto WHATSAPP con testo creato al momento ---
-    if ((text.startsWith("invia whatsapp") || text.startsWith("whatsapp")) 
-    && text.split(" ").length > 1) {
-    content = text.replace(/^(invia whatsapp|whatsapp)\s*/i, "").trim();
-    handleWhatsapp(content, true); // formattazione attiva
-    lastMainOutput = formatted;    // memoria
-    return setState(STATES.IDLE);
+    // --- invio diretto WHATSAPP oppure se senza contenuto invio del testo già scritto ---
+   // Normalizzazione del testo riconosciuto
+const cmd = text
+    .toLowerCase()
+    .trim()
+    .replace(/[.!?]+$/g, "")   // rimuove punteggiatura finale
+    .replace(/\s+/g, " ");     // normalizza spazi
+
+// alias accettati
+const whatsappAliases = [
+    "whatsapp",
+    "invia whatsapp",
+    "in via whatsapp",
+    "invio whatsapp"
+];
+
+// unico blocco che gestisce TUTTO
+if (whatsappAliases.some(a => cmd.startsWith(a))) {
+
+  let content = cmd.replace(/^(invia whatsapp|in via whatsapp|invio whatsapp|whatsapp)\s*/i, "").trim();
+
+if (content.length > 0) {
+    // invio diretto con testo nuovo
+    const formatted = formatText(content, true);  // se vuoi formattare come prima
+    handleWhatsapp(formatted, true);
+
+    lastMainOutput = formatted;   // memoria
+} else {
+    // invio ultimo contenuto
+    if (!lastMainOutput) {
+        speak("Nulla da inviare");
+        appendOutput("Non c'è nulla da inviare con WhatsApp.");
+        return setState(STATES.IDLE);
+    }
+    handleWhatsapp(lastMainOutput, false);
 }
 
+return setState(STATES.IDLE);
+}
 
   
     // --- MESSAGGIO (Con Emoji Automatiche) ---
@@ -593,18 +623,6 @@ if (searchCommand) {
     }
         return setState(STATES.IDLE);
     }
-
-   // --- WHATSAPP invio input già registrato ---
-    if (text === "invia whatsapp" || text === "in via whatsapp" || text === "whatsapp") {
-        if (!lastMainOutput) {
-        speak("Nulla da inviare");
-        appendOutput("Non c'è nulla da inviare con Whatsapp.");
-        return setState(STATES.IDLE);
-    }
-    content = lastMainOutput;
-    handleWhatsapp(content, false); // non formattare, invia così com’è
-    return setState(STATES.IDLE);
-}
 
  // --- ARCHIVIA ---
 if (text.startsWith("archivia")) {
