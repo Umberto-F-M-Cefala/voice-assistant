@@ -843,6 +843,7 @@ function handleSearchResults(results, query) {
         displayEntry(results[0]);
         speak(results[0].output);
         setState(STATES.IDLE);
+      lastMainOutput = results[0].output;
     } else {
         tempMemory.results = results;
 
@@ -896,6 +897,7 @@ function handleChoiceInput(text) {
         displayEntry(item);
         speak(item.output);
         setState(STATES.IDLE);
+        lastMainOutput = item.output;
     } else {
         speak("Numero non valido. Riprova.");
     }
