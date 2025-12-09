@@ -512,6 +512,7 @@ if (searchCommand) {
     if (found.score > 0.85) {
         displayEntry(found.item);
         speak(found.item.output);
+        lastMainOutput = found.item.output;
         setState(STATES.IDLE);
     } else {
         // fallback globale: trigger in tutte le sezioni
@@ -842,8 +843,8 @@ function handleSearchResults(results, query) {
     } else if (results.length === 1) {
         displayEntry(results[0]);
         speak(results[0].output);
-        setState(STATES.IDLE);
-      lastMainOutput = results[0].output;
+        lastMainOutput = results[0].output;
+        setState(STATES.IDLE);  
     } else {
         tempMemory.results = results;
 
@@ -896,8 +897,8 @@ function handleChoiceInput(text) {
         const item = tempMemory.results[num - 1];
         displayEntry(item);
         speak(item.output);
-        setState(STATES.IDLE);
         lastMainOutput = item.output;
+        setState(STATES.IDLE);   
     } else {
         speak("Numero non valido. Riprova.");
     }
