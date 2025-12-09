@@ -595,9 +595,8 @@ if (searchCommand) {
     }
 
    // --- WHATSAPP invio input già registrato ---
-    if (text === "invia whatsapp" || text === "whatsapp") {
-      console.log("DEBUG lastMainOutput:", lastMainOutput);
-    if (!lastMainOutput) {
+    if (text === "invia whatsapp" || text === "in via whatsapp" || text === "whatsapp") {
+        if (!lastMainOutput) {
         speak("Nulla da inviare");
         appendOutput("Non c'è nulla da inviare con Whatsapp.");
         return setState(STATES.IDLE);
