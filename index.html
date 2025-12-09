@@ -697,12 +697,6 @@ function formatText(str, autoEmoji) {
         s = s.replace(p.regex, p.char);
     }
 
-    // Normalizzazione spazi e punteggiatura
-    s = s.replace(/\s+([,.!?])/g, "$1");  // niente spazio prima della punteggiatura
-    s = s.replace(/([,.!?])(?=\S)/g, "$1 "); // assicura spazio dopo punteggiatura (tranne prima di newline)
-    s = s.replace(/([,.!?])\s+\n/g, "$1\n"); // niente spazio prima delle newline
-    s = s.replace(/\s*\n\s*/g, "\n");
-
     // Capitalizzazione frasi
     s = s.replace(/(^|[.!?]\s+)([a-z])/g, (m, before, char) => before + char.toUpperCase());
 
@@ -737,6 +731,13 @@ function formatText(str, autoEmoji) {
         m.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
     );
 
+// Normalizzazione spazi e punteggiatura
+    s = s.replace(/\s+([,.!?])/g, "$1");  // niente spazio prima della punteggiatura
+    s = s.replace(/([,.!?])(?=\S)/g, "$1 "); // assicura spazio dopo punteggiatura (tranne prima di newline)
+    s = s.replace(/([,.!?])\s+\n/g, "$1\n"); // niente spazio prima delle newline
+    s = s.replace(/\s*\n\s*/g, "\n");
+  
+  
  return s;
   
 }
