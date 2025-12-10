@@ -1,10 +1,10 @@
 const CACHE_NAME = 'assistente-cache-v1';
 
 const urlsToCache = [
-  './',
-  './index.html',
-  './icon-192x192.png',
-  './icon-512x512.png'
+  'https://umberto-f-m-cefala.github.io/voice-assistant/',
+  'https://umberto-f-m-cefala.github.io/voice-assistant/index.html',
+  'https://umberto-f-m-cefala.github.io/voice-assistant/icon-192x192.png',
+  'https://umberto-f-m-cefala.github.io/voice-assistant/icon-512x512.png'
 ];
 
 self.addEventListener('install', event => {
