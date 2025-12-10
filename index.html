@@ -1019,7 +1019,7 @@ document.getElementById('muteButton').onclick = () => {
 </script>
   <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js')
+  navigator.serviceWorker.register('/voice-assistant/sw.js')
     .then(() => console.log('Service Worker registrato'))
     .catch(err => console.error('Errore Service Worker:', err));
 }
