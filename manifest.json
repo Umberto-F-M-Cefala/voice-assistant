@@ -1,8 +1,8 @@
 {
-  "name": "Assistente Vocale Offline",
+  "name": "Assistente",
   "short_name": "Assistente",
   "description": "Un assistente vocale offline PWA per la gestione di comandi personali.",
-  "start_url": "./",
+  "start_url": "https://umberto-f-m-cefala.github.io/voice-assistant/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#007bff",
