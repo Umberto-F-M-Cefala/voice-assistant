@@ -1,10 +1,10 @@
 const CACHE_NAME = 'assistente-cache-v1';
 
 const urlsToCache = [
-  './',
-  './index.html',
-  './icon-192x192.png',
-  './icon-512x512.png'
+  '/voice-assistant/',
+  '/voice-assistant/index.html',
+  '/voice-assistant/icon-192x192.png',
+  '/voice-assistant/icon-512x512.png'
 ];
 
 self.addEventListener('install', event => {
