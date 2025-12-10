@@ -2,7 +2,7 @@
   "name": "Assistente Vocale Offline",
   "short_name": "Assistente",
   "description": "Un assistente vocale offline PWA per la gestione di comandi personali.",
-  "start_url": "index.html",
+  "start_url": "/voice-assistant/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#007bff",
