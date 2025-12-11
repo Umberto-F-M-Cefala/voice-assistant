@@ -1,4 +1,4 @@
-const CACHE_NAME = 'assistente-cache-v1';
+const CACHE_NAME = 'assistente-cache-v2';
 
 const urlsToCache = [
   '/voice-assistant/',
@@ -13,7 +13,20 @@ self.addEventListener('install', event => {
       return cache.addAll(urlsToCache);
     })
   );
-  self.skipWaiting();
+  self.skipWaiting(); // usa subito la nuova versione
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames
+          .filter(name => name !== CACHE_NAME)
+          .map(name => caches.delete(name))
+      );
+    })
+  );
+  self.clients.claim(); // aggiorna subito tutte le finestre aperte
 });
 
 self.addEventListener('fetch', event => {
