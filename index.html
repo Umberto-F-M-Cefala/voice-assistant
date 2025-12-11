@@ -812,14 +812,36 @@ function saveToArchive(text, type) {
 // Logica di Ricerca
 
 function handleSearchCommand(text) {
-    const searchRegex = /^cerca\s+(?:in\s+([a-zA-Z0-9_]+))?(?:\s+per\s+(titolo|autore))?\s*(.*)$/i;
-    const match = text.match(searchRegex);
+    const words = text.trim().split(/\s+/);
+    
+    if (!words.length || words[0].toLowerCase() !== "cerca") return null;
 
-    if (!match) return null;
+    let section = null;
+    let field = "trigger";
+    let queryStartIndex = 1; // l'indice da cui inizia la query
 
-    const section = match[1] ? match[1].toLowerCase() : null;
-    const field = match[2] ? match[2].toLowerCase() : "trigger";
-    const query = match[3].trim();
+    // cerchiamo la sezione: prima parola dopo "cerca" che non sia "autore" o "titolo"
+    for (let i = 1; i < words.length; i++) {
+        const w = words[i].toLowerCase();
+        if (w !== "autore" && w !== "titolo") {
+            section = w;
+            queryStartIndex = i + 1;
+            break;
+        }
+    }
+
+    // cerchiamo il campo (autore/titolo) dopo la sezione
+    for (let i = queryStartIndex; i < words.length; i++) {
+        const w = words[i].toLowerCase();
+        if (w === "autore" || w === "titolo") {
+            field = w;
+            queryStartIndex = i + 1;
+            break;
+        }
+    }
+
+    // la query è tutto ciò che rimane dopo sezione e campo
+    const query = words.slice(queryStartIndex).join(" ").trim();
 
     if (!query) return null;
 
