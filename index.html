@@ -646,19 +646,42 @@ if (searchCommand) {
         return setState(STATES.IDLE);
     }
 
- // --- ARCHIVIA ---
-if (text.startsWith("archivia")) {
-    content = text.replace(/^archivia\s*/i, "").trim();
-    if (lastMainOutput === 0) {
-        speak("Nulla da archiviare");
-        appendOutput("Non c'è nulla da archiviare.");
+
+// --- ARCHIVIA ---
+    if (text.startsWith("archivia")) {
+        content = text.replace(/^archivia\s*/i, "").trim();
+        
+        if (!lastMainOutput) {
+            speak("Nulla da archiviare");
+            appendOutput("Non c'è nulla da archiviare.");
+            return setState(STATES.IDLE);
+        }
+
+        if (!content) {
+            speak("Devi dirmi un titolo per archiviare");
+            return setState(STATES.IDLE);
+        }
+
+        // Controllo anti-duplicazione
+        // Verifica se esiste già un elemento con lo stesso titolo (trigger o meta_title) nella sezione conversazione
+        const exists = archive.conversazione.some(item => 
+            (item.trigger && item.trigger.toLowerCase() === content.toLowerCase()) || 
+            (item.meta_title && item.meta_title.toLowerCase() === content.toLowerCase())
+        );
+
+        if (exists) {
+            speak("Esiste già un contenuto con questo nome.");
+            appendOutput(`<b>Non eseguo</b>: Il titolo "${content}" esiste già in archivio.`);
+            return setState(STATES.IDLE);
+        }
+
+        saveToArchive(lastMainOutput, content);
+        speak("Archiviato come " + content);
+        appendOutput(`Ho archiviato: <b>${content}</b>`);
         return setState(STATES.IDLE);
     }
-    saveToArchive(lastMainOutput, content);
-    speak("Archiviato");
-    appendOutput("Archiviato con successo.");
-    return setState(STATES.IDLE);
-}
+
+  
  // --- SALVA in appunti ---
 
 if (text === "salva" || text === "copia") {
@@ -835,22 +858,52 @@ function fuzzyScore(query, text) {
     if (query.includes(text) && text.length > 3) return 0.7;
     return 0;
 }
-          
+
+//  Ricerca con punteggio e flessibilità
 function searchArchive(query, fields = ["trigger"], section = null) {
     let results = [];
-    const q = query.toLowerCase().trim();
+    const qRaw = query.toLowerCase().trim();
+    const tokens = qRaw.split(/\s+/).filter(t => t.length > 2); 
+
     const sectionsToSearch = section ? [section] : Object.keys(archive);
 
     sectionsToSearch.forEach(sec => {
         archive[sec].forEach(item => {
+            let maxItemScore = 0;
+
             for (let f of fields) {
-                if ((item[f] || "").toLowerCase().includes(q)) {
-                    results.push({ ...item, section: sec });
-                    break; // Non duplicare se più campi matchano
+                const val = (item[f] || "").toLowerCase();
+                let score = 0;
+
+                // 1. Corrispondenza Esatta (Massima priorità)
+                if (val === qRaw) {
+                    score = 100;
                 }
+                // 2. Inizia con la query
+                else if (val.startsWith(qRaw)) {
+                    score = 80;
+                }
+                // 3. Contiene la frase esatta
+                else if (val.includes(qRaw)) {
+                    score = 60;
+                }
+                // 4. Ricerca flessibile (contiene tutti i token sparsi)
+                else if (tokens.length > 0 && tokens.every(t => val.includes(t))) {
+                    score = 40;
+                }
+
+                if (score > maxItemScore) maxItemScore = score;
+            }
+
+            if (maxItemScore > 0) {
+                // Aggiungiamo un flag score per l'ordinamento
+                results.push({ ...item, section: sec, searchScore: maxItemScore });
             }
         });
     });
+
+    // Ordina per punteggio decrescente (i match migliori per primi)
+    results.sort((a, b) => b.searchScore - a.searchScore);
 
     return results;
 }
@@ -858,18 +911,19 @@ function searchArchive(query, fields = ["trigger"], section = null) {
 function handleSearchResults(results, query) {
     if (results.length === 0) {
         speak("Nessun risultato. Vuoi salvare questo testo?");
-        appendOutput(`Nessun risultato per "${query}". Lo devo salvare?`);
+        appendOutput(`Nessun risultato per "${query}". Lo devo salvare in appunti?`);
         tempMemory.pendingText = query;
         setState(STATES.AWAITING_CONFIRM);
     } else if (results.length === 1) {
+        // Un solo risultato: mostriamo direttamente
         displayEntry(results[0]);
         speak(results[0].output);
         lastMainOutput = results[0].output;
-        setState(STATES.IDLE);  
+        setState(STATES.IDLE);
     } else {
         tempMemory.results = results;
-
-        // Raggruppa per sezione
+        
+        // Visualizzazione elenco raggruppato
         const resultsBySection = {};
         results.forEach(r => {
             const sec = r.section || "Generale";
@@ -878,55 +932,57 @@ function handleSearchResults(results, query) {
         });
 
         let list = "";
-        let counter = 1;
+        let globalCounter = 1; // Contatore unico per permettere la selezione
+
         for (let sec in resultsBySection) {
             list += `\n--- ${sec.toUpperCase()} ---\n`;
             resultsBySection[sec].forEach(item => {
-                list += `${counter}. ${item.meta_title || item.trigger}\n`;
-                counter++;
+                // Usiamo il titolo o il trigger, e mostriamo un'anteprima score se utile debug
+                list += `${globalCounter}. ${item.meta_title || item.trigger}\n`;
+                globalCounter++;
             });
         }
 
-        appendOutput(`📋 Trovati ${results.length} risultati:${list}\n\n👉 Scegli un numero o dì 'Tutti'.`);
-        speak(`Ho trovato ${results.length} risultati. Scegli un numero o dì tutti.`);
+        appendOutput(`📋 Trovati ${results.length} risultati:${list}\n\n  Dimmi il numero di quello che vuoi aprire.`);
+        speak(`Ho trovato ${results.length} risultati. Dimmi il numero di quello che vuoi aprire.`);
         setState(STATES.AWAITING_CHOICE);
     }
 }
 
-// Gestione Scelte Successive
 function handleChoiceInput(text) {
-    if (text.includes("annulla")) {
-        speak("Annullato.");
-        appendOutput("❌ Annullato.");
+    // Gestione annullamento
+    if (text.includes("annulla") || text.includes("basta") || text.includes("stop")) {
+        speak("Operazione annullata.");
+        appendOutput("Ricerca terminata.");
         return setState(STATES.IDLE);
     }
 
-    if (text.includes("tutti")) {
-        const fullText = tempMemory.results.map(r => r.output).join(". ");
-        speak("Leggo tutto: " + fullText);
-        appendOutput("📖 Lettura completa...");
-        return setState(STATES.IDLE);
-    }
-
-    // Parsing numero (parola o cifra)
     let num = parseInt(text.replace(/\D/g, ''));
     if (isNaN(num)) {
-        for (let w in textToNumMap) if (text.includes(w)) num = textToNumMap[w];
+        // Fallback su mappa testuale (uno, due, tre...)
+        for (let w in textToNumMap) {
+            if (text.includes(w) && textToNumMap[w] !== "all") {
+                num = textToNumMap[w];
+                break;
+            }
+        }
     }
 
+    // Verifica validità numero
     if (num > 0 && num <= tempMemory.results.length) {
         const item = tempMemory.results[num - 1];
         displayEntry(item);
-        speak(item.output);
+        speak("Ecco: " + item.output); // Feedback vocale più naturale
         lastMainOutput = item.output;
         setState(STATES.IDLE);   
     } else {
-        speak("Numero non valido. Riprova.");
+        speak("Numero non valido. Riprova o annulla.");
+        // Rimaniamo in AWAITING_CHOICE per dare un'altra possibilità
     }
 }
 
 function handleConfirmInput(text) {
-    if (text.includes("si")) {
+if (["si", "sì", "ok", "va bene"].includes(text.toLowerCase())) {
         formatted = formatText(tempMemory.pendingText, false);
      if (!navigator.clipboard || !navigator.clipboard.writeText) {
         speak("La funzione copia non è supportata");
