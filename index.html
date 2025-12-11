@@ -492,6 +492,23 @@ return setState(STATES.IDLE);
         return setState(STATES.IDLE);
     }
 
+// --- INPUT semplice per verificare riconoscimento vocale ---
+        if (text.startsWith("input") || text.startsWith("input vocale")) {
+        content = text.replace(/^(input|input vocale)\s*/i, "").trim();
+        if (!content) {
+          speak("Contenuto vuoto");
+          appendOutput(`Contenuto vuoto.`);
+            return setState(STATES.IDLE);
+        }
+        
+        speak("Input non formattato: " + content);
+        appendOutput(`<b>Input non formattato:</b> ${content}`);
+        lastMainOutput = content; //memoria
+        infotxt = "💡 <i>Prova a dire: • Ripeti • Salva • Archivia ... [il titolo del contenuto] • Invia Whatsapp</i>";
+        appendCustomDiv(infotxt, "info-message");
+        return setState(STATES.IDLE);
+  }
+  
     // --- RICERCA NELL'ARCHIVIO ---
 const prefissiEsclusi = ["trascrivi", "scrivi", "messaggio", "archivia", "invia whatsapp", "whatsapp"];
 const paroleEsatteEscluse = ["ripeti", "salva", "copia", "esamina", "esamina dispositivo", "invia whatsapp", "whatsapp"];
