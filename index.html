@@ -144,6 +144,24 @@
     padding: 0.3rem; /* 8px */
     font-size: 0.9rem;
   }
+
+    #screenFlash {
+  position: fixed;
+  inset: 0;
+  background-color: transparent;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+#screenFlash.flash {
+  animation: flashOnce 280ms ease-out;
+}
+
+@keyframes flashOnce {
+  0%   { opacity: 0; }
+  30%  { opacity: 1; }
+  100% { opacity: 0; }
+}
 </style>
 </head>
 <body>
@@ -324,6 +342,7 @@ function startListening() {
 
     r.onstart = () => {
         setState(STATES.LISTENING);
+        flashScreen('rgba(220,53,69,0.6)'); // rosso
         appendOutput("⏳ Attendo istruzioni", "temp-status");
     };
 
@@ -467,7 +486,8 @@ return setState(STATES.IDLE);
         }
         // Qui attiviamo le emoji automatiche (true)
         formatted = formatText(content, true);
-        
+
+        flashScreen('rgba(40,167,69,0.6)'); // verde
         speak("Messaggio creato: " + formatted);
         appendOutput(`💬 <b>Messaggio:</b> ${formatted}`);
         lastMainOutput = formatted; //memoria
@@ -487,6 +507,7 @@ return setState(STATES.IDLE);
         // Qui DISATTIVIAMO le emoji automatiche (false)
         formatted = formatText(content, false);
 
+        flashScreen('rgba(40,167,69,0.6)'); // verde
         speak("Ho scritto: " + formatted);
         appendOutput(`<b>Testo:</b> ${formatted}`);
         lastMainOutput = formatted; //memoria
@@ -534,6 +555,7 @@ if (searchCommand) {
         displayEntry(found.item);
         speak(found.item.output);
         lastMainOutput = found.item.output;
+        flashScreen('rgba(40,167,69,0.6)'); // verde
         setState(STATES.IDLE);
     } else {
         // fallback globale: trigger in tutte le sezioni
@@ -676,8 +698,9 @@ if (searchCommand) {
         }
 
         saveToArchive(lastMainOutput, content);
-        speak("Archiviato come " + content);
-        appendOutput(`Ho archiviato: <b>${content}</b>`);
+       flashScreen('rgba(40,167,69,0.6)'); // verde
+       speak("Archiviato come " + content);
+       appendOutput(`Ho archiviato: <b>${content}</b>`);
         return setState(STATES.IDLE);
     }
 
@@ -702,6 +725,7 @@ if (text === "salva" || text === "copia") {
     (async () => {
         try {
             await navigator.clipboard.writeText(lastMainOutput);
+            flashScreen('rgba(40,167,69,0.6)'); // verde
             speak("Salvato negli appunti");
             appendOutput(`💾 Copiato: "${lastMainOutput}"`);
         } catch (err) {
@@ -939,6 +963,7 @@ function handleSearchResults(results, query) {
     } else if (results.length === 1) {
         // Un solo risultato: mostriamo direttamente
         displayEntry(results[0]);
+        flashScreen('rgba(40,167,69,0.6)'); // verde
         speak(results[0].output);
         lastMainOutput = results[0].output;
         setState(STATES.IDLE);
@@ -965,6 +990,7 @@ function handleSearchResults(results, query) {
             });
         }
 
+        flashScreen('rgba(255,193,7,0.6)'); // giallo
         appendOutput(`📋 Trovati ${results.length} risultati:${list}\n\n  Dimmi il numero di quello che vuoi aprire.`);
         speak(`Ho trovato ${results.length} risultati. Dimmi il numero di quello che vuoi aprire.`);
         setState(STATES.AWAITING_CHOICE);
@@ -1035,6 +1061,24 @@ if (["si", "sì", "ok", "va bene"].includes(text.toLowerCase())) {
 }
 
 /* ================== UTILITIES UI ================== */
+  //funzione flash schermo
+  function flashScreen(color, duration = 280) {
+  const flash = document.getElementById('screenFlash');
+  if (!flash) return;
+
+  flash.style.backgroundColor = color;
+
+  // reset animazione
+  flash.classList.remove('flash');
+  void flash.offsetWidth; // force reflow
+  flash.classList.add('flash');
+
+  // pulizia finale
+  setTimeout(() => {
+    flash.classList.remove('flash');
+  }, duration);
+}
+
 function displayEntry(item) {
     appendOutput(`📌 <b>${item.meta_title || item.trigger}</b>\n${item.output}`);
 }
@@ -1122,5 +1166,7 @@ if ('serviceWorker' in navigator) {
     .catch(err => console.error('Errore Service Worker:', err));
 }
   </script>
+  
+  <div id="screenFlash"></div>
 </body>
 </html>
