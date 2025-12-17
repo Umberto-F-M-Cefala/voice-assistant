@@ -341,7 +341,6 @@ function startListening() {
         const text = e.results[0][0].transcript.toLowerCase().trim();
         document.querySelectorAll('.temp-status').forEach(el => el.remove());
         handleSpeechInput(text);
-        flashScreen('transparent');//trasparente 
     };
 
     r.onerror = (e) => {
@@ -350,8 +349,7 @@ function startListening() {
         setState(STATES.IDLE);
     };
 
-    r.onend = () => {
-       flashScreen('transparent');//trasparente 
+    r.onend = () => {  
         // Se non stiamo processando, torna in IDLE
         if (appState === STATES.LISTENING) setState(STATES.IDLE);
     };
@@ -368,6 +366,7 @@ micBtn.onclick = () => {
     }
    if (appState === STATES.LISTENING) {
         if (currentRecognition) currentRecognition.stop();
+        flashScreen('transparent');//trasparente 
         return;
     }
     startListening();
