@@ -1066,16 +1066,20 @@ if (["si", "sì", "ok", "va bene"].includes(text.toLowerCase())) {
   const flash = document.getElementById('screenFlash');
   if (!flash) return;
 
+  // imposta colore
   flash.style.backgroundColor = color;
+  flash.style.opacity = '0';
 
   // reset animazione
   flash.classList.remove('flash');
   void flash.offsetWidth; // force reflow
   flash.classList.add('flash');
 
-  // pulizia finale
+  // cleanup FONDAMENTALE
   setTimeout(() => {
     flash.classList.remove('flash');
+    flash.style.backgroundColor = 'transparent';
+    flash.style.opacity = '0';
   }, duration);
 }
 
