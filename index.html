@@ -341,14 +341,17 @@ function startListening() {
         const text = e.results[0][0].transcript.toLowerCase().trim();
         document.querySelectorAll('.temp-status').forEach(el => el.remove());
         handleSpeechInput(text);
+        flashScreen('transparent');//trasparente 
     };
 
     r.onerror = (e) => {
         if (e.error !== 'no-speech') appendOutput("⚠️ Errore microfono: " + e.error);
+        flashScreen('transparent');//trasparente 
         setState(STATES.IDLE);
     };
 
     r.onend = () => {
+       flashScreen('transparent');//trasparente 
         // Se non stiamo processando, torna in IDLE
         if (appState === STATES.LISTENING) setState(STATES.IDLE);
     };
@@ -399,6 +402,7 @@ document.getElementById('stopButton').onclick = () => {
         micBtn.classList.remove('listening');
     }
 
+    flashScreen('transparent');//trasparente 
     // 5. Messaggio finale
     appendOutput("🗑️ Elimino gli input e termino l'ascolto", "temp-status");
 
@@ -1053,21 +1057,40 @@ if (["si", "sì", "ok", "va bene"].includes(text.toLowerCase())) {
 
 /* ================== UTILITIES UI ================== */
   //funzione flash schermo
+ let flashTimeout; // variabile per gestire flash sovrapposti
+
  function flashScreen(color, duration = 5000) {
   const flash = document.getElementById('screenFlash');
   if (!flash) return;
 
-  // colore istantaneo e opacità massima
+  // annulla eventuale timeout precedente
+  if (flashTimeout) clearTimeout(flashTimeout);
+
+  // reset immediato dello stato
   flash.style.transition = 'none';
+  flash.style.opacity = '0';
+  flash.style.backgroundColor = 'transparent';
+
+  // forza il browser a registrare il reset (reflow)
+  void flash.offsetWidth;
+
+  // applica il nuovo colore e mostra l'elemento
   flash.style.backgroundColor = color;
   flash.style.opacity = '1';
 
-  // torna trasparente dopo 'duration' ms
-  setTimeout(() => {
+  // programma la sparizione dopo 'duration' ms
+  flashTimeout = setTimeout(() => {
+    flash.style.transition = 'opacity 0.5s'; // durata transizione in uscita
     flash.style.opacity = '0';
-    flash.style.backgroundColor = 'transparent';
+
+    // torna trasparente anche il colore dopo la transizione
+    setTimeout(() => {
+      flash.style.backgroundColor = 'transparent';
+      flash.style.transition = 'none';
+    }, 500); // stessa durata della transizione
   }, duration);
 }
+
 
 
 function displayEntry(item) {
