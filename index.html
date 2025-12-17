@@ -145,24 +145,15 @@
     font-size: 0.9rem;
   }
 
-    #screenFlash {
+#screenFlash {
   position: fixed;
   inset: 0;
+  opacity: 0;
   background-color: transparent;
-  opacity: 0;                 /* STATO BASE */
   pointer-events: none;
   z-index: 9999;
-}
 
-#screenFlash.flash {
-  animation: flashOnce 3s ease-out;
-}
-
-@keyframes flashOnce {
-  0%   { opacity: 0; }
-  30%  { opacity: 1; }
-  80%  { opacity: 1; }
-  100% { opacity: 0; }
+  will-change: opacity;
 }
 </style>
 </head>
@@ -1064,36 +1055,30 @@ if (["si", "sì", "ok", "va bene"].includes(text.toLowerCase())) {
 
 /* ================== UTILITIES UI ================== */
   //funzione flash schermo
- function flashScreen(color, duration = 280) {
+ function flashScreen(color, duration = 3000) {
   const flash = document.getElementById('screenFlash');
   if (!flash) return;
 
-  // reset totale PRIMA
+  // reset totale
   flash.style.transition = 'none';
   flash.style.opacity = '0';
-  flash.style.backgroundColor = 'transparent';
-
-  // forza reflow
-  void flash.offsetWidth;
-
-  // imposta colore
   flash.style.backgroundColor = color;
 
-  // anima manualmente
-  flash.style.transition = `opacity ${duration}ms ease-out`;
-  flash.style.opacity = '1';
+  // garantisce che il browser applichi lo stato iniziale
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
 
-  // ritorno a zero
-  setTimeout(() => {
-    flash.style.opacity = '0';
-  }, duration * 0.3);
+      // unica transizione (in + out)
+      flash.style.transition = `opacity ${duration}ms ease-in-out`;
+      flash.style.opacity = '1';
 
-  // cleanup finale
-  setTimeout(() => {
-    flash.style.transition = 'none';
-    flash.style.backgroundColor = 'transparent';
-    flash.style.opacity = '0';
-  }, duration);
+      // ritorno a zero dopo metà animazione
+      setTimeout(() => {
+        flash.style.opacity = '0';
+      }, duration * 0.5);
+
+    });
+  });
 }
 
 function displayEntry(item) {
