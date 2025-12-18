@@ -7,10 +7,11 @@
 <meta name="author" content="Umberto F. M. Cefalà">
 <link rel="manifest" href="/voice-assistant/manifest.json">
   <style>
-  html { font-size: 100%; box-sizing: border-box; }
+  html {height: 100%; font-size: 100%; box-sizing: border-box; }
   *, *:before, *:after { box-sizing: inherit; }
 
   body {
+    height: 100%;
     font-family: 'Segoe UI', sans-serif;
     text-align: center;
     padding: 0.1rem;
@@ -110,7 +111,7 @@
   border-radius: 0.5rem;
 
   min-height: 35svh;
-  max-height: 77dvh;
+  max-height: 77vh;
   flex-grow: 1;
 
   overflow-y: auto;
@@ -125,6 +126,7 @@
    #toggleButtons {
     cursor: pointer;
     margin-top: 0.5rem; 
+    margin-bottom: 0;
     padding: 0.6rem 1rem; /* 10px 20px */
     width: 100%;
     max-width: 18rem; /* 300px */
