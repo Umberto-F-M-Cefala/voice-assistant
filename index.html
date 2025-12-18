@@ -358,20 +358,27 @@ function startListening() {
     r.start();
 }
 
-micBtn.onclick = () => {
-   if (appState === STATES.SPEAKING || speechSynthesis.speaking) {
+//attivazione microfono con click su bottone o doppio click su output 
+function handleMicAction() {
+    if (appState === STATES.SPEAKING || speechSynthesis.speaking) {
         stopAllAudio();
         startListening();
         return;
     }
-   if (appState === STATES.LISTENING) {
+
+    if (appState === STATES.LISTENING) {
         if (currentRecognition) currentRecognition.stop();
-        flashScreen('transparent');//trasparente 
+        flashScreen('transparent');
         return;
     }
+
     startListening();
-};
- 
+}
+micBtn.onclick = handleMicAction;
+const outputDiv = document.getElementById('output');
+outputDiv.ondblclick = handleMicAction;
+
+  
 
 document.getElementById('stopButton').onclick = () => {
 
