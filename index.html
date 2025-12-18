@@ -110,8 +110,8 @@
   padding-bottom: calc(0.6rem + env(safe-area-inset-bottom));
   border-radius: 0.5rem;
 
-  min-height: 35svh;
-  max-height: 77vh;
+  min-height: 45svh;
+  max-height: none;
   flex-grow: 1;
 
   overflow-y: auto;
@@ -143,6 +143,7 @@
     border-radius: 0.3rem; /* 6px */
     padding: 0.3rem; 
     margin-top: 0.3rem; 
+    margin-bottom: 0;
     width: 100%;
     margin-left: auto;
     margin-right: auto;
@@ -168,6 +169,13 @@
   pointer-events: none;
   z-index: 9999;
 }
+
+    .main-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+    }
+    
 </style>
 </head>
 <body>
