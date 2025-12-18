@@ -799,6 +799,9 @@ function formatText(str, autoEmoji) {
     s = s.replace(/([,.!?])(?=\S)/g, "$1 "); // assicura spazio dopo punteggiatura (tranne prima di newline)
     s = s.replace(/([,.!?])\s+\n/g, "$1\n"); // niente spazio prima delle newline
     s = s.replace(/\s*\n\s*/g, "\n");
+
+// Rimuove punteggiatura duplicata (,, .. !! ??)
+s = s.replace(/([,.!?])\s*\1+/g, "$1");
   
   
  return s;
