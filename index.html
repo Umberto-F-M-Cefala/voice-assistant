@@ -356,23 +356,27 @@ function startListening() {
 
     r.onstart = () => {
         setState(STATES.LISTENING);
-        flashScreen('rgba(220,53,69,0.6)'); // rosso
+        flashTimerDisabled = true;
+        flashScreen('rgba(220,53,69,0.6)');
         appendOutput("⏳ Attendo istruzioni", "temp-status");
     };
 
     r.onresult = (e) => {
+        flashTimerDisabled = false;
         const text = e.results[0][0].transcript.toLowerCase().trim();
         document.querySelectorAll('.temp-status').forEach(el => el.remove());
         handleSpeechInput(text);
     };
 
     r.onerror = (e) => {
+        flashTimerDisabled = false;
         if (e.error !== 'no-speech') appendOutput("⚠️ Errore microfono: " + e.error);
         flashScreen('transparent');//trasparente 
         setState(STATES.IDLE);
     };
 
     r.onend = () => {  
+        
         // Se non stiamo processando, torna in IDLE
         if (appState === STATES.LISTENING) setState(STATES.IDLE);
     };
@@ -1090,39 +1094,49 @@ if (["si", "sì", "ok", "va bene"].includes(text.toLowerCase())) {
 /* ================== UTILITIES UI ================== */
   //funzione flash schermo
  let flashTimeout; // variabile per gestire flash sovrapposti
+let flashTimerDisabled = false;
 
- function flashScreen(color, duration = 5000) {
+/**
+ * Flash dello schermo.
+ * Se flashTimerDisabled === true, il flash resta visibile
+ * finché non viene richiamata la funzione con il timer attivo.
+ */
+function flashScreen(color, duration = 5000) {
   const flash = document.getElementById('screenFlash');
   if (!flash) return;
 
   // annulla eventuale timeout precedente
-  if (flashTimeout) clearTimeout(flashTimeout);
+  if (flashTimeout) {
+    clearTimeout(flashTimeout);
+    flashTimeout = null;
+  }
 
-  // reset immediato dello stato
+  // reset immediato
   flash.style.transition = 'none';
   flash.style.opacity = '0';
   flash.style.backgroundColor = 'transparent';
 
-  // forza il browser a registrare il reset (reflow)
+  // forza reflow
   void flash.offsetWidth;
 
-  // applica il nuovo colore e mostra l'elemento
+  // mostra il flash
   flash.style.backgroundColor = color;
   flash.style.opacity = '1';
 
-  // programma la sparizione dopo 'duration' ms
+  // 🔴 timer disattivato (es. LISTENING)
+  if (flashTimerDisabled) return;
+
+  // programma la sparizione
   flashTimeout = setTimeout(() => {
-    flash.style.transition = 'opacity 0.5s'; // durata transizione in uscita
+    flash.style.transition = 'opacity 0.5s';
     flash.style.opacity = '0';
 
-    // torna trasparente anche il colore dopo la transizione
     setTimeout(() => {
       flash.style.backgroundColor = 'transparent';
       flash.style.transition = 'none';
-    }, 500); // stessa durata della transizione
+    }, 500);
   }, duration);
 }
-
 
 
 function displayEntry(item) {
