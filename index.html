@@ -370,13 +370,13 @@ function startListening() {
 
     r.onerror = (e) => {
         flashTimerDisabled = false;
-        if (e.error !== 'no-speech') appendOutput("⚠️ Errore microfono: " + e.error);
         flashScreen('transparent');//trasparente 
+        if (e.error !== 'no-speech') appendOutput("⚠️ Errore microfono: " + e.error); 
         setState(STATES.IDLE);
     };
 
     r.onend = () => {  
-        
+        flashTimerDisabled = false;
         // Se non stiamo processando, torna in IDLE
         if (appState === STATES.LISTENING) setState(STATES.IDLE);
     };
