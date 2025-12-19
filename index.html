@@ -373,10 +373,11 @@ function startListening() {
     };
 
     r.onend = () => {  
+      
+      if (flashTimerDisabled) {
       flashTimerDisabled = false;
-      if (!flashActive) {
-    flashScreen('transparent');
-     }
+      flashScreen('transparent');
+  }
         // Se non stiamo processando, torna in IDLE
         if (appState === STATES.LISTENING) setState(STATES.IDLE);
     };
@@ -1098,7 +1099,6 @@ if (["si", "sì", "ok", "va bene"].includes(text.toLowerCase())) {
   //funzione flash schermo
  let flashTimeout; // variabile per gestire flash sovrapposti
 let flashTimerDisabled = false;
-  let flashActive = false;
 
 /**
  * Flash dello schermo.
@@ -1126,7 +1126,6 @@ function flashScreen(color, duration = 1000) {
   // mostra il flash
   flash.style.backgroundColor = color;
   flash.style.opacity = '1';
-  flashActive = true; 
 
   // 🔴 timer disattivato (es. LISTENING)
   if (flashTimerDisabled) return;
@@ -1139,7 +1138,6 @@ function flashScreen(color, duration = 1000) {
     setTimeout(() => {
       flash.style.backgroundColor = 'transparent';
       flash.style.transition = 'none';
-      flashActive = false;
     }, 500);
   }, duration);
 }
