@@ -374,7 +374,9 @@ function startListening() {
 
     r.onend = () => {  
       flashTimerDisabled = false;
-      flashScreen('transparent');//trasparente 
+      if (!flashActive) {
+    flashScreen('transparent');
+     }
         // Se non stiamo processando, torna in IDLE
         if (appState === STATES.LISTENING) setState(STATES.IDLE);
     };
