@@ -362,6 +362,8 @@ function startListening() {
     };
 
     r.onresult = (e) => {
+      flashScreen('transparent');//trasparente
+      flashTimerDisabled = false;
         const text = e.results[0][0].transcript.toLowerCase().trim();
         document.querySelectorAll('.temp-status').forEach(el => el.remove());
         handleSpeechInput(text);
@@ -1107,7 +1109,7 @@ let flashTimerDisabled = false;
  * Se flashTimerDisabled === true, il flash resta visibile
  * finché non viene richiamata la funzione con il timer attivo.
  */
-function flashScreen(color, duration = 3000) {
+function flashScreen(color, duration = 2000) {
   const flash = document.getElementById('screenFlash');
   if (!flash) return;
 
