@@ -363,6 +363,7 @@ function startListening() {
 
     r.onresult = (e) => {
         flashTimerDisabled = false;
+        flashScreen('transparent');//trasparente
         const text = e.results[0][0].transcript.toLowerCase().trim();
         document.querySelectorAll('.temp-status').forEach(el => el.remove());
         handleSpeechInput(text);
@@ -377,12 +378,15 @@ function startListening() {
 
     r.onend = () => {  
         flashTimerDisabled = false;
+        flashScreen('transparent');//trasparente
         // Se non stiamo processando, torna in IDLE
         if (appState === STATES.LISTENING) setState(STATES.IDLE);
     };
 
     currentRecognition = r;
     r.start();
+flashScreen('transparent');//trasparente
+  
 }
 
 //attivazione microfono con click su bottone o doppio click su output 
