@@ -185,7 +185,7 @@
   <button id="stopButton" aria-label="Stop">⏹️</button>
   <button id="muteButton" aria-label="Audio">🔇</button>
 </div>  
-<p style="font-size:0.8rem; color:#777;">Assistente vocale di Umberto F. M. Cefalà</p>
+<p style="font-size:0.8rem; color:#777;">Assistente vocale</p>
 
 <div id="sectionsList">Caricamento...</div>
 <div id="statusIconContainer"></div> 
@@ -1128,7 +1128,7 @@ function flashScreen(color, duration = 1000) {
 
   // mostra il flash
   flash.style.backgroundColor = color;
-  flash.style.opacity = '1';
+  flash.style.opacity = '0.5';
 
   // 🔴 timer disattivato (es. LISTENING)
   if (flashTimerDisabled) return;
