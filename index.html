@@ -385,7 +385,6 @@ function startListening() {
 
     currentRecognition = r;
     r.start();
-flashScreen('transparent');//trasparente
   
 }
 
@@ -454,6 +453,8 @@ function handleSpeechInput(text) {
   if (appState === STATES.PROCESSING) {
     return;
    }
+
+  flashScreen('transparent');//toglie flash fisso e riporta a trasparente
     setState(STATES.PROCESSING);
     console.log("Input:", text, "State:", appState);
 
@@ -556,7 +557,8 @@ return setState(STATES.IDLE);
           appendOutput(`Contenuto vuoto.`);
             return setState(STATES.IDLE);
         }
-        
+
+        flashScreen('rgba(40,167,69,0.6)'); // verde
         speak("Input non formattato: " + content);
         appendOutput(`<b>Input non formattato:</b> ${content}`);
         lastMainOutput = content; //memoria
@@ -690,6 +692,7 @@ if (searchCommand) {
     // --- RIPETI ---
     if (text === "ripeti") {
         if (lastMainOutput) {
+        flashScreen('rgba(40,167,69,0.6)'); // verde
         speak("Ripeto: " + lastMainOutput);
         appendOutput("Ripeto... ");
     } 
@@ -1105,7 +1108,7 @@ let flashTimerDisabled = false;
  * Se flashTimerDisabled === true, il flash resta visibile
  * finché non viene richiamata la funzione con il timer attivo.
  */
-function flashScreen(color, duration = 5000) {
+function flashScreen(color, duration = 3000) {
   const flash = document.getElementById('screenFlash');
   if (!flash) return;
 
