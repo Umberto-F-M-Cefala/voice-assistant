@@ -452,6 +452,8 @@ function handleSpeechInput(text) {
     return;
    }
 
+flashTimerDisabled = false; //disattiva flash fisso 
+  
   setState(STATES.PROCESSING);
     console.log("Input:", text, "State:", appState);
 
