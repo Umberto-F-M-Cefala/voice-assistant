@@ -362,8 +362,6 @@ function startListening() {
     };
 
     r.onresult = (e) => {
-        flashTimerDisabled = false;
-        flashScreen('transparent');//trasparente
         const text = e.results[0][0].transcript.toLowerCase().trim();
         document.querySelectorAll('.temp-status').forEach(el => el.remove());
         handleSpeechInput(text);
@@ -377,8 +375,6 @@ function startListening() {
     };
 
     r.onend = () => {  
-        flashTimerDisabled = false;
-        flashScreen('transparent');//trasparente
         // Se non stiamo processando, torna in IDLE
         if (appState === STATES.LISTENING) setState(STATES.IDLE);
     };
@@ -453,9 +449,11 @@ function handleSpeechInput(text) {
   if (appState === STATES.PROCESSING) {
     return;
    }
-
+  
+  flashTimerDisabled = false;
   flashScreen('transparent');//toglie flash fisso e riporta a trasparente
-    setState(STATES.PROCESSING);
+   
+  setState(STATES.PROCESSING);
     console.log("Input:", text, "State:", appState);
 
     // 1. Gestione Stati Speciali (Attesa Risposta)
