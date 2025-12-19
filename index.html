@@ -368,15 +368,13 @@ function startListening() {
     };
 
     r.onerror = (e) => {
-        flashTimerDisabled = false;
-        flashScreen('transparent');//trasparente 
         if (e.error !== 'no-speech') appendOutput("⚠️ Errore microfono: " + e.error); 
         setState(STATES.IDLE);
     };
 
     r.onend = () => {  
-      flashScreen('transparent');//trasparente
       flashTimerDisabled = false;
+      flashScreen('transparent');//trasparente 
         // Se non stiamo processando, torna in IDLE
         if (appState === STATES.LISTENING) setState(STATES.IDLE);
     };
@@ -396,7 +394,6 @@ function handleMicAction() {
 
     if (appState === STATES.LISTENING) {
         if (currentRecognition) currentRecognition.stop();
-        flashScreen('transparent');
         return;
     }
 
@@ -452,10 +449,6 @@ function handleSpeechInput(text) {
     return;
    }
 
-  flashScreen('transparent');//trasparente
-  flashTimerDisabled = false;
-  //toglie flash fisso e riporta a timer
-   
   setState(STATES.PROCESSING);
     console.log("Input:", text, "State:", appState);
 
