@@ -1147,7 +1147,7 @@ function flashScreen(color, duration = 1000) {
 
 
 function displayEntry(item) {
-    appendOutput(`📌 <b>${item.meta_title || item.trigger}</b>\n${item.output}`);
+    appendOutput(`📌 <b>${item.meta_title || item.trigger}</b>\n${item.output}\n<i>autore: ${item.meta_title || "N.D."}</i>`);
 }
 //append output
 function appendOutput(html, className) {
