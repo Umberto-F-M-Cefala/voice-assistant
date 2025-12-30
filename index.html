@@ -875,7 +875,8 @@ function saveToArchive(text, type) {
 
 function handleSearchCommand(text) {
     const words = text.trim().split(/\s+/);
-    
+    const ignoreWords = ["tra", "in", "nella", "nelle", "nello", "negli", "nel", "le", "lo", "la", "i", "nei", "per", "sotto"];
+  
     if (!words.length || words[0].toLowerCase() !== "cerca") return null;
 
     let section = null;
@@ -885,7 +886,7 @@ function handleSearchCommand(text) {
     // cerchiamo la sezione: prima parola dopo "cerca" che non sia "autore" o "titolo"
     for (let i = 1; i < words.length; i++) {
         const w = words[i].toLowerCase();
-        if (w !== "autore" && w !== "titolo") {
+        if (!ignoreWords.includes(w) && (w !== "autore" && w !== "titolo")) {
             section = w;
             queryStartIndex = i + 1;
             break;
@@ -895,7 +896,7 @@ function handleSearchCommand(text) {
     // cerchiamo il campo (autore/titolo) dopo la sezione
     for (let i = queryStartIndex; i < words.length; i++) {
         const w = words[i].toLowerCase();
-        if (w === "autore" || w === "titolo") {
+        if (!ignoreWords.includes(w) && (w === "autore" || w === "titolo")) {
             field = w;
             queryStartIndex = i + 1;
             break;
